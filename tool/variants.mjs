@@ -20,7 +20,7 @@ export const PATTERNS = [
 
 // Yahoo symbols that carry enough intraday history to scan.
 export const INSTRUMENTS = [
-  { symbol: 'GC=F', pair: 'XAU/USD', slug: 'xau' },
+  { symbol: 'GC=F', pair: 'GC=F Gold Futures proxy', slug: 'xau' },
   { symbol: 'SI=F', pair: 'XAG/USD', slug: 'xag' },
   { symbol: 'CL=F', pair: 'WTI/USD', slug: 'wti' },
 ];

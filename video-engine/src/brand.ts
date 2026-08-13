@@ -9,3 +9,14 @@
  * quietly.
  */
 export const CHANNEL_MARK = 'XAU LAB';
+
+/** Locked brand and conversion target for the XAU LAB MVP. */
+export const BRAND = {
+  name: 'XAU LAB | VĂN THẮNG INVEST',
+  tagline: {
+    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Invest',
+    en: 'Risk Management • Safer Trading with Van Thang Invest',
+  },
+  zaloUrl: 'https://zalo.me/g/vuqtnr406',
+  disclaimer: 'Educational content · Not investment advice',
+} as const;

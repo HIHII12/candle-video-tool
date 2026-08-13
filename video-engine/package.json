@@ -6,14 +6,16 @@
   "scripts": {
     "dev": "remotion studio",
     "render": "remotion render ForexChart out/demo.mp4",
-    "render:config": "remotion render ForexChart out/video.mp4 --props=./src/data/config.json"
+    "render:config": "remotion render ForexChart out/video.mp4 --props=./src/data/config.json",
+    "showcase": "node ../tool/showcase.mjs"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.286",
+    "@remotion/cli": "^4.0.509",
     "lightweight-charts": "^5.2.0",
+    "qrcode": "^1.5.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "remotion": "4.0.286"
+    "remotion": "^4.0.509"
   },
   "devDependencies": {
     "@types/react": "19.0.0",

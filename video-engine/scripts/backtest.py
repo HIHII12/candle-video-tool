@@ -239,7 +239,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pattern", required=True)
     ap.add_argument("--symbol", default="GC=F")
-    ap.add_argument("--pair", default="XAU/USD")
+    ap.add_argument("--pair", default="GC=F Gold Futures proxy")
     ap.add_argument("--interval", default="15m")
     ap.add_argument("--range", dest="rng", default="60d")
     ap.add_argument("--rr", type=float, default=2.0)

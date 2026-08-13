@@ -124,8 +124,8 @@ Máy nhiều nhân hơn thì nhanh hơn: sửa `--workers 2` thành `--workers 3
 
 ## Hai điều nên biết
 
-1. **Chưa có âm thanh.** Video hoàn toàn im lặng. Đây là thiếu sót lớn nhất
-   với nội dung short-form.
+1. **Đã có âm thanh.** Tool có music bed, SFX, narration và subtitle. Case showcase
+   dùng voice local Piper, duck nhạc khi có lời và xuất track giọng riêng.
 
 2. **Kết quả kèo là thật.** Phần phân tích chỉ đọc dữ liệu trước điểm vào lệnh;
    phần sau bị giấu hoàn toàn rồi mới chạy ra. Nên **có video kèo thua** — đó là

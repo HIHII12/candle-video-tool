@@ -77,7 +77,8 @@ lấy từ model hay dự phòng. Một job hỏng **không** làm chết cả b
 
 ## Còn thiếu
 
-- **Chưa có tiếng.**
+- **Đã có tiếng.** Music bed, SFX, narration và subtitle đều có trong engine;
+  showcase song ngữ dùng Piper local và xuất track voice riêng.
 - **Chưa tự đăng.** YouTube Data API v3 làm được; TikTok cần audit 2–6 tuần.
 - Đăng thật thì để `outcome: any` — kế hoạch đã mặc định vậy. Ép `TP` chỉ dùng
   lúc demo.

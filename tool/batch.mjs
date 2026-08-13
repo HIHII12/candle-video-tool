@@ -209,7 +209,11 @@ async function runJob(job) {
     file: target,
     composition,
     caption: { title: caption.title, hook: caption.hook, source: caption.source },
-    seconds: Math.round((Date.now() - started) / 1000),
+    renderSeconds: Math.round((Date.now() - started) / 1000),
+    // All current batch compositions are 2100 frames at 60 fps. Keep this
+    // distinct from wall-clock render time; older manifests called the latter
+    // simply `seconds`, which made downstream scheduling reports ambiguous.
+    videoDurationSeconds: 35,
   };
 }
 
@@ -309,7 +313,7 @@ let done = 0;
 const results = await pool(plan, workers, runJob, (r) => {
   done += 1;
   const mark = r.status === 'rendered' ? 'ok' : r.status === 'skipped' ? '--' : 'FAIL';
-  const extra = r.status === 'rendered' ? `${r.seconds}s · caption: ${r.caption.source}`
+  const extra = r.status === 'rendered' ? `${r.renderSeconds}s render · ${r.videoDurationSeconds}s video · caption: ${r.caption.source}`
     : r.status === 'failed' ? r.error.split('\n')[0] : r.reason;
   console.log(`[${String(done).padStart(2)}/${plan.length}] ${mark.padEnd(4)} ${r.id.padEnd(30)} ${extra}`);
 });

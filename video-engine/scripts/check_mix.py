@@ -15,29 +15,38 @@ a video has a flat envelope.
 
 import argparse
 import os
+import platform
 import subprocess
 import sys
+import tempfile
 import wave
 from pathlib import Path
 
 import numpy as np
 
-COMPOSITOR = Path(__file__).resolve().parents[1] / (
-    "node_modules/@remotion/compositor-linux-x64-gnu"
-)
+PACKAGE = {
+    "Windows": "compositor-win32-x64-msvc",
+    "Linux": "compositor-linux-x64-gnu",
+    "Darwin": "compositor-darwin-x64",
+}.get(platform.system())
+if not PACKAGE:
+    raise SystemExit(f"Unsupported platform for mix QA: {platform.system()}")
+COMPOSITOR = Path(__file__).resolve().parents[1] / "node_modules/@remotion" / PACKAGE
 
 
 def decode(video: Path) -> tuple[np.ndarray, int]:
-    wav = Path("/tmp/_mix.wav")
-    subprocess.run(
-        [str(COMPOSITOR / "ffmpeg"), "-y", "-v", "error", "-i", str(video),
-         "-vn", "-acodec", "pcm_s16le", str(wav)],
-        env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
-        check=True,
-    )
-    with wave.open(str(wav), "rb") as w:
-        ch, rate, n = w.getnchannels(), w.getframerate(), w.getnframes()
-        a = np.frombuffer(w.readframes(n), dtype="<i2").astype(np.float64) / 32768
+    executable = COMPOSITOR / ("ffmpeg.exe" if platform.system() == "Windows" else "ffmpeg")
+    with tempfile.TemporaryDirectory(prefix="xau-mix-") as temp:
+        wav = Path(temp) / "mix.wav"
+        subprocess.run(
+            [str(executable), "-y", "-v", "error", "-i", str(video),
+             "-vn", "-acodec", "pcm_s16le", str(wav)],
+            env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
+            check=True,
+        )
+        with wave.open(str(wav), "rb") as w:
+            ch, rate, n = w.getnchannels(), w.getframerate(), w.getnframes()
+            a = np.frombuffer(w.readframes(n), dtype="<i2").astype(np.float64) / 32768
     if ch > 1:
         a = a.reshape(-1, ch).mean(axis=1)
     return a, rate

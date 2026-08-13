@@ -612,7 +612,7 @@ def main() -> None:
     ap.add_argument("--stats", action="store_true",
                     help="measure how this pattern actually performed on real data")
     ap.add_argument("--stats-symbol", default="GC=F")
-    ap.add_argument("--stats-pair", default="XAU/USD")
+    ap.add_argument("--stats-pair", default="GC=F Gold Futures proxy")
     ap.add_argument("--stats-interval", default="15m")
     ap.add_argument("--stats-range", default="60d")
     args = ap.parse_args()

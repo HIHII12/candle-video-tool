@@ -30,7 +30,9 @@ export const Narration: React.FC<{
    * break-even line — the single most important mark in the video.
    */
   bottom?: number;
-}> = ({id, marks, frame, tone, bottom = 300}) => {
+  /** Long-form 16:9 has no Shorts UI band and can use its own lower-third. */
+  respectShortSafeArea?: boolean;
+}> = ({id, marks, frame, tone, bottom = 300, respectShortSafeArea = true}) => {
   const current = marks.find((m) => frame >= m.startFrame && frame < m.endFrame + 8);
 
   const ink = tone === 'dark' ? '#ffffff' : '#0b0f14';
@@ -46,7 +48,7 @@ export const Narration: React.FC<{
             // Never below the platform's own UI band; see src/safeArea.ts. A
             // subtitle covered by the Shorts title is worse than none, because
             // the viewer can tell something is there and cannot read it.
-            bottom: Math.max(bottom, SAFE.bottom),
+            bottom: respectShortSafeArea ? Math.max(bottom, SAFE.bottom) : bottom,
             left: 60,
             right: 60,
             zIndex: 40,

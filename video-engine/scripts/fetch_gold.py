@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Fetch real XAUUSD (gold) candles and emit config.json for the Remotion renderer.
+"""Fetch COMEX Gold Futures proxy candles and emit Remotion config JSON.
 
 Data source: Yahoo Finance COMEX gold futures (GC=F). Free, no API key.
-Note: the forex symbol XAUUSD=X is not served by Yahoo; GC=F tracks spot gold
-closely and is the practical stand-in.
+Note: Yahoo's GC=F is a COMEX Gold Futures proxy. It must not be labelled as
+XAUUSD spot data in rendered output.
 
 The video hides the last stretch of candles and replays them as a reveal, so
 this script also decides *which* historical moment to feature: it scans
@@ -462,7 +462,7 @@ def build_scenario(candles: list[dict], end: int, setup: int, future: int,
     ratio = reward / risk if risk else 0.0
 
     return {
-        "pair": "XAU/USD",
+        "pair": "GC=F Gold Futures proxy",
         "timeframe": "15m",
         # Placeholder copy; a cheap LLM can overwrite title/hook later.
         # The hook must never leak the outcome — that is the whole point.
@@ -543,7 +543,7 @@ def find_scenario(candles: list[dict], setup: int, future: int, min_rr: float,
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbol", default="GC=F", help="Yahoo symbol (GC=F = COMEX gold)")
-    ap.add_argument("--pair", default="XAU/USD")
+    ap.add_argument("--pair", default="GC=F Gold Futures proxy")
     ap.add_argument("--timeframe", default="15m")
     ap.add_argument("--interval", default="15m")
     ap.add_argument("--range", dest="rng", default="1mo")

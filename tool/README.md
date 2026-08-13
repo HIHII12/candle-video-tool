@@ -55,4 +55,5 @@ Lần chạy đầu tự cài dependency. Video ra ở `video-engine/out/`.
 - **Yahoo chỉ giữ nến 15m trong ~60 ngày**, nên phần quét lịch sử dùng `60d`.
 - **`--outcome TP` là chọn lọc kèo thắng.** Dùng để demo thì được; đăng kênh
   thật nên để `any` cho thắng thua tự nhiên.
-- Chưa có âm thanh.
+- Đã có music bed, SFX, narration và subtitle. Case showcase dùng Piper local,
+  duck nhạc dưới voice và xuất track WAV riêng.

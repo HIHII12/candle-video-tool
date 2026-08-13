@@ -2,7 +2,6 @@ import React from 'react';
 import {interpolate, spring} from 'remotion';
 import {TV, FONT, stroke} from './chartTheme';
 import {CHANNEL_MARK} from '../brand';
-import {SAFE} from '../safeArea';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -209,71 +208,6 @@ export const AnswerBadge: React.FC<{
       {/* "SELLER!" read as a label for a person rather than a verdict on the
           move. Naming the winner is what the viewer is waiting to hear. */}
       {answer === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'}
-    </div>
-  );
-};
-
-/** Like + subscribe stack, matching the shape short-form viewers expect. */
-export const SubscribeBar: React.FC<{frame: number; fps: number; at: number}> = ({
-  frame,
-  fps,
-  at,
-}) => {
-  if (frame < at) return null;
-  const rise = spring({frame: frame - at, fps, config: {damping: 14}, durationInFrames: 30});
-  const pulse = 1 + Math.sin((frame - at) * 0.18) * 0.03;
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: SAFE.bottom,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 22,
-        transform: `translateY(${interpolate(rise, [0, 1], [180, 0])}px)`,
-        opacity: rise,
-      }}
-    >
-      <div
-        style={{
-          width: 108,
-          height: 108,
-          borderRadius: '50%',
-          background: '#2f6fed',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 58,
-        }}
-      >
-        👍
-      </div>
-      <div
-        style={{
-          background: '#ff0000',
-          borderRadius: 60,
-          padding: '20px 76px',
-          transform: `scale(${pulse})`,
-          boxShadow: '0 12px 0 rgba(0,0,0,0.35)',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: FONT,
-            fontSize: 66,
-            fontWeight: 900,
-            color: '#fff',
-            letterSpacing: 1,
-            ...stroke(4),
-          }}
-        >
-          SUBSCRIBE
-        </span>
-      </div>
     </div>
   );
 };

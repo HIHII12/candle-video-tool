@@ -6,7 +6,7 @@ import {priceWindowAt} from './priceWindow';
 import {Cursor, LevelLine, PositionBox} from './Overlay';
 import {FiboLevels, FvgBox, OrderBlockBox} from './Zones';
 import {Flash, ResultStrip} from './Beats';
-import {AnswerBadge, Countdown, QuizPills, SubscribeBar, TopBanner, Watermark} from './Chrome';
+import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark} from './Chrome';
 import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt} from './storyboard';
 import {logicalWindowAt} from './logicalWindow';
 import {CHART_BOX, TV, FONT} from './chartTheme';
@@ -274,10 +274,11 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
       )}
 
       <Countdown frame={frame} fps={fps} range={SB.countdown} />
-      <AnswerBadge frame={frame} fps={fps} at={SB.answer} answer={props.answer} />
+      {frame < SB.result[0] && (
+        <AnswerBadge frame={frame} fps={fps} at={SB.answer} answer={props.answer} />
+      )}
       <Flash frame={frame} at={RESOLUTION_FRAME} win={win} />
       <ResultStrip props={props} frame={frame} fps={fps} at={SB.result[0]} />
-      <SubscribeBar frame={frame} fps={fps} at={SB.result[0] + 40} />
 
       <div
         style={{

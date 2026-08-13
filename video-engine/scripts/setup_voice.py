@@ -15,7 +15,8 @@ setup stays one command. Quality is a little behind; a working pipeline is worth
 more than a better voice nobody can install.
 
     python3 scripts/setup_voice.py
-    python3 scripts/setup_voice.py --voice en_US-ryan-high
+    python3 scripts/setup_voice.py --voice vi_VN-vais1000-medium
+    python3 scripts/setup_voice.py --voice en_US-norman-medium
 """
 
 import argparse
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VENDOR = ROOT / "vendor" / "piper"
 
 PIPER = "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_{}.{}"
-VOICES = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/{name}/{q}/{file}"
+VOICES = "https://huggingface.co/rhasspy/piper-voices/resolve/main/{family}/{locale}/{name}/{q}/{file}"
 
 BUILDS = {
     ("Linux", "x86_64"): ("linux_x86_64", "tar.gz"),
@@ -51,8 +52,8 @@ def fetch(url: str, dest: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--voice", default="en_US-amy-medium",
-                    help="piper voice id, e.g. en_US-amy-medium or en_US-ryan-high")
+    ap.add_argument("--voice", default="vi_VN-vais1000-medium",
+                    help="Piper voice id, e.g. vi_VN-vais1000-medium or en_US-norman-medium")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
 
@@ -92,14 +93,17 @@ def main() -> None:
             exe.chmod(0o755)
 
     # voice
-    _, name, quality = args.voice.split("-", 2)
+    locale, name, quality = args.voice.split("-", 2)
+    family = locale.split("_", 1)[0]
     model = VENDOR / f"{args.voice}.onnx"
     if model.exists() and not args.force:
         print(f"voice already present at {model.name}")
     else:
         print("voice:")
-        fetch(VOICES.format(name=name, q=quality, file=f"{args.voice}.onnx"), model)
-        fetch(VOICES.format(name=name, q=quality, file=f"{args.voice}.onnx.json"),
+        fetch(VOICES.format(family=family, locale=locale, name=name, q=quality,
+                            file=f"{args.voice}.onnx"), model)
+        fetch(VOICES.format(family=family, locale=locale, name=name, q=quality,
+                            file=f"{args.voice}.onnx.json"),
               VENDOR / f"{args.voice}.onnx.json")
 
     total = sum(p.stat().st_size for p in VENDOR.rglob("*") if p.is_file()) / 1e6

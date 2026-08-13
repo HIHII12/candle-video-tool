@@ -347,7 +347,7 @@ def build(candles: list[dict], pair: str, timeframe: str, bars: int, project: in
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbol", default="GC=F", help="Yahoo symbol (GC=F = COMEX gold)")
-    ap.add_argument("--pair", default="XAU/USD")
+    ap.add_argument("--pair", default="GC=F Gold Futures proxy")
     ap.add_argument("--timeframe", default="H1", help="label drawn in the header")
     ap.add_argument("--interval", default="1h")
     ap.add_argument("--range", dest="rng", default="3mo")
