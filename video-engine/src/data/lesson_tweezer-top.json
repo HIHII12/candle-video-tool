@@ -1,0 +1,285 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Tweezer Top",
+    "tagline": "Two bars, one ceiling",
+    "bias": "bearish",
+    "rule": "Two consecutive bars reach the same high and both fail to break it. The second refusal is what makes the level worth marking.",
+    "checks": [
+      "Both highs land at effectively the same price",
+      "The second bar closes back downward",
+      "Comes after an up leg"
+    ],
+    "bodyLow": 1980.26,
+    "bodyHigh": 1985.46,
+    "indices": [
+      16,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 16,
+      "part": "upperWick",
+      "label": "First refusal"
+    },
+    {
+      "index": 17,
+      "part": "upperWick",
+      "label": "Same high again"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 1958.0,
+      "high": 1962.44,
+      "low": 1956.14,
+      "close": 1961.29
+    },
+    {
+      "time": 1700000900,
+      "open": 1961.29,
+      "high": 1964.05,
+      "low": 1956.41,
+      "close": 1957.52
+    },
+    {
+      "time": 1700001800,
+      "open": 1957.52,
+      "high": 1961.24,
+      "low": 1955.93,
+      "close": 1959.82
+    },
+    {
+      "time": 1700002700,
+      "open": 1959.82,
+      "high": 1960.32,
+      "low": 1957.89,
+      "close": 1958.6
+    },
+    {
+      "time": 1700003600,
+      "open": 1958.6,
+      "high": 1959.08,
+      "low": 1957.21,
+      "close": 1957.61
+    },
+    {
+      "time": 1700004500,
+      "open": 1957.61,
+      "high": 1963.92,
+      "low": 1954.37,
+      "close": 1962.06
+    },
+    {
+      "time": 1700005400,
+      "open": 1962.06,
+      "high": 1966.54,
+      "low": 1960.78,
+      "close": 1965.2
+    },
+    {
+      "time": 1700006300,
+      "open": 1965.2,
+      "high": 1968.31,
+      "low": 1963.56,
+      "close": 1967.73
+    },
+    {
+      "time": 1700007200,
+      "open": 1967.73,
+      "high": 1972.34,
+      "low": 1966.46,
+      "close": 1971.53
+    },
+    {
+      "time": 1700008100,
+      "open": 1971.53,
+      "high": 1977.79,
+      "low": 1970.79,
+      "close": 1976.0
+    },
+    {
+      "time": 1700009000,
+      "open": 1976.0,
+      "high": 1976.93,
+      "low": 1973.0,
+      "close": 1973.66
+    },
+    {
+      "time": 1700009900,
+      "open": 1973.66,
+      "high": 1974.13,
+      "low": 1972.53,
+      "close": 1972.93
+    },
+    {
+      "time": 1700010800,
+      "open": 1972.93,
+      "high": 1978.38,
+      "low": 1971.18,
+      "close": 1976.18
+    },
+    {
+      "time": 1700011700,
+      "open": 1976.18,
+      "high": 1976.58,
+      "low": 1973.97,
+      "close": 1974.9
+    },
+    {
+      "time": 1700012600,
+      "open": 1974.9,
+      "high": 1979.27,
+      "low": 1973.66,
+      "close": 1977.8
+    },
+    {
+      "time": 1700013500,
+      "open": 1977.8,
+      "high": 1982.68,
+      "low": 1977.11,
+      "close": 1980.86
+    },
+    {
+      "time": 1700014400,
+      "open": 1980.86,
+      "high": 1986.86,
+      "low": 1979.66,
+      "close": 1985.46
+    },
+    {
+      "time": 1700015300,
+      "open": 1985.46,
+      "high": 1986.86,
+      "low": 1978.86,
+      "close": 1980.26
+    },
+    {
+      "time": 1700016200,
+      "open": 1980.26,
+      "high": 1981.58,
+      "low": 1977.7,
+      "close": 1978.1
+    },
+    {
+      "time": 1700017100,
+      "open": 1978.1,
+      "high": 1979.12,
+      "low": 1972.78,
+      "close": 1974.78
+    },
+    {
+      "time": 1700018000,
+      "open": 1974.78,
+      "high": 1976.42,
+      "low": 1968.63,
+      "close": 1969.98
+    },
+    {
+      "time": 1700018900,
+      "open": 1969.98,
+      "high": 1971.05,
+      "low": 1967.52,
+      "close": 1968.55
+    },
+    {
+      "time": 1700019800,
+      "open": 1968.55,
+      "high": 1970.31,
+      "low": 1960.79,
+      "close": 1963.84
+    },
+    {
+      "time": 1700020700,
+      "open": 1963.84,
+      "high": 1966.29,
+      "low": 1963.44,
+      "close": 1965.79
+    },
+    {
+      "time": 1700021600,
+      "open": 1965.79,
+      "high": 1967.47,
+      "low": 1959.27,
+      "close": 1961.37
+    },
+    {
+      "time": 1700022500,
+      "open": 1961.37,
+      "high": 1964.22,
+      "low": 1960.85,
+      "close": 1963.04
+    },
+    {
+      "time": 1700023400,
+      "open": 1963.04,
+      "high": 1964.75,
+      "low": 1958.82,
+      "close": 1959.96
+    },
+    {
+      "time": 1700024300,
+      "open": 1959.96,
+      "high": 1961.46,
+      "low": 1959.56,
+      "close": 1961.06
+    },
+    {
+      "time": 1700025200,
+      "open": 1961.06,
+      "high": 1966.54,
+      "low": 1960.17,
+      "close": 1964.19
+    },
+    {
+      "time": 1700026100,
+      "open": 1964.19,
+      "high": 1965.42,
+      "low": 1956.52,
+      "close": 1959.41
+    },
+    {
+      "time": 1700027000,
+      "open": 1959.41,
+      "high": 1960.5,
+      "low": 1954.59,
+      "close": 1956.18
+    },
+    {
+      "time": 1700027900,
+      "open": 1956.18,
+      "high": 1957.35,
+      "low": 1951.97,
+      "close": 1953.22
+    },
+    {
+      "time": 1700028800,
+      "open": 1953.22,
+      "high": 1953.8,
+      "low": 1951.16,
+      "close": 1951.88
+    },
+    {
+      "time": 1700029700,
+      "open": 1951.88,
+      "high": 1957.3,
+      "low": 1950.8,
+      "close": 1955.63
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 1980.26,
+    "stop": 1987.46,
+    "target": 1965.86,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 22
+  },
+  "note": "Illustration - constructed price series, not a live chart"
+}

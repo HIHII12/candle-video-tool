@@ -1,0 +1,32 @@
+[
+  {
+    "text": "Everyone trades the hammer.",
+    "startFrame": 40,
+    "endFrame": 168
+  },
+  {
+    "text": "Price got rejected from the lows.",
+    "startFrame": 520,
+    "endFrame": 680
+  },
+  {
+    "text": "A long lower wick with a small body on top.",
+    "startFrame": 860,
+    "endFrame": 1056
+  },
+  {
+    "text": "Entry at the close. Stop beyond the wick.",
+    "startFrame": 1390,
+    "endFrame": 1602
+  },
+  {
+    "text": "But once is not evidence.",
+    "startFrame": 1660,
+    "endFrame": 1802
+  },
+  {
+    "text": "28 tries. Only 7 won.",
+    "startFrame": 1820,
+    "endFrame": 2036
+  }
+]

@@ -1,0 +1,272 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Morning Star",
+    "tagline": "Three bars that turn a trend",
+    "bias": "bullish",
+    "rule": "A big red bar, then a small indecisive bar, then a big green bar that recovers most of the first. Selling stalled, then reversed.",
+    "checks": [
+      "Bar 1 is a strong red candle",
+      "Bar 2 has a small body \u2014 momentum stalls",
+      "Bar 3 closes back inside bar 1's body"
+    ],
+    "bodyLow": 2016.08,
+    "bodyHigh": 2023.38,
+    "indices": [
+      15,
+      16,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 16,
+      "part": "body",
+      "label": "Indecision"
+    },
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Reversal bar"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 2045.0,
+      "high": 2046.22,
+      "low": 2039.51,
+      "close": 2041.49
+    },
+    {
+      "time": 1700000900,
+      "open": 2041.49,
+      "high": 2048.45,
+      "low": 2040.3,
+      "close": 2045.51
+    },
+    {
+      "time": 1700001800,
+      "open": 2045.51,
+      "high": 2047.01,
+      "low": 2041.36,
+      "close": 2043.06
+    },
+    {
+      "time": 1700002700,
+      "open": 2043.06,
+      "high": 2044.89,
+      "low": 2042.29,
+      "close": 2044.36
+    },
+    {
+      "time": 1700003600,
+      "open": 2044.36,
+      "high": 2045.92,
+      "low": 2043.96,
+      "close": 2045.41
+    },
+    {
+      "time": 1700004500,
+      "open": 2045.41,
+      "high": 2047.39,
+      "low": 2037.21,
+      "close": 2040.67
+    },
+    {
+      "time": 1700005400,
+      "open": 2040.67,
+      "high": 2042.1,
+      "low": 2035.96,
+      "close": 2037.32
+    },
+    {
+      "time": 1700006300,
+      "open": 2037.32,
+      "high": 2037.95,
+      "low": 2032.87,
+      "close": 2034.62
+    },
+    {
+      "time": 1700007200,
+      "open": 2034.62,
+      "high": 2035.49,
+      "low": 2029.21,
+      "close": 2030.57
+    },
+    {
+      "time": 1700008100,
+      "open": 2030.57,
+      "high": 2032.47,
+      "low": 2025.01,
+      "close": 2025.79
+    },
+    {
+      "time": 1700009000,
+      "open": 2025.79,
+      "high": 2029.28,
+      "low": 2025.09,
+      "close": 2028.3
+    },
+    {
+      "time": 1700009900,
+      "open": 2028.3,
+      "high": 2029.57,
+      "low": 2027.9,
+      "close": 2029.08
+    },
+    {
+      "time": 1700010800,
+      "open": 2029.08,
+      "high": 2031.42,
+      "low": 2023.74,
+      "close": 2025.6
+    },
+    {
+      "time": 1700011700,
+      "open": 2025.6,
+      "high": 2027.39,
+      "low": 2024.61,
+      "close": 2026.97
+    },
+    {
+      "time": 1700012600,
+      "open": 2026.97,
+      "high": 2028.54,
+      "low": 2022.55,
+      "close": 2023.88
+    },
+    {
+      "time": 1700013500,
+      "open": 2023.88,
+      "high": 2025.08,
+      "low": 2015.98,
+      "close": 2017.38
+    },
+    {
+      "time": 1700014400,
+      "open": 2016.38,
+      "high": 2017.98,
+      "low": 2013.18,
+      "close": 2015.58
+    },
+    {
+      "time": 1700015300,
+      "open": 2016.08,
+      "high": 2025.38,
+      "low": 2014.68,
+      "close": 2023.38
+    },
+    {
+      "time": 1700016200,
+      "open": 2023.38,
+      "high": 2029.24,
+      "low": 2022.56,
+      "close": 2027.06
+    },
+    {
+      "time": 1700017100,
+      "open": 2027.06,
+      "high": 2030.98,
+      "low": 2026.66,
+      "close": 2029.49
+    },
+    {
+      "time": 1700018000,
+      "open": 2029.49,
+      "high": 2034.38,
+      "low": 2027.25,
+      "close": 2033.23
+    },
+    {
+      "time": 1700018900,
+      "open": 2033.23,
+      "high": 2040.46,
+      "low": 2031.7,
+      "close": 2038.62
+    },
+    {
+      "time": 1700019800,
+      "open": 2038.62,
+      "high": 2041.43,
+      "low": 2037.47,
+      "close": 2040.23
+    },
+    {
+      "time": 1700020700,
+      "open": 2040.23,
+      "high": 2047.52,
+      "low": 2036.81,
+      "close": 2045.53
+    },
+    {
+      "time": 1700021600,
+      "open": 2045.53,
+      "high": 2046.1,
+      "low": 2042.94,
+      "close": 2043.34
+    },
+    {
+      "time": 1700022500,
+      "open": 2043.34,
+      "high": 2050.2,
+      "low": 2040.98,
+      "close": 2048.31
+    },
+    {
+      "time": 1700023400,
+      "open": 2048.31,
+      "high": 2049.63,
+      "low": 2045.84,
+      "close": 2046.43
+    },
+    {
+      "time": 1700024300,
+      "open": 2046.43,
+      "high": 2051.82,
+      "low": 2045.15,
+      "close": 2049.9
+    },
+    {
+      "time": 1700025200,
+      "open": 2049.9,
+      "high": 2050.33,
+      "low": 2048.26,
+      "close": 2048.66
+    },
+    {
+      "time": 1700026100,
+      "open": 2048.66,
+      "high": 2051.3,
+      "low": 2044.13,
+      "close": 2045.14
+    },
+    {
+      "time": 1700027000,
+      "open": 2045.14,
+      "high": 2051.91,
+      "low": 2041.89,
+      "close": 2050.52
+    },
+    {
+      "time": 1700027900,
+      "open": 2050.52,
+      "high": 2055.38,
+      "low": 2048.73,
+      "close": 2054.15
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 2023.38,
+    "stop": 2012.58,
+    "target": 2044.98,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 23
+  },
+  "note": "Illustration - constructed price series, not a live chart"
+}

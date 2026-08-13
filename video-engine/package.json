@@ -1,0 +1,22 @@
+{
+  "name": "forex-video-engine",
+  "version": "0.1.0",
+  "description": "Automated forex data-visualization video renderer (Remotion)",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render ForexChart out/demo.mp4",
+    "render:config": "remotion render ForexChart out/video.mp4 --props=./src/data/config.json"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.286",
+    "lightweight-charts": "^5.2.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.286"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "typescript": "5.7.3"
+  }
+}

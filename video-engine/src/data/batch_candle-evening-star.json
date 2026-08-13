@@ -1,0 +1,288 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Evening Star",
+    "tagline": "What a evening star actually tells you",
+    "bias": "bearish",
+    "rule": "A strong green bar, then a small indecisive one, then a red bar that gives back most of the first. Buying stalled, then reversed.",
+    "checks": [
+      "Bar 1 is a strong green candle",
+      "Bar 2 has a small body — momentum stalls",
+      "Bar 3 closes back inside bar 1's body"
+    ],
+    "bodyLow": 1983.23,
+    "bodyHigh": 1990.53,
+    "indices": [
+      15,
+      16,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 16,
+      "part": "body",
+      "label": "Indecision"
+    },
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Reversal bar"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 1955,
+      "high": 1955.54,
+      "low": 1951.46,
+      "close": 1952.3
+    },
+    {
+      "time": 1700000900,
+      "open": 1952.3,
+      "high": 1952.82,
+      "low": 1951.17,
+      "close": 1951.57
+    },
+    {
+      "time": 1700001800,
+      "open": 1951.57,
+      "high": 1955.96,
+      "low": 1949.57,
+      "close": 1955.31
+    },
+    {
+      "time": 1700002700,
+      "open": 1955.31,
+      "high": 1956.03,
+      "low": 1953.13,
+      "close": 1953.77
+    },
+    {
+      "time": 1700003600,
+      "open": 1953.77,
+      "high": 1955.38,
+      "low": 1953.14,
+      "close": 1954.98
+    },
+    {
+      "time": 1700004500,
+      "open": 1954.98,
+      "high": 1959.83,
+      "low": 1953.39,
+      "close": 1958.27
+    },
+    {
+      "time": 1700005400,
+      "open": 1958.27,
+      "high": 1958.67,
+      "low": 1957.25,
+      "close": 1957.65
+    },
+    {
+      "time": 1700006300,
+      "open": 1957.65,
+      "high": 1963,
+      "low": 1954.95,
+      "close": 1962.02
+    },
+    {
+      "time": 1700007200,
+      "open": 1962.02,
+      "high": 1970.4,
+      "low": 1959.3,
+      "close": 1966.81
+    },
+    {
+      "time": 1700008100,
+      "open": 1966.81,
+      "high": 1972.82,
+      "low": 1963.68,
+      "close": 1971.92
+    },
+    {
+      "time": 1700009000,
+      "open": 1971.92,
+      "high": 1975.1,
+      "low": 1970.93,
+      "close": 1974.4
+    },
+    {
+      "time": 1700009900,
+      "open": 1974.4,
+      "high": 1980.65,
+      "low": 1972.8,
+      "close": 1978.59
+    },
+    {
+      "time": 1700010800,
+      "open": 1978.59,
+      "high": 1981.43,
+      "low": 1978.19,
+      "close": 1980.53
+    },
+    {
+      "time": 1700011700,
+      "open": 1980.53,
+      "high": 1986.08,
+      "low": 1978.48,
+      "close": 1984.69
+    },
+    {
+      "time": 1700012600,
+      "open": 1984.69,
+      "high": 1985.97,
+      "low": 1981.88,
+      "close": 1982.73
+    },
+    {
+      "time": 1700013500,
+      "open": 1982.73,
+      "high": 1990.63,
+      "low": 1981.53,
+      "close": 1989.23
+    },
+    {
+      "time": 1700014400,
+      "open": 1990.23,
+      "high": 1993.43,
+      "low": 1988.63,
+      "close": 1991.03
+    },
+    {
+      "time": 1700015300,
+      "open": 1990.53,
+      "high": 1991.93,
+      "low": 1981.23,
+      "close": 1983.23
+    },
+    {
+      "time": 1700016200,
+      "open": 1983.23,
+      "high": 1984.2,
+      "low": 1980.11,
+      "close": 1981.41
+    },
+    {
+      "time": 1700017100,
+      "open": 1981.41,
+      "high": 1983.99,
+      "low": 1973.39,
+      "close": 1976.4
+    },
+    {
+      "time": 1700018000,
+      "open": 1976.4,
+      "high": 1977.89,
+      "low": 1975.9,
+      "close": 1977.49
+    },
+    {
+      "time": 1700018900,
+      "open": 1977.49,
+      "high": 1980.5,
+      "low": 1970.08,
+      "close": 1972.31
+    },
+    {
+      "time": 1700019800,
+      "open": 1972.31,
+      "high": 1973.69,
+      "low": 1971.71,
+      "close": 1973.29
+    },
+    {
+      "time": 1700020700,
+      "open": 1973.29,
+      "high": 1976.77,
+      "low": 1972.03,
+      "close": 1975.47
+    },
+    {
+      "time": 1700021600,
+      "open": 1975.47,
+      "high": 1977.55,
+      "low": 1975,
+      "close": 1976.68
+    },
+    {
+      "time": 1700022500,
+      "open": 1976.68,
+      "high": 1977.68,
+      "low": 1974.06,
+      "close": 1974.72
+    },
+    {
+      "time": 1700023400,
+      "open": 1974.72,
+      "high": 1976.09,
+      "low": 1969.44,
+      "close": 1971.51
+    },
+    {
+      "time": 1700024300,
+      "open": 1971.51,
+      "high": 1973.74,
+      "low": 1970.43,
+      "close": 1972.95
+    },
+    {
+      "time": 1700025200,
+      "open": 1972.95,
+      "high": 1977.22,
+      "low": 1972.41,
+      "close": 1975.43
+    },
+    {
+      "time": 1700026100,
+      "open": 1975.43,
+      "high": 1977.76,
+      "low": 1974.37,
+      "close": 1976.95
+    },
+    {
+      "time": 1700027000,
+      "open": 1976.95,
+      "high": 1978.47,
+      "low": 1976.15,
+      "close": 1978.06
+    },
+    {
+      "time": 1700027900,
+      "open": 1978.06,
+      "high": 1978.98,
+      "low": 1971.81,
+      "close": 1974.46
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 1983.23,
+    "stop": 1994.03,
+    "target": 1961.63,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "OPEN",
+    "index": 31
+  },
+  "note": "Illustration - constructed price series, not a live chart",
+  "stats": {
+    "pattern": "evening-star",
+    "bias": "bearish",
+    "rewardRisk": 2,
+    "occurrences": 92,
+    "settled": 91,
+    "wins": 36,
+    "losses": 55,
+    "gapped": 1,
+    "unresolved": 0,
+    "hitRate": 40,
+    "expectancyR": 0.19,
+    "pair": "XAU/USD",
+    "timeframe": "15m",
+    "windowLabel": "60d"
+  }
+}

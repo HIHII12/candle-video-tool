@@ -1,0 +1,25 @@
+# Dependencies and downloaded runtimes/models
+node_modules/
+video-engine/vendor/
+
+# Rendered media and generated reports
+video-engine/out/
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+tool/.env
+tool/.env.*
+!tool/.env.example
+
+# Generated run data, caches, and temporary files
+video-engine/src/data/run_*.json
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+

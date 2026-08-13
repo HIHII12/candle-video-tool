@@ -1,0 +1,346 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Hammer",
+    "tagline": "Price got rejected from the lows",
+    "bias": "bullish",
+    "rule": "A long lower wick with a small body on top. Sellers pushed price down, buyers took it all back before the close.",
+    "checks": [
+      "Lower wick at least 2x the body",
+      "Upper wick under 5% of the body",
+      "Only valid after a down leg"
+    ],
+    "bodyLow": 2021.19,
+    "bodyHigh": 2023.79,
+    "wickRatio": 2.8,
+    "indices": [
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Small body"
+    },
+    {
+      "index": 17,
+      "part": "lowerWick",
+      "label": "Long lower wick"
+    },
+    {
+      "index": 17,
+      "part": "upperWick",
+      "label": "Almost no upper wick"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 2050.0,
+      "high": 2051.3,
+      "low": 2044.17,
+      "close": 2046.27
+    },
+    {
+      "time": 1700000900,
+      "open": 2046.27,
+      "high": 2053.66,
+      "low": 2045.01,
+      "close": 2050.54
+    },
+    {
+      "time": 1700001800,
+      "open": 2050.54,
+      "high": 2052.14,
+      "low": 2046.13,
+      "close": 2047.93
+    },
+    {
+      "time": 1700002700,
+      "open": 2047.93,
+      "high": 2049.89,
+      "low": 2047.13,
+      "close": 2049.32
+    },
+    {
+      "time": 1700003600,
+      "open": 2049.32,
+      "high": 2050.98,
+      "low": 2048.92,
+      "close": 2050.44
+    },
+    {
+      "time": 1700004500,
+      "open": 2050.44,
+      "high": 2052.54,
+      "low": 2041.73,
+      "close": 2045.4
+    },
+    {
+      "time": 1700005400,
+      "open": 2045.4,
+      "high": 2046.92,
+      "low": 2040.39,
+      "close": 2041.84
+    },
+    {
+      "time": 1700006300,
+      "open": 2041.84,
+      "high": 2042.5,
+      "low": 2037.11,
+      "close": 2038.98
+    },
+    {
+      "time": 1700007200,
+      "open": 2038.98,
+      "high": 2039.89,
+      "low": 2033.23,
+      "close": 2034.66
+    },
+    {
+      "time": 1700008100,
+      "open": 2034.66,
+      "high": 2036.69,
+      "low": 2028.76,
+      "close": 2029.59
+    },
+    {
+      "time": 1700009000,
+      "open": 2029.59,
+      "high": 2033.3,
+      "low": 2028.85,
+      "close": 2032.25
+    },
+    {
+      "time": 1700009900,
+      "open": 2032.25,
+      "high": 2033.61,
+      "low": 2031.85,
+      "close": 2033.08
+    },
+    {
+      "time": 1700010800,
+      "open": 2033.08,
+      "high": 2035.57,
+      "low": 2027.41,
+      "close": 2029.39
+    },
+    {
+      "time": 1700011700,
+      "open": 2029.39,
+      "high": 2031.29,
+      "low": 2028.33,
+      "close": 2030.84
+    },
+    {
+      "time": 1700012600,
+      "open": 2030.84,
+      "high": 2032.51,
+      "low": 2026.15,
+      "close": 2027.56
+    },
+    {
+      "time": 1700013500,
+      "open": 2027.56,
+      "high": 2029.63,
+      "low": 2023.31,
+      "close": 2024.09
+    },
+    {
+      "time": 1700014400,
+      "open": 2024.09,
+      "high": 2025.5,
+      "low": 2021.39,
+      "close": 2021.79
+    },
+    {
+      "time": 1700015300,
+      "open": 2021.19,
+      "high": 2023.89,
+      "low": 2013.91,
+      "close": 2023.79
+    },
+    {
+      "time": 1700016200,
+      "open": 2023.79,
+      "high": 2028.41,
+      "low": 2021.67,
+      "close": 2027.32
+    },
+    {
+      "time": 1700017100,
+      "open": 2027.32,
+      "high": 2034.15,
+      "low": 2025.88,
+      "close": 2032.41
+    },
+    {
+      "time": 1700018000,
+      "open": 2032.41,
+      "high": 2035.07,
+      "low": 2031.32,
+      "close": 2033.94
+    },
+    {
+      "time": 1700018900,
+      "open": 2033.94,
+      "high": 2040.82,
+      "low": 2030.7,
+      "close": 2038.94
+    },
+    {
+      "time": 1700019800,
+      "open": 2038.94,
+      "high": 2039.48,
+      "low": 2036.47,
+      "close": 2036.87
+    },
+    {
+      "time": 1700020700,
+      "open": 2036.87,
+      "high": 2043.35,
+      "low": 2034.64,
+      "close": 2041.56
+    },
+    {
+      "time": 1700021600,
+      "open": 2041.56,
+      "high": 2042.81,
+      "low": 2039.23,
+      "close": 2039.79
+    },
+    {
+      "time": 1700022500,
+      "open": 2039.79,
+      "high": 2044.88,
+      "low": 2038.58,
+      "close": 2043.07
+    },
+    {
+      "time": 1700023400,
+      "open": 2043.07,
+      "high": 2043.47,
+      "low": 2041.49,
+      "close": 2041.89
+    },
+    {
+      "time": 1700024300,
+      "open": 2041.89,
+      "high": 2044.39,
+      "low": 2037.62,
+      "close": 2038.57
+    },
+    {
+      "time": 1700025200,
+      "open": 2038.57,
+      "high": 2044.96,
+      "low": 2035.5,
+      "close": 2043.65
+    },
+    {
+      "time": 1700026100,
+      "open": 2043.65,
+      "high": 2048.24,
+      "low": 2041.97,
+      "close": 2047.08
+    },
+    {
+      "time": 1700027000,
+      "open": 2047.08,
+      "high": 2051.48,
+      "low": 2045.76,
+      "close": 2050.22
+    },
+    {
+      "time": 1700027900,
+      "open": 2050.22,
+      "high": 2052.26,
+      "low": 2049.46,
+      "close": 2051.65
+    },
+    {
+      "time": 1700028800,
+      "open": 2051.65,
+      "high": 2053.42,
+      "low": 2046.51,
+      "close": 2047.66
+    },
+    {
+      "time": 1700029700,
+      "open": 2047.66,
+      "high": 2051.88,
+      "low": 2046.81,
+      "close": 2050.13
+    },
+    {
+      "time": 1700030600,
+      "open": 2050.13,
+      "high": 2051.46,
+      "low": 2046.89,
+      "close": 2047.87
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 2023.79,
+    "stop": 2013.31,
+    "target": 2044.75,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 25
+  },
+  "note": "Illustration - constructed price series, not a live chart",
+  "stats": {
+    "pattern": "hammer",
+    "bias": "bullish",
+    "rewardRisk": 2.0,
+    "occurrences": 28,
+    "settled": 28,
+    "wins": 7,
+    "losses": 21,
+    "gapped": 0,
+    "unresolved": 0,
+    "hitRate": 25,
+    "expectancyR": -0.25,
+    "pair": "XAU/USD",
+    "timeframe": "15m",
+    "windowLabel": "60d"
+  },
+  "voiceId": "lesson_hammer",
+  "voiceMarks": [
+    {
+      "text": "Everyone trades the hammer.",
+      "startFrame": 40,
+      "endFrame": 168
+    },
+    {
+      "text": "Price got rejected from the lows.",
+      "startFrame": 520,
+      "endFrame": 680
+    },
+    {
+      "text": "A long lower wick with a small body on top.",
+      "startFrame": 860,
+      "endFrame": 1056
+    },
+    {
+      "text": "Entry at the close. Stop beyond the wick.",
+      "startFrame": 1390,
+      "endFrame": 1602
+    },
+    {
+      "text": "But once is not evidence.",
+      "startFrame": 1660,
+      "endFrame": 1802
+    },
+    {
+      "text": "28 tries. Only 7 won.",
+      "startFrame": 1820,
+      "endFrame": 2036
+    }
+  ]
+}

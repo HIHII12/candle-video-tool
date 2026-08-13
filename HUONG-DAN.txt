@@ -1,0 +1,146 @@
+===========================================================
+ CO MAY REN VIDEO FOREX  —  DOC FILE NAY TRUOC
+===========================================================
+
+Goi nay tu ren video phan tich vang doc 9:16 (1080x1920, 60fps),
+moi video ~35 giay. Muc tieu: 30 video / ngay.
+
+Video CO TIENG (nhac nen + hieu ung theo nhip). Am thanh nam trong
+video-engine\public\audio\ - muon doi nhac rieng thi ghi de dung ten file
+do la duoc, khong can sua code.
+
+Video ra o dau:  video-engine\out\batch\<ngay>\
+Ban day du hon:  mo file DOC-NAY-TRUOC.md (co bang bieu, de doc hon)
+
+
+-----------------------------------------------------------
+ B1. CAI 2 THU (chi lam 1 lan duy nhat)
+-----------------------------------------------------------
+
+  1. Node.js ban LTS   ->  https://nodejs.org
+     Cu bam Next -> Next.
+
+  2. Python 3          ->  https://python.org
+     ! QUAN TRONG: o man hinh dau tien phai TICK vao
+       "Add Python to PATH". Khong tick thi tool khong chay.
+
+Cai xong: DONG het cua so CMD / PowerShell dang mo roi mo lai
+(hoac khoi dong lai may) de may nhan lenh moi.
+
+Khong can AWS, khong can Docker, khong can tai khoan gi.
+
+
+-----------------------------------------------------------
+ B2. NHAY DUP 3 FILE NAY, DUNG THU TU
+-----------------------------------------------------------
+
+  0) giao-dien.bat           <-- CACH DE NHAT, NEN DUNG CAI NAY
+     Mo bang dieu khien trong trinh duyet: bam nut la chay,
+     thay tien do tung video, xem lai video ngay tai do.
+     Khong bi dong bang khi lo click chuot nhu cua so CMD.
+     Cac file duoi day la cach chay bang dong lenh, van dung duoc.
+
+  1) xem-ke-hoach.bat        ~1 giay
+     In ra 30 video hom nay se lam. KHONG ren gi ca.
+     Chay cai nay truoc de biet may da du dieu kien chua.
+
+  2) render-thu-2-cai.bat    ~5 phut
+     Ren 2 video that. Lan dau se tu cai dependency va tu tai
+     trinh duyet ren (~150 MB) nen lau hon.
+     => Ra duoc 2 cai thi 30 cai cung ra duoc.
+
+  3) giong-doc.bat           ~2 phut, CHAY 1 LAN DUY NHAT (tuy chon)
+     Tai bo doc tieng Anh (~90 MB, can mang). Chay xong thi moi
+     video se co giong doc + phu de tu dong.
+     Khong chay cung khong sao: video van co nhac va hieu ung.
+     Muon tat lai: node tool\batch.mjs --no-voice
+
+  4) run-30.bat              ~60-75 phut
+     Ren tron 30 video. De may chay, khong can ngoi trong.
+
+File khac:
+  studio.bat   mo che do xem truoc / sua truc tiep (danh cho dev)
+  daily.bat    dung khi muon hen gio chay moi ngay
+
+
+-----------------------------------------------------------
+ B3. NEU CO LOI
+-----------------------------------------------------------
+
+Tool tu kiem tra may truoc khi chay va noi ro thieu gi.
+
+  Hien dong "DeprecationWarning: Passing args to a child process..."
+      -> KHONG PHAI LOI. Day la canh bao cua Node 24, vo hai.
+         Cu de yen, tool van chay dung.
+
+  Tieu de cua so CMD hien chu "Select ..." va moi thu dung im
+      -> KHONG PHAI DO. Anh lo click vao trong cua so CMD nen Windows
+         bat che do boi den va TAM DUNG tien trinh.
+         Bam phim ESC la chay tiep ngay.
+         Dung giao-dien.bat thi khong bao gio gap loi nay.
+
+  Man hinh im lang mot luc
+      -> Binh thuong. Moi video in tien do theo tung 10%.
+         Lan dau chay lau hon vi phai dung bundle.
+
+  "Chua co Node.js" / "Chua co Python"
+      -> Cai theo B1, roi MO LAI cua so CMD.
+
+  "python not found" du da cai
+      -> Cai lai Python va TICK "Add Python to PATH".
+
+  Vai video bao FAIL, so con lai ok
+      -> Binh thuong. Chay lai run-30.bat: no BO QUA video da
+         xong va chi lam lai cai con thieu.
+
+  Dut giua buoi / tat may
+      -> Chay lai run-30.bat, no tiep tuc cho do.
+
+  Mang cong ty chan
+      -> 3 trong 4 format can internet (lay du lieu gia). Format
+         day mau nen thi KHONG can mang - font da nhung san.
+
+Mot video loi KHONG lam chet ca batch: 29 cai con lai van chay.
+
+
+-----------------------------------------------------------
+ B4. 30 VIDEO KHAC NHAU O DAU
+-----------------------------------------------------------
+
+Bon format, moi ngay chia deu:
+
+   8 video  day mau nen - 13 mau (engulfing, hammer, shooting
+            star, morning/evening star, 3 loai doji, marubozu,
+            pin bar, tweezer top/bottom). Du lieu tu dung nen
+            KHONG can mang, doi moi ngay.
+
+   8 video  quiz "BUY or SELL" - du lieu that.
+
+   8 video  phan tich setup co ten - du lieu that.
+
+   6 video  market map - danh dau vung thanh khoan BSL/SSL,
+            order block, gap chua lap, diem CHoCH, roi ve KE
+            HOACH di toi cac vung do.
+
+Nhan voi 3 san pham (vang, bac, dau) x 4 khung gio (5m, 15m,
+30m, 1H); market map dung H1 va D1. Thu tu xoay theo ngay nen
+hom nay khac hom qua.
+
+LUU Y ve market map: duong mau xanh la KE HOACH, khong phai du
+doan - video ghi ro dieu do tren man hinh. Cac muc gia thi deu
+do tu du lieu that.
+
+
+-----------------------------------------------------------
+ B5. AI VIET CAPTION (tuy chon, khong bat buoc)
+-----------------------------------------------------------
+
+Khong co key thi tool van chay binh thuong, dung caption co san.
+
+Muon dung key rieng:
+  1. Doi ten  tool\.env.example  thanh  tool\.env
+  2. Mo bang Notepad, dan key vao dong LLM_API_KEY=
+  3. Luu lai.
+
+TUYET DOI khong dan key truc tiep vao file .bat hay .mjs, va
+khong gui file .env cho ai.

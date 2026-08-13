@@ -1,0 +1,618 @@
+{
+  "pair": "WTI/USD",
+  "timeframe": "15m",
+  "title": "THE ENTRY MOST TRADERS MISS",
+  "hook": "WTI/USD on the 15m — does this one reach target?",
+  "side": "SHORT",
+  "answer": "BUY",
+  "candles": [
+    {
+      "time": 1786034700,
+      "open": 78.05,
+      "high": 78.09,
+      "low": 77.78,
+      "close": 77.88
+    },
+    {
+      "time": 1786035600,
+      "open": 77.88,
+      "high": 77.88,
+      "low": 77.66,
+      "close": 77.75
+    },
+    {
+      "time": 1786036500,
+      "open": 77.74,
+      "high": 77.9,
+      "low": 77.58,
+      "close": 77.64
+    },
+    {
+      "time": 1786037400,
+      "open": 77.62,
+      "high": 77.69,
+      "low": 77.24,
+      "close": 77.35
+    },
+    {
+      "time": 1786038300,
+      "open": 77.35,
+      "high": 77.41,
+      "low": 77.14,
+      "close": 77.31
+    },
+    {
+      "time": 1786039200,
+      "open": 77.31,
+      "high": 77.49,
+      "low": 77.11,
+      "close": 77.28
+    },
+    {
+      "time": 1786040100,
+      "open": 77.29,
+      "high": 77.46,
+      "low": 77.18,
+      "close": 77.27
+    },
+    {
+      "time": 1786041000,
+      "open": 77.28,
+      "high": 77.35,
+      "low": 77.15,
+      "close": 77.28
+    },
+    {
+      "time": 1786041900,
+      "open": 77.28,
+      "high": 77.44,
+      "low": 77.23,
+      "close": 77.4
+    },
+    {
+      "time": 1786042800,
+      "open": 77.41,
+      "high": 77.69,
+      "low": 77.41,
+      "close": 77.57
+    },
+    {
+      "time": 1786043700,
+      "open": 77.59,
+      "high": 78.33,
+      "low": 77.51,
+      "close": 78.14
+    },
+    {
+      "time": 1786044600,
+      "open": 78.16,
+      "high": 78.29,
+      "low": 77.85,
+      "close": 77.95
+    },
+    {
+      "time": 1786045500,
+      "open": 77.95,
+      "high": 78.08,
+      "low": 77.41,
+      "close": 77.72
+    },
+    {
+      "time": 1786046400,
+      "open": 77.68,
+      "high": 77.84,
+      "low": 77.61,
+      "close": 77.77
+    },
+    {
+      "time": 1786047300,
+      "open": 77.76,
+      "high": 78.18,
+      "low": 77.66,
+      "close": 78.09
+    },
+    {
+      "time": 1786048200,
+      "open": 78.09,
+      "high": 78.29,
+      "low": 77.98,
+      "close": 78.18
+    },
+    {
+      "time": 1786049100,
+      "open": 78.17,
+      "high": 78.51,
+      "low": 78.15,
+      "close": 78.23
+    },
+    {
+      "time": 1786053600,
+      "open": 78.17,
+      "high": 78.21,
+      "low": 77.8,
+      "close": 78.11
+    },
+    {
+      "time": 1786054500,
+      "open": 78.07,
+      "high": 78.14,
+      "low": 78.03,
+      "close": 78.08
+    },
+    {
+      "time": 1786055400,
+      "open": 78.07,
+      "high": 78.15,
+      "low": 78.07,
+      "close": 78.11
+    },
+    {
+      "time": 1786056300,
+      "open": 78.11,
+      "high": 78.15,
+      "low": 78.03,
+      "close": 78.11
+    },
+    {
+      "time": 1786057200,
+      "open": 78.12,
+      "high": 78.13,
+      "low": 78.06,
+      "close": 78.08
+    },
+    {
+      "time": 1786058100,
+      "open": 78.07,
+      "high": 78.11,
+      "low": 78.01,
+      "close": 78.06
+    },
+    {
+      "time": 1786059000,
+      "open": 78.06,
+      "high": 78.11,
+      "low": 78.05,
+      "close": 78.08
+    },
+    {
+      "time": 1786059900,
+      "open": 78.07,
+      "high": 78.1,
+      "low": 77.95,
+      "close": 77.99
+    },
+    {
+      "time": 1786060800,
+      "open": 77.98,
+      "high": 78.26,
+      "low": 77.9,
+      "close": 78.13
+    },
+    {
+      "time": 1786061700,
+      "open": 78.13,
+      "high": 78.35,
+      "low": 78.12,
+      "close": 78.26
+    },
+    {
+      "time": 1786062600,
+      "open": 78.27,
+      "high": 78.42,
+      "low": 78.19,
+      "close": 78.23
+    },
+    {
+      "time": 1786063500,
+      "open": 78.23,
+      "high": 78.23,
+      "low": 77.87,
+      "close": 77.94
+    },
+    {
+      "time": 1786064400,
+      "open": 77.94,
+      "high": 78.02,
+      "low": 77.73,
+      "close": 77.84
+    },
+    {
+      "time": 1786065300,
+      "open": 77.82,
+      "high": 78.03,
+      "low": 77.79,
+      "close": 77.86
+    },
+    {
+      "time": 1786066200,
+      "open": 77.84,
+      "high": 77.92,
+      "low": 77.74,
+      "close": 77.81
+    },
+    {
+      "time": 1786067100,
+      "open": 77.81,
+      "high": 78,
+      "low": 77.81,
+      "close": 77.92
+    },
+    {
+      "time": 1786068000,
+      "open": 77.92,
+      "high": 78.12,
+      "low": 77.92,
+      "close": 78.03
+    },
+    {
+      "time": 1786068900,
+      "open": 78.02,
+      "high": 78.17,
+      "low": 77.96,
+      "close": 78.1
+    },
+    {
+      "time": 1786069800,
+      "open": 78.11,
+      "high": 78.21,
+      "low": 78.04,
+      "close": 78.09
+    },
+    {
+      "time": 1786070700,
+      "open": 78.09,
+      "high": 78.11,
+      "low": 77.98,
+      "close": 78
+    },
+    {
+      "time": 1786071600,
+      "open": 78.01,
+      "high": 78.11,
+      "low": 77.9,
+      "close": 78.1
+    },
+    {
+      "time": 1786072500,
+      "open": 78.08,
+      "high": 78.26,
+      "low": 78.05,
+      "close": 78.06
+    },
+    {
+      "time": 1786073400,
+      "open": 78.06,
+      "high": 78.1,
+      "low": 77.97,
+      "close": 78.01
+    },
+    {
+      "time": 1786074300,
+      "open": 78.02,
+      "high": 78.1,
+      "low": 78,
+      "close": 78.05
+    },
+    {
+      "time": 1786075200,
+      "open": 78.05,
+      "high": 78.34,
+      "low": 77.99,
+      "close": 78.3
+    },
+    {
+      "time": 1786076100,
+      "open": 78.29,
+      "high": 78.72,
+      "low": 78.28,
+      "close": 78.65
+    },
+    {
+      "time": 1786077000,
+      "open": 78.64,
+      "high": 78.77,
+      "low": 78.27,
+      "close": 78.46
+    },
+    {
+      "time": 1786077900,
+      "open": 78.46,
+      "high": 78.52,
+      "low": 78.23,
+      "close": 78.32
+    },
+    {
+      "time": 1786078800,
+      "open": 78.33,
+      "high": 78.34,
+      "low": 78.22,
+      "close": 78.32
+    },
+    {
+      "time": 1786079700,
+      "open": 78.33,
+      "high": 78.36,
+      "low": 78.25,
+      "close": 78.32
+    },
+    {
+      "time": 1786080600,
+      "open": 78.35,
+      "high": 78.39,
+      "low": 78.17,
+      "close": 78.25
+    },
+    {
+      "time": 1786081500,
+      "open": 78.26,
+      "high": 78.35,
+      "low": 78.06,
+      "close": 78.06
+    },
+    {
+      "time": 1786082400,
+      "open": 78.06,
+      "high": 78.15,
+      "low": 77.79,
+      "close": 77.83
+    },
+    {
+      "time": 1786083300,
+      "open": 77.84,
+      "high": 77.91,
+      "low": 77.58,
+      "close": 77.6
+    },
+    {
+      "time": 1786084200,
+      "open": 77.58,
+      "high": 78.1,
+      "low": 77.56,
+      "close": 78.07
+    },
+    {
+      "time": 1786085100,
+      "open": 78.06,
+      "high": 78.12,
+      "low": 77.85,
+      "close": 77.87
+    },
+    {
+      "time": 1786086000,
+      "open": 77.88,
+      "high": 78.05,
+      "low": 77.66,
+      "close": 77.66
+    },
+    {
+      "time": 1786086900,
+      "open": 77.67,
+      "high": 77.85,
+      "low": 77.52,
+      "close": 77.56
+    },
+    {
+      "time": 1786087800,
+      "open": 77.56,
+      "high": 77.85,
+      "low": 77.51,
+      "close": 77.85
+    },
+    {
+      "time": 1786088700,
+      "open": 77.85,
+      "high": 77.95,
+      "low": 77.7,
+      "close": 77.76
+    },
+    {
+      "time": 1786089600,
+      "open": 77.77,
+      "high": 77.81,
+      "low": 77.46,
+      "close": 77.66
+    },
+    {
+      "time": 1786090500,
+      "open": 77.67,
+      "high": 77.98,
+      "low": 77.66,
+      "close": 77.85
+    },
+    {
+      "time": 1786091400,
+      "open": 77.86,
+      "high": 77.98,
+      "low": 77.6,
+      "close": 77.84
+    },
+    {
+      "time": 1786092300,
+      "open": 77.84,
+      "high": 78.04,
+      "low": 77.7,
+      "close": 77.74
+    },
+    {
+      "time": 1786093200,
+      "open": 77.75,
+      "high": 77.84,
+      "low": 77.54,
+      "close": 77.6
+    },
+    {
+      "time": 1786094100,
+      "open": 77.59,
+      "high": 77.77,
+      "low": 77.51,
+      "close": 77.52
+    },
+    {
+      "time": 1786095000,
+      "open": 77.54,
+      "high": 77.55,
+      "low": 77.09,
+      "close": 77.24
+    }
+  ],
+  "setupCount": 42,
+  "levels": [
+    {
+      "price": 78.51,
+      "label": "Resistance",
+      "kind": "resistance"
+    },
+    {
+      "price": 77.11,
+      "label": "Support",
+      "kind": "support"
+    }
+  ],
+  "riskReward": {
+    "entry": 78.3,
+    "stop": 78.68,
+    "target": 77.11,
+    "entryIndex": 41
+  },
+  "structure": [
+    {
+      "index": 5,
+      "price": 77.11,
+      "type": "L"
+    },
+    {
+      "index": 10,
+      "price": 78.33,
+      "type": "H"
+    },
+    {
+      "index": 12,
+      "price": 77.41,
+      "type": "L"
+    },
+    {
+      "index": 16,
+      "price": 78.51,
+      "type": "H"
+    },
+    {
+      "index": 17,
+      "price": 77.8,
+      "type": "L"
+    },
+    {
+      "index": 20,
+      "price": 78.15,
+      "type": "H"
+    },
+    {
+      "index": 25,
+      "price": 77.9,
+      "type": "L"
+    },
+    {
+      "index": 27,
+      "price": 78.42,
+      "type": "H"
+    },
+    {
+      "index": 29,
+      "price": 77.73,
+      "type": "L"
+    },
+    {
+      "index": 35,
+      "price": 78.21,
+      "type": "H"
+    },
+    {
+      "index": 37,
+      "price": 77.9,
+      "type": "L"
+    },
+    {
+      "index": 38,
+      "price": 78.26,
+      "type": "H"
+    }
+  ],
+  "pattern": {
+    "name": "Inverse Head & Shoulders",
+    "bias": "bullish",
+    "neckline": 78.42,
+    "points": [
+      {
+        "index": 25,
+        "price": 77.9,
+        "label": "Shoulder"
+      },
+      {
+        "index": 29,
+        "price": 77.73,
+        "label": "Head"
+      },
+      {
+        "index": 37,
+        "price": 77.9,
+        "label": "Shoulder"
+      }
+    ]
+  },
+  "patternTrade": {
+    "entry": 78.42,
+    "stop": 77.83,
+    "target": 79.11,
+    "entryIndex": 41
+  },
+  "patternSide": "LONG",
+  "patternOutcome": {
+    "result": "SL",
+    "index": 49
+  },
+  "fvgs": [
+    {
+      "kind": "bullish",
+      "bottom": 77.35,
+      "top": 77.41,
+      "startIndex": 9
+    }
+  ],
+  "orderBlock": {
+    "kind": "bullish",
+    "top": 77.29,
+    "bottom": 77.27,
+    "index": 6
+  },
+  "fibonacci": {
+    "high": 78.51,
+    "low": 77.11,
+    "direction": "up",
+    "levels": [
+      {
+        "ratio": 0.236,
+        "price": 78.18
+      },
+      {
+        "ratio": 0.382,
+        "price": 77.98
+      },
+      {
+        "ratio": 0.5,
+        "price": 77.81
+      },
+      {
+        "ratio": 0.618,
+        "price": 77.64
+      },
+      {
+        "ratio": 0.786,
+        "price": 77.41
+      }
+    ],
+    "startIndex": 5
+  },
+  "outcome": {
+    "result": "SL",
+    "index": 42
+  }
+}

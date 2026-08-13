@@ -1,0 +1,307 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Gravestone Doji",
+    "tagline": "What a gravestone doji actually tells you",
+    "bias": "bearish",
+    "rule": "Open and close land together at the bottom of the range, with a long wick above. The whole advance was given back.",
+    "checks": [
+      "Body is a sliver near the low",
+      "Long upper wick, effectively no lower wick",
+      "Read it at resistance, not mid-range"
+    ],
+    "bodyLow": 1987.17,
+    "bodyHigh": 1987.37,
+    "indices": [
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Body sits at the bottom"
+    },
+    {
+      "index": 17,
+      "part": "upperWick",
+      "label": "All the range is above"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 1955,
+      "high": 1959.21,
+      "low": 1953.46,
+      "close": 1957.82
+    },
+    {
+      "time": 1700000900,
+      "open": 1957.82,
+      "high": 1958.84,
+      "low": 1953.88,
+      "close": 1954.87
+    },
+    {
+      "time": 1700001800,
+      "open": 1954.87,
+      "high": 1957.43,
+      "low": 1954.22,
+      "close": 1956.66
+    },
+    {
+      "time": 1700002700,
+      "open": 1956.66,
+      "high": 1962.76,
+      "low": 1953.83,
+      "close": 1961.18
+    },
+    {
+      "time": 1700003600,
+      "open": 1961.18,
+      "high": 1963.46,
+      "low": 1960.2,
+      "close": 1962.61
+    },
+    {
+      "time": 1700004500,
+      "open": 1962.61,
+      "high": 1968.45,
+      "low": 1960.95,
+      "close": 1966.92
+    },
+    {
+      "time": 1700005400,
+      "open": 1966.92,
+      "high": 1969.82,
+      "low": 1965.64,
+      "close": 1969.26
+    },
+    {
+      "time": 1700006300,
+      "open": 1969.26,
+      "high": 1971.41,
+      "low": 1968.74,
+      "close": 1970.87
+    },
+    {
+      "time": 1700007200,
+      "open": 1970.87,
+      "high": 1978.43,
+      "low": 1968.71,
+      "close": 1975.41
+    },
+    {
+      "time": 1700008100,
+      "open": 1975.41,
+      "high": 1975.81,
+      "low": 1973.23,
+      "close": 1973.72
+    },
+    {
+      "time": 1700009000,
+      "open": 1973.72,
+      "high": 1975.98,
+      "low": 1972.93,
+      "close": 1975.1
+    },
+    {
+      "time": 1700009900,
+      "open": 1975.1,
+      "high": 1977.01,
+      "low": 1974.7,
+      "close": 1976.44
+    },
+    {
+      "time": 1700010800,
+      "open": 1976.44,
+      "high": 1982.68,
+      "low": 1975.33,
+      "close": 1980.47
+    },
+    {
+      "time": 1700011700,
+      "open": 1980.47,
+      "high": 1983.4,
+      "low": 1979.49,
+      "close": 1982.44
+    },
+    {
+      "time": 1700012600,
+      "open": 1982.44,
+      "high": 1985.13,
+      "low": 1981.43,
+      "close": 1984.17
+    },
+    {
+      "time": 1700013500,
+      "open": 1984.17,
+      "high": 1990.41,
+      "low": 1982.92,
+      "close": 1988.51
+    },
+    {
+      "time": 1700014400,
+      "open": 1988.51,
+      "high": 1989.15,
+      "low": 1986.97,
+      "close": 1987.37
+    },
+    {
+      "time": 1700015300,
+      "open": 1987.37,
+      "high": 1996.87,
+      "low": 1986.87,
+      "close": 1987.17
+    },
+    {
+      "time": 1700016200,
+      "open": 1987.17,
+      "high": 1988.69,
+      "low": 1980.43,
+      "close": 1983.02
+    },
+    {
+      "time": 1700017100,
+      "open": 1983.02,
+      "high": 1983.65,
+      "low": 1981.25,
+      "close": 1981.67
+    },
+    {
+      "time": 1700018000,
+      "open": 1981.67,
+      "high": 1984.23,
+      "low": 1975.76,
+      "close": 1978.15
+    },
+    {
+      "time": 1700018900,
+      "open": 1978.15,
+      "high": 1978.55,
+      "low": 1975.45,
+      "close": 1976.11
+    },
+    {
+      "time": 1700019800,
+      "open": 1976.11,
+      "high": 1977.43,
+      "low": 1970.13,
+      "close": 1972.43
+    },
+    {
+      "time": 1700020700,
+      "open": 1972.43,
+      "high": 1973.45,
+      "low": 1966.62,
+      "close": 1967.78
+    },
+    {
+      "time": 1700021600,
+      "open": 1967.78,
+      "high": 1969.36,
+      "low": 1967.32,
+      "close": 1968.74
+    },
+    {
+      "time": 1700022500,
+      "open": 1968.74,
+      "high": 1969.46,
+      "low": 1965.18,
+      "close": 1966.44
+    },
+    {
+      "time": 1700023400,
+      "open": 1966.44,
+      "high": 1967.82,
+      "low": 1964.12,
+      "close": 1964.55
+    },
+    {
+      "time": 1700024300,
+      "open": 1964.55,
+      "high": 1965.01,
+      "low": 1961.07,
+      "close": 1962.1
+    },
+    {
+      "time": 1700025200,
+      "open": 1962.1,
+      "high": 1962.88,
+      "low": 1956.3,
+      "close": 1958
+    },
+    {
+      "time": 1700026100,
+      "open": 1958,
+      "high": 1962.16,
+      "low": 1956.18,
+      "close": 1960.49
+    },
+    {
+      "time": 1700027000,
+      "open": 1960.49,
+      "high": 1961.91,
+      "low": 1957.49,
+      "close": 1958.41
+    },
+    {
+      "time": 1700027900,
+      "open": 1958.41,
+      "high": 1960.95,
+      "low": 1951.93,
+      "close": 1954.05
+    },
+    {
+      "time": 1700028800,
+      "open": 1954.05,
+      "high": 1955.01,
+      "low": 1951.72,
+      "close": 1952.35
+    },
+    {
+      "time": 1700029700,
+      "open": 1952.35,
+      "high": 1953.15,
+      "low": 1948.56,
+      "close": 1950.04
+    },
+    {
+      "time": 1700030600,
+      "open": 1950.04,
+      "high": 1954.08,
+      "low": 1949.19,
+      "close": 1952.49
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 1987.17,
+    "stop": 1997.47,
+    "target": 1966.57,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 25
+  },
+  "note": "Illustration - constructed price series, not a live chart",
+  "stats": {
+    "pattern": "gravestone-doji",
+    "bias": "bearish",
+    "rewardRisk": 2,
+    "occurrences": 23,
+    "settled": 22,
+    "wins": 5,
+    "losses": 17,
+    "gapped": 0,
+    "unresolved": 1,
+    "hitRate": 23,
+    "expectancyR": -0.32,
+    "pair": "XAU/USD",
+    "timeframe": "15m",
+    "windowLabel": "60d"
+  }
+}
