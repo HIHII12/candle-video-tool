@@ -28,11 +28,13 @@ mkdirSync(PUBLIC_BRAND, {recursive: true});
 
 // Run inside video-engine so Node resolves the package from its local
 // node_modules even when the launcher itself lives one directory above.
-for (const locale of ['vi', 'en']) {
-  const destination = CORE.destinations[locale];
-  const filename = destination.qrAsset.split('/').pop();
-  run('node', ['scripts/generate_qr.mjs', destination.url, join(PUBLIC_BRAND, filename)]);
-  copyFileSync(join(PUBLIC_BRAND, filename), join(OUT, filename));
+if (CORE.ctaMode === 'link') {
+  for (const locale of ['vi', 'en']) {
+    const destination = CORE.destinations[locale];
+    const filename = destination.qrAsset.split('/').pop();
+    run('node', ['scripts/generate_qr.mjs', destination.url, join(PUBLIC_BRAND, filename)]);
+    copyFileSync(join(PUBLIC_BRAND, filename), join(OUT, filename));
+  }
 }
 writeFileSync(join(OUT, 'content-core.json'), JSON.stringify(CORE, null, 2));
 
@@ -87,12 +89,13 @@ if (!has('skip-voice')) {
 }
 
 if (!has('skip-render')) {
+  const marketCase = CORE.content?.type === 'market-case';
   const jobs = [
-    {key: 'short-vi', type: 'render', composition: 'CaseShort', file: 'short-vi.mp4', props: 'props-short-vi.json'},
-    {key: 'short-en', type: 'render', composition: 'CaseShort', file: 'short-en.mp4', props: 'props-short-en.json'},
-    {key: 'case-file-vi', type: 'render', composition: 'CaseFile', file: 'case-file-vi.mp4', props: 'props-case-file-vi.json'},
-    {key: 'thumb-vi', type: 'still', composition: 'CaseThumbnail', file: 'thumb-vi.png', props: 'props-thumb-vi.json'},
-    {key: 'thumb-en', type: 'still', composition: 'CaseThumbnail', file: 'thumb-en.png', props: 'props-thumb-en.json'},
+    {key: 'short-vi', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-vi.mp4', props: 'props-short-vi.json'},
+    {key: 'short-en', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-en.mp4', props: 'props-short-en.json'},
+    ...(marketCase ? [{key: 'case-file-vi', type: 'render', composition: 'CaseFile', file: 'case-file-vi.mp4', props: 'props-case-file-vi.json'}] : []),
+    {key: 'thumb-vi', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-vi.png', props: 'props-thumb-vi.json'},
+    {key: 'thumb-en', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-en.png', props: 'props-thumb-en.json'},
   ].filter((job) => !onlyArg || job.key === onlyArg);
 
   for (const job of jobs) {

@@ -23,6 +23,40 @@
     "shortSeconds": 43,
     "longSeconds": 300
   },
+  "content": {
+    "type": "market-case",
+    "template": "decision-lab",
+    "title": "Gold H1 · Decision Lab",
+    "topic": "Chờ xác nhận tại vùng quyết định",
+    "pattern": "Bullish Engulfing",
+    "indicator": "RSI",
+    "indicatorPeriod": 14,
+    "smcConcept": "Order Block + CHoCH",
+    "fibonacciHigh": 4055.6,
+    "fibonacciLow": 4040.7,
+    "fibonacciDirection": "down",
+    "lessonChecks": {
+      "vi": ["Xác định bối cảnh trước mô hình", "Đọc cấu trúc thân và râu nến", "Chờ xác nhận thay vì đoán"],
+      "en": ["Read context before the pattern", "Inspect body and wick structure", "Wait for confirmation"]
+    }
+  },
+  "branding": {
+    "showLogo": false,
+    "showBrandName": false
+  },
+  "ctaMode": "engagement",
+  "engagement": {
+    "vi": {
+      "title": "Thấy hữu ích? Đăng ký để học tiếp",
+      "sub": "LIKE · SUBSCRIBE · BÌNH LUẬN chủ đề anh muốn xem",
+      "button": "SUBSCRIBE"
+    },
+    "en": {
+      "title": "Useful? Subscribe for the next breakdown",
+      "sub": "LIKE · SUBSCRIBE · COMMENT your next topic",
+      "button": "SUBSCRIBE"
+    }
+  },
   "cta": {
     "url": "https://zalo.me/g/vuqtnr406"
   },

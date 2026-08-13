@@ -126,11 +126,16 @@ def main() -> None:
         "vi.srt", "en.srt", "thumb-vi.png", "thumb-en.png", "metadata-vi.txt", "metadata-en.txt",
         "zalo-qr.svg", "telegram-qr.svg", "content-core.json",
     ]
+    if CORE.get("ctaMode") != "link":
+        required = [name for name in required if name not in ("zalo-qr.svg", "telegram-qr.svg")]
+    if CORE.get("content", {}).get("type") != "market-case":
+        required = [name for name in required if name != "case-file-vi.mp4"]
     missing = [name for name in required if not (OUT / name).exists()]
     if missing:
         raise SystemExit(f"Missing required showcase files: {', '.join(missing)}")
 
-    videos = {name: probe(OUT / name) for name in ("short-vi.mp4", "short-en.mp4", "case-file-vi.mp4")}
+    video_names = ["short-vi.mp4", "short-en.mp4"] + (["case-file-vi.mp4"] if CORE.get("content", {}).get("type") == "market-case" else [])
+    videos = {name: probe(OUT / name) for name in video_names}
     voices = {name: probe(OUT / name) for name in ("voice-vi.wav", "voice-en.wav")}
     expected = {
         "short-vi.mp4": (1080, 1920, "60/1", 43),
@@ -168,13 +173,15 @@ def main() -> None:
         "short-en.mp4": frames_dir / "short-en-038.png",
         "case-file-vi.mp4": frames_dir / "case-file-vi-294.png",
     }
+    qr_frames = {name: path for name, path in qr_frames.items() if name in videos}
     qr_results = {name: qr_decode(path) for name, path in qr_frames.items()}
     expected_qr = {
         "short-vi.mp4": CORE["destinations"]["vi"]["url"],
         "short-en.mp4": CORE["destinations"]["en"]["url"],
         "case-file-vi.mp4": CORE["destinations"]["vi"]["url"],
     }
-    qr_pass = all(qr_results[name] == url for name, url in expected_qr.items())
+    qr_pass = (all(qr_results.get(name) == url for name, url in expected_qr.items() if name in videos)
+               if CORE.get("ctaMode") == "link" else all(not value for value in qr_results.values()))
 
     audio = {name: audio_metrics(OUT / name) for name in videos}
     thumbs = {}

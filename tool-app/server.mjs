@@ -24,6 +24,12 @@ const cleanId = (value) => String(value || 'project').toLowerCase().normalize('N
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'project';
 const projectPath = (id) => join(PROJECTS, `${cleanId(id)}.json`);
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
+const mergeDefaults = (defaults, value) => {
+  if (Array.isArray(defaults)) return Array.isArray(value) ? value : defaults;
+  if (!defaults || typeof defaults !== 'object') return value === undefined ? defaults : value;
+  const source = value && typeof value === 'object' ? value : {};
+  return Object.fromEntries(Object.keys(defaults).map((key) => [key, mergeDefaults(defaults[key], source[key])]).concat(Object.keys(source).filter((key) => !(key in defaults)).map((key) => [key, source[key]])));
+};
 
 async function ensureData() {
   await Promise.all([mkdir(PROJECTS, {recursive: true}), mkdir(PREVIEWS, {recursive: true}), mkdir(ARCHIVES, {recursive: true})]);
@@ -31,6 +37,10 @@ async function ensureData() {
   if (!existsSync(path)) {
     const [core, map] = await Promise.all([readJson(CORE_PATH), readJson(MAP_PATH)]);
     await writeFile(path, JSON.stringify({id: 'case-001', name: 'Gold H1 · WAIT', updatedAt: new Date().toISOString(), core, candles: map.candles}, null, 2), 'utf8');
+  } else {
+    const [current, core] = await Promise.all([readJson(path), readJson(CORE_PATH)]);
+    current.core = mergeDefaults(core, current.core);
+    await writeFile(path, JSON.stringify(current, null, 2), 'utf8');
   }
 }
 
@@ -79,7 +89,8 @@ async function runQueue() {
   map.timeframe = project.core.data.timeframe;
   try {
     await Promise.all([writeFile(CORE_PATH, JSON.stringify(project.core, null, 2), 'utf8'), writeFile(MAP_PATH, JSON.stringify(map, null, 2), 'utf8')]);
-    const child = spawn(process.execPath, [join(ROOT, 'tool', 'showcase.mjs')], {cwd: ROOT, windowsHide: true, env: {...process.env, FORCE_COLOR: '0'}});
+    const renderArgs = [join(ROOT, 'tool', 'showcase.mjs'), ...(job.only ? ['--only', job.only] : [])];
+    const child = spawn(process.execPath, renderArgs, {cwd: ROOT, windowsHide: true, env: {...process.env, FORCE_COLOR: '0'}});
     job.child = child;
     const onData = (buffer) => {
       const lines = buffer.toString('utf8').split(/\r?\n/).filter(Boolean);
@@ -147,7 +158,8 @@ app.post('/api/render', async (req, res, next) => {
     if (req.body.project) await saveProject(req.body.project);
     const projectId = cleanId(req.body.projectId || req.body.project?.id);
     await readFile(projectPath(projectId), 'utf8');
-    const job = {id: `render-${Date.now().toString(36)}`, projectId, status: 'queued', progress: 0, log: []};
+    const allowedOnly = ['short-vi','short-en','thumb-vi','thumb-en'].includes(req.body.only) ? req.body.only : '';
+    const job = {id: `render-${Date.now().toString(36)}`, projectId, only: allowedOnly, status: 'queued', progress: 0, log: []};
     jobs.push(job); runQueue(); res.status(202).json(serializeJob(job));
   } catch (e) { next(e); }
 });

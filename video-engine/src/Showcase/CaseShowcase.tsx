@@ -64,9 +64,10 @@ const Logo: React.FC<{size?: number}> = ({size = 94}) => (
   </div>
 );
 
-const BrandHeader: React.FC<{copy: Copy; compact?: boolean}> = ({copy, compact}) => (
-  <div style={{display: 'flex', alignItems: 'center', gap: compact ? 16 : 22}}>
-    <Logo size={compact ? 74 : 96} />
+const BrandHeader: React.FC<{copy: Copy; compact?: boolean}> = ({copy, compact}) => {
+  if (!core.branding.showLogo && !core.branding.showBrandName) return null;
+  return <div style={{display: 'flex', alignItems: 'center', gap: compact ? 16 : 22}}>
+    {core.branding.showLogo && <Logo size={compact ? 74 : 96} />}
     <div>
       <div
         style={{
@@ -78,13 +79,11 @@ const BrandHeader: React.FC<{copy: Copy; compact?: boolean}> = ({copy, compact})
       >
         XAU LAB
       </div>
-      <div style={{color: C.white, fontSize: compact ? 20 : 25, fontWeight: 800, letterSpacing: 2}}>
-        VĂN THẮNG INVEST
-      </div>
+      {core.branding.showBrandName && <div style={{color: C.white, fontSize: compact ? 20 : 25, fontWeight: 800, letterSpacing: 2}}>VĂN THẮNG INVEST</div>}
       {!compact && <div style={{color: C.muted, marginTop: 6, fontSize: 18}}>{copy.tagline}</div>}
     </div>
-  </div>
-);
+  </div>;
+};
 
 const Pill: React.FC<{children: React.ReactNode; tone?: 'gold' | 'cyan' | 'red'}> = ({children, tone = 'gold'}) => {
   const color = tone === 'cyan' ? C.cyan : tone === 'red' ? C.red : C.gold;
@@ -258,7 +257,24 @@ const QRCard: React.FC<{copy: Copy; destination: Destination; horizontal?: boole
   </div>
 );
 
-const ShortVisual: React.FC<{copy: Copy; destination: Destination; frame: number; fps: number}> = ({copy, destination, frame, fps}) => {
+const EngagementCard: React.FC<{locale: Locale; horizontal?: boolean}> = ({locale, horizontal}) => {
+  const engagement = core.engagement[locale];
+  return (
+    <div style={{width: '100%', display: 'flex', flexDirection: horizontal ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: horizontal ? 54 : 28, background: 'linear-gradient(145deg,rgba(13,43,48,.98),rgba(7,24,28,.98))', border: `2px solid ${C.gold}80`, borderRadius: 30, padding: horizontal ? '42px 58px' : '48px 40px', boxShadow: '0 24px 70px rgba(0,0,0,.35)', textAlign: horizontal ? 'left' : 'center'}}>
+      <div style={{display: 'flex', gap: 14, alignItems: 'center'}}>
+        <div style={{fontSize: horizontal ? 35 : 29, color: C.white, border: `1px solid ${C.cyan}70`, borderRadius: 999, padding: '12px 22px'}}>LIKE</div>
+        <div style={{fontSize: horizontal ? 35 : 29, color: C.bg, background: C.gold, borderRadius: 999, padding: '12px 25px', fontWeight: 900}}>{engagement.button}</div>
+        <div style={{fontSize: horizontal ? 35 : 29, color: C.white, border: `1px solid ${C.cyan}70`, borderRadius: 999, padding: '12px 22px'}}>COMMENT</div>
+      </div>
+      <div style={{maxWidth: 820}}>
+        <div style={{fontFamily: DISPLAY_FONT, fontSize: horizontal ? 48 : 54, lineHeight: 1.12, color: C.white}}>{engagement.title}</div>
+        <div style={{fontSize: horizontal ? 25 : 28, color: C.cyan, marginTop: 18, fontWeight: 800}}>{engagement.sub}</div>
+      </div>
+    </div>
+  );
+};
+
+const ShortVisual: React.FC<{copy: Copy; destination: Destination; locale: Locale; frame: number; fps: number}> = ({copy, destination, locale, frame, fps}) => {
   const seconds = frame / fps;
   const revealChart = interpolate(seconds, [3, 15.5], [0.3, 1], clamp);
   const countdown = seconds >= 19.9 ? 1 : seconds >= 18.7 ? 2 : 3;
@@ -268,7 +284,7 @@ const ShortVisual: React.FC<{copy: Copy; destination: Destination; frame: number
     return (
       <div style={{position: 'absolute', inset: '160px 64px 250px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 46}}>
         <BrandHeader copy={copy} />
-        <QRCard copy={copy} destination={destination} />
+        {core.ctaMode === 'link' ? <QRCard copy={copy} destination={destination} /> : <EngagementCard locale={locale} />}
       </div>
     );
   }
@@ -335,7 +351,7 @@ export const CaseShort: React.FC<ShowcaseProps> = ({locale}) => {
   return (
     <AbsoluteFill style={{background: C.bg, color: C.white, fontFamily: TEXT_FONT, overflow: 'hidden'}}>
       <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 28%,rgba(24,224,208,.12),transparent 42%),radial-gradient(circle at 20% 80%,rgba(247,200,75,.08),transparent 38%)'}} />
-      <ShortVisual copy={copy} destination={destination} frame={frame} fps={fps} />
+      <ShortVisual copy={copy} destination={destination} locale={locale} frame={frame} fps={fps} />
       {core.retention.progressBar && (
         <div style={{position: 'absolute', top: 112, left: 64, right: 64, height: 5, borderRadius: 99, background: '#183238', overflow: 'hidden'}}>
           <div style={{height: '100%', width: `${(frame / durationInFrames) * 100}%`, background: `linear-gradient(90deg,${C.gold},${C.cyan})`}} />
@@ -379,7 +395,7 @@ const LongVisual: React.FC<{copy: Copy; destination: Destination; frame: number;
   const fade = interpolate(second % 1, [0, 0.18], [0.92, 1], clamp);
 
   if (second >= 290) {
-    return <div style={{position: 'absolute', inset: '170px 150px 90px', display: 'flex', alignItems: 'center'}}><QRCard copy={copy} destination={destination} horizontal /></div>;
+    return <div style={{position: 'absolute', inset: '170px 150px 90px', display: 'flex', alignItems: 'center'}}>{core.ctaMode === 'link' ? <QRCard copy={copy} destination={destination} horizontal /> : <EngagementCard locale="vi" horizontal />}</div>;
   }
 
   if (chapter === 0) {
