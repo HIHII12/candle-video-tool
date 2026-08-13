@@ -17,6 +17,7 @@ import mapData from '../data/map_xau_h1.json';
 type Locale = 'vi' | 'en';
 type NarrationLine = {at: number; text: string; tts?: string};
 type Copy = (typeof core.locales)[Locale];
+type Destination = (typeof core.destinations)[Locale];
 
 export type ShowcaseProps = {locale: Locale};
 
@@ -229,7 +230,7 @@ const ChoiceRow: React.FC<{copy: Copy; selected?: boolean; countdown?: number; l
   );
 };
 
-const QRCard: React.FC<{copy: Copy; horizontal?: boolean}> = ({copy, horizontal}) => (
+const QRCard: React.FC<{copy: Copy; destination: Destination; horizontal?: boolean}> = ({copy, destination, horizontal}) => (
   <div
     style={{
       width: '100%',
@@ -246,18 +247,18 @@ const QRCard: React.FC<{copy: Copy; horizontal?: boolean}> = ({copy, horizontal}
     }}
   >
     <div style={{background: '#fff', borderRadius: 18, padding: 18, lineHeight: 0, flex: '0 0 auto'}}>
-      <Img src={staticFile('brand/zalo-qr.svg')} style={{width: horizontal ? 255 : 360, height: horizontal ? 255 : 360}} />
+      <Img src={staticFile(destination.qrAsset)} style={{width: horizontal ? 255 : 360, height: horizontal ? 255 : 360}} />
     </div>
     <div style={{textAlign: horizontal ? 'left' : 'center', maxWidth: horizontal ? 760 : 840}}>
       <div style={{fontFamily: DISPLAY_FONT, fontSize: horizontal ? 42 : 48, lineHeight: 1.16, color: C.white}}>{copy.ctaTitle}</div>
       <div style={{fontSize: horizontal ? 26 : 30, color: C.cyan, marginTop: 20, fontWeight: 800}}>{copy.ctaSub}</div>
       <div style={{fontSize: 20, color: C.gold, marginTop: 15, fontWeight: 800, letterSpacing: 1.2}}>{copy.scan}</div>
-      <div style={{fontSize: 18, color: C.muted, marginTop: 10}}>{core.cta.url}</div>
+      <div style={{fontSize: 18, color: C.muted, marginTop: 10}}>{destination.handle} · {destination.url}</div>
     </div>
   </div>
 );
 
-const ShortVisual: React.FC<{copy: Copy; frame: number; fps: number}> = ({copy, frame, fps}) => {
+const ShortVisual: React.FC<{copy: Copy; destination: Destination; frame: number; fps: number}> = ({copy, destination, frame, fps}) => {
   const seconds = frame / fps;
   const revealChart = interpolate(seconds, [3, 15.5], [0.3, 1], clamp);
   const countdown = seconds >= 19.9 ? 1 : seconds >= 18.7 ? 2 : 3;
@@ -267,7 +268,7 @@ const ShortVisual: React.FC<{copy: Copy; frame: number; fps: number}> = ({copy, 
     return (
       <div style={{position: 'absolute', inset: '160px 64px 250px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 46}}>
         <BrandHeader copy={copy} />
-        <QRCard copy={copy} />
+        <QRCard copy={copy} destination={destination} />
       </div>
     );
   }
@@ -317,6 +318,7 @@ export const CaseShort: React.FC<ShowcaseProps> = ({locale}) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
   const copy = core.locales[locale] as Copy;
+  const destination = core.destinations[locale] as Destination;
   const lines = copy.shortNarration as NarrationLine[];
   const marks = marksFor(lines, fps, core.duration.shortSeconds);
   const cues: Cue[] = [
@@ -333,13 +335,23 @@ export const CaseShort: React.FC<ShowcaseProps> = ({locale}) => {
   return (
     <AbsoluteFill style={{background: C.bg, color: C.white, fontFamily: TEXT_FONT, overflow: 'hidden'}}>
       <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 28%,rgba(24,224,208,.12),transparent 42%),radial-gradient(circle at 20% 80%,rgba(247,200,75,.08),transparent 38%)'}} />
-      <ShortVisual copy={copy} frame={frame} fps={fps} />
+      <ShortVisual copy={copy} destination={destination} frame={frame} fps={fps} />
+      {core.retention.progressBar && (
+        <div style={{position: 'absolute', top: 112, left: 64, right: 64, height: 5, borderRadius: 99, background: '#183238', overflow: 'hidden'}}>
+          <div style={{height: '100%', width: `${(frame / durationInFrames) * 100}%`, background: `linear-gradient(90deg,${C.gold},${C.cyan})`}} />
+        </div>
+      )}
+      {core.retention.evidenceCounter && frame < 23 * fps && (
+        <div style={{position: 'absolute', top: 127, right: 64, color: C.cyan, fontWeight: 900, fontSize: 17, letterSpacing: 1.2}}>
+          {Math.min(3, Math.max(1, Math.floor(frame / (4 * fps)) + 1))}/3 · {core.retention.openLoop[locale]}
+        </div>
+      )}
       <div style={{position: 'absolute', left: 64, right: 64, bottom: 178, display: 'flex', justifyContent: 'space-between', color: C.muted, fontSize: 17}}>
         <span>CASE #001 · {core.data.symbol} · {core.data.timeframe}</span>
         <span>EDUCATIONAL · NOT INVESTMENT ADVICE</span>
       </div>
-      <Soundtrack bed="dark" cues={cues} durationInFrames={durationInFrames} fps={fps} bedGain={(f) => 0.12 * duckAt(marks, f, fps)} />
-      <Narration id={`showcase-short-${locale}`} marks={marks} frame={frame} tone="dark" bottom={265} />
+      <Soundtrack bed="dark" cues={cues} durationInFrames={durationInFrames} fps={fps} bedGain={(f) => core.voice.musicGain * duckAt(marks, f, fps)} />
+      <Narration id={`showcase-short-${locale}`} marks={marks} frame={frame} tone="dark" bottom={265} volume={1} />
     </AbsoluteFill>
   );
 };
@@ -361,13 +373,13 @@ const Stat: React.FC<{label: string; value: string; color?: string}> = ({label, 
   </div>
 );
 
-const LongVisual: React.FC<{copy: Copy; frame: number; fps: number}> = ({copy, frame, fps}) => {
+const LongVisual: React.FC<{copy: Copy; destination: Destination; frame: number; fps: number}> = ({copy, destination, frame, fps}) => {
   const second = frame / fps;
   const chapter = chapterForSecond(second);
   const fade = interpolate(second % 1, [0, 0.18], [0.92, 1], clamp);
 
   if (second >= 290) {
-    return <div style={{position: 'absolute', inset: '170px 150px 90px', display: 'flex', alignItems: 'center'}}><QRCard copy={copy} horizontal /></div>;
+    return <div style={{position: 'absolute', inset: '170px 150px 90px', display: 'flex', alignItems: 'center'}}><QRCard copy={copy} destination={destination} horizontal /></div>;
   }
 
   if (chapter === 0) {
@@ -491,6 +503,7 @@ export const CaseFile: React.FC<ShowcaseProps> = ({locale}) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
   const copy = core.locales[locale] as Copy;
+  const destination = core.destinations[locale] as Destination;
   const lines = copy.longNarration as NarrationLine[];
   const marks = marksFor(lines, fps, core.duration.longSeconds);
   const second = frame / fps;
@@ -510,12 +523,12 @@ export const CaseFile: React.FC<ShowcaseProps> = ({locale}) => {
       <div style={{position: 'absolute', left: 72, right: 72, top: 132, height: 3, background: '#294147'}}>
         <div style={{width: `${(frame / durationInFrames) * 100}%`, height: '100%', background: `linear-gradient(90deg,${C.gold},${C.cyan})`}} />
       </div>
-      <LongVisual copy={copy} frame={frame} fps={fps} />
+      <LongVisual copy={copy} destination={destination} frame={frame} fps={fps} />
       <div style={{position: 'absolute', left: 72, right: 72, bottom: 34, display: 'flex', justifyContent: 'space-between', color: C.muted, fontSize: 16}}>
         <span>CASE #001 · SOURCE: YAHOO GC=F (COMEX GOLD FUTURES PROXY)</span>
         <span>EDUCATIONAL · NOT INVESTMENT ADVICE</span>
       </div>
-      <Soundtrack bed="dark" cues={cues} durationInFrames={durationInFrames} fps={fps} bedGain={(f) => 0.1 * duckAt(marks, f, fps)} />
+      <Soundtrack bed="dark" cues={cues} durationInFrames={durationInFrames} fps={fps} bedGain={(f) => core.voice.musicGain * duckAt(marks, f, fps)} />
       <Narration id="showcase-long-vi" marks={marks} frame={frame} tone="dark" bottom={74} respectShortSafeArea={false} />
     </AbsoluteFill>
   );

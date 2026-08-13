@@ -32,7 +32,9 @@ export const Narration: React.FC<{
   bottom?: number;
   /** Long-form 16:9 has no Shorts UI band and can use its own lower-third. */
   respectShortSafeArea?: boolean;
-}> = ({id, marks, frame, tone, bottom = 300, respectShortSafeArea = true}) => {
+  /** Master voice level. The WAV is already compressed and peak-normalised. */
+  volume?: number;
+}> = ({id, marks, frame, tone, bottom = 300, respectShortSafeArea = true, volume = 1}) => {
   const current = marks.find((m) => frame >= m.startFrame && frame < m.endFrame + 8);
 
   const ink = tone === 'dark' ? '#ffffff' : '#0b0f14';
@@ -40,7 +42,7 @@ export const Narration: React.FC<{
 
   return (
     <>
-      <Audio src={staticFile(`voice/${id}.wav`)} />
+      <Audio src={staticFile(`voice/${id}.wav`)} volume={volume} />
       {current && (
         <div
           style={{

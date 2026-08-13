@@ -26,6 +26,35 @@
   "cta": {
     "url": "https://zalo.me/g/vuqtnr406"
   },
+  "destinations": {
+    "vi": {
+      "channel": "Zalo",
+      "url": "https://zalo.me/g/vuqtnr406",
+      "handle": "Nhóm Zalo Văn Thắng Invest",
+      "qrAsset": "brand/zalo-qr.svg"
+    },
+    "en": {
+      "channel": "Telegram",
+      "url": "https://t.me/goldfather_fxhub",
+      "handle": "@goldfather_fxhub",
+      "qrAsset": "brand/telegram-qr.svg"
+    }
+  },
+  "voice": {
+    "pace": 0.94,
+    "gainDb": 3.0,
+    "clarity": 0.72,
+    "musicGain": 0.1
+  },
+  "retention": {
+    "progressBar": true,
+    "evidenceCounter": true,
+    "countdown": true,
+    "openLoop": {
+      "vi": "3 dữ kiện trước khi chốt đáp án",
+      "en": "3 evidence checks before the answer"
+    }
+  },
   "locales": {
     "vi": {
       "choiceWait": "ĐỨNG NGOÀI",
@@ -112,8 +141,8 @@
       "reason": "No H1 close has confirmed a break from the decision zone",
       "invalidLevel": "BUY invalid below 4040.7 · SELL invalid above 4055.6",
       "ctaTitle": "Get the risk framework and a plan for every session",
-      "ctaSub": "Zalo group link in the pinned comment",
-      "scan": "SCAN TO JOIN THE ZALO GROUP",
+      "ctaSub": "Global Telegram: @goldfather_fxhub",
+      "scan": "SCAN TO JOIN TELEGRAM",
       "longTitle": "CASE FILE #001",
       "chapters": ["THE QUESTION", "CONTEXT", "STRUCTURE", "TWO SCENARIOS", "RISK", "REPLAY", "THE LESSON"],
       "lesson": "No confirmation is still information. WAIT preserves capital for a clearer setup.",
@@ -121,8 +150,8 @@
       "discipline": "No entry means no TP, no SL, and no invented result.",
       "metadata": {
         "title": "Gold H1: BUY, SELL, or WAIT? | One Zone, Two Scenarios",
-        "description": "Case #001 uses Yahoo GC=F (a COMEX Gold Futures proxy), not XAUUSD spot. It demonstrates confirmation, invalidation and risk limits before entry.\n\nGet the risk framework and a plan for every session: https://zalo.me/g/vuqtnr406\n\nEducational content only, not investment advice.",
-        "pinnedComment": "Get the risk framework and a plan for every session in our Zalo group: https://zalo.me/g/vuqtnr406"
+        "description": "Case #001 uses Yahoo GC=F (a COMEX Gold Futures proxy), not XAUUSD spot. It demonstrates confirmation, invalidation and risk limits before entry.\n\nJoin the global Telegram channel: https://t.me/goldfather_fxhub\n\nEducational content only, not investment advice.",
+        "pinnedComment": "Join the global Goldfather FX Hub on Telegram: https://t.me/goldfather_fxhub"
       },
       "shortNarration": [
         {"at": 0.3, "text": "If you could choose only one: BUY, SELL, or WAIT?"},
@@ -134,7 +163,7 @@
         {"at": 26.4, "text": "There is no confirmed H1 close away from the decision zone."},
         {"at": 31.0, "text": "Not entering is also a risk-management decision."},
         {"at": 35.3, "text": "Get the risk framework and a plan for every session."},
-        {"at": 39.2, "text": "The Zalo group link is in the pinned comment."}
+        {"at": 39.2, "text": "Join Goldfather FX Hub on Telegram."}
       ],
       "longNarration": []
     }

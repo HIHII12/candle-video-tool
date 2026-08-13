@@ -12,6 +12,9 @@ video-engine/out/
 tool/.env
 tool/.env.*
 !tool/.env.example
+tool-app/node_modules/
+tool-app/dist/
+tool-app/data/
 
 # Generated run data, caches, and temporary files
 video-engine/src/data/run_*.json

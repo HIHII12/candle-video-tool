@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import shutil
 import subprocess
 import tempfile
@@ -37,10 +38,10 @@ def piper_exe() -> Path:
     raise SystemExit("Piper is missing. Run scripts/setup_voice.py first.")
 
 
-def synthesize(exe: Path, model: Path, text: str, output: Path) -> tuple[int, array]:
+def synthesize(exe: Path, model: Path, text: str, output: Path, pace: float) -> tuple[int, array]:
     subprocess.run(
         [str(exe), "--model", str(model), "--config", str(model) + ".json",
-         "--length_scale", "0.94", "--output_file", str(output)],
+         "--length_scale", str(pace), "--output_file", str(output)],
         input=text.encode("utf-8"), check=True, capture_output=True,
     )
     with wave.open(str(output), "rb") as wav:
@@ -50,6 +51,39 @@ def synthesize(exe: Path, model: Path, text: str, output: Path) -> tuple[int, ar
         samples = array("h")
         samples.frombytes(wav.readframes(wav.getnframes()))
         return rate, samples
+
+
+def enhance(samples: array, rate: int, clarity: float, gain_db: float) -> array:
+    """Phone-first vocal chain: DC/rumble cut, gentle compression and limiter."""
+    if not samples:
+        return samples
+    alpha = math.exp(-2 * math.pi * (55 + 45 * clarity) / rate)
+    previous_in = 0.0
+    previous_out = 0.0
+    drive = 10 ** (gain_db / 20)
+    threshold = 0.16
+    ratio = 3.2
+    processed = array("h")
+    for raw in samples:
+        x = raw / 32768.0
+        high = alpha * (previous_out + x - previous_in)
+        previous_in, previous_out = x, high
+        value = high * drive
+        sign = -1 if value < 0 else 1
+        magnitude = abs(value)
+        if magnitude > threshold:
+            magnitude = threshold + (magnitude - threshold) / ratio
+        limited = math.tanh(sign * magnitude * 1.35) / math.tanh(1.35)
+        processed.append(max(-32768, min(32767, round(limited * 32767))))
+    return processed
+
+
+def peak_normalize(track: array, target_db: float = -1.5) -> array:
+    peak = max((abs(value) for value in track), default=0)
+    if peak == 0:
+        return track
+    scale = (32767 * (10 ** (target_db / 20))) / peak
+    return array("h", (max(-32768, min(32767, round(value * scale))) for value in track))
 
 
 def stamp(track: array, samples: array, start: int) -> None:
@@ -80,7 +114,7 @@ def write_srt(path: Path, marks: list[dict]) -> None:
     path.write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
 
 
-def make_track(exe: Path, locale: str, lines: list[dict], duration: float, name: str) -> list[dict]:
+def make_track(exe: Path, locale: str, lines: list[dict], duration: float, name: str, settings: dict) -> list[dict]:
     voice = VOICES[locale]
     model = VENDOR / f"{voice}.onnx"
     if not model.exists() or not Path(str(model) + ".json").exists():
@@ -96,9 +130,10 @@ def make_track(exe: Path, locale: str, lines: list[dict], duration: float, name:
         for index, line in enumerate(lines):
             wav_path = temp_dir / f"line-{index:03}.wav"
             spoken = line.get("tts") or line["text"]
-            line_rate, samples = synthesize(exe, model, spoken, wav_path)
+            line_rate, samples = synthesize(exe, model, spoken, wav_path, float(settings.get("pace", 0.94)))
             if line_rate != rate:
                 raise SystemExit(f"Voice {voice} is {line_rate} Hz; expected {rate} Hz")
+            samples = enhance(samples, rate, float(settings.get("clarity", 0.72)), float(settings.get("gainDb", 3.0)))
             requested = float(line["at"])
             start_seconds = max(requested, previous_end + 0.12 if marks else requested)
             end_seconds = start_seconds + len(samples) / rate
@@ -115,6 +150,7 @@ def make_track(exe: Path, locale: str, lines: list[dict], duration: float, name:
             })
             previous_end = end_seconds
 
+    track = peak_normalize(track)
     PUBLIC_VOICE.mkdir(parents=True, exist_ok=True)
     wav_out = PUBLIC_VOICE / f"{name}.wav"
     with wave.open(str(wav_out), "wb") as wav:
@@ -135,6 +171,7 @@ def main() -> None:
     args = parser.parse_args()
 
     core = json.loads(CORE_PATH.read_text(encoding="utf-8"))
+    settings = core.get("voice", {})
     exe = piper_exe()
     OUT.mkdir(parents=True, exist_ok=True)
 
@@ -142,7 +179,7 @@ def main() -> None:
     for locale in ("vi", "en"):
         short_marks[locale] = make_track(
             exe, locale, core["locales"][locale]["shortNarration"],
-            float(core["duration"]["shortSeconds"]), f"showcase-short-{locale}",
+            float(core["duration"]["shortSeconds"]), f"showcase-short-{locale}", settings,
         )
         write_srt(OUT / f"{locale}.srt", short_marks[locale])
         shutil.copy2(PUBLIC_VOICE / f"showcase-short-{locale}.wav", OUT / f"voice-{locale}.wav")
@@ -150,10 +187,9 @@ def main() -> None:
     if not args.skip_long:
         make_track(
             exe, "vi", core["locales"]["vi"]["longNarration"],
-            float(core["duration"]["longSeconds"]), "showcase-long-vi",
+            float(core["duration"]["longSeconds"]), "showcase-long-vi", settings,
         )
 
 
 if __name__ == "__main__":
     main()
-

@@ -124,7 +124,7 @@ def main() -> None:
     required = [
         "short-vi.mp4", "short-en.mp4", "case-file-vi.mp4", "voice-vi.wav", "voice-en.wav",
         "vi.srt", "en.srt", "thumb-vi.png", "thumb-en.png", "metadata-vi.txt", "metadata-en.txt",
-        "zalo-qr.svg", "content-core.json",
+        "zalo-qr.svg", "telegram-qr.svg", "content-core.json",
     ]
     missing = [name for name in required if not (OUT / name).exists()]
     if missing:
@@ -169,7 +169,12 @@ def main() -> None:
         "case-file-vi.mp4": frames_dir / "case-file-vi-294.png",
     }
     qr_results = {name: qr_decode(path) for name, path in qr_frames.items()}
-    qr_pass = all(value == CORE["cta"]["url"] for value in qr_results.values())
+    expected_qr = {
+        "short-vi.mp4": CORE["destinations"]["vi"]["url"],
+        "short-en.mp4": CORE["destinations"]["en"]["url"],
+        "case-file-vi.mp4": CORE["destinations"]["vi"]["url"],
+    }
+    qr_pass = all(qr_results[name] == url for name, url in expected_qr.items())
 
     audio = {name: audio_metrics(OUT / name) for name in videos}
     thumbs = {}
@@ -223,7 +228,7 @@ def main() -> None:
             "pass": args.layout_pass,
         },
         "qr": {
-            "url": CORE["cta"]["url"],
+            "urls": expected_qr,
             "format": "SVG",
             "errorCorrection": "H",
             "quietZoneModules": 4,
@@ -263,4 +268,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

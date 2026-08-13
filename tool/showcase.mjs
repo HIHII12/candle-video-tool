@@ -28,17 +28,22 @@ mkdirSync(PUBLIC_BRAND, {recursive: true});
 
 // Run inside video-engine so Node resolves the package from its local
 // node_modules even when the launcher itself lives one directory above.
-run('node', ['scripts/generate_qr.mjs', CORE.cta.url, join(PUBLIC_BRAND, 'zalo-qr.svg')]);
-copyFileSync(join(PUBLIC_BRAND, 'zalo-qr.svg'), join(OUT, 'zalo-qr.svg'));
+for (const locale of ['vi', 'en']) {
+  const destination = CORE.destinations[locale];
+  const filename = destination.qrAsset.split('/').pop();
+  run('node', ['scripts/generate_qr.mjs', destination.url, join(PUBLIC_BRAND, filename)]);
+  copyFileSync(join(PUBLIC_BRAND, filename), join(OUT, filename));
+}
 writeFileSync(join(OUT, 'content-core.json'), JSON.stringify(CORE, null, 2));
 
 for (const locale of ['vi', 'en']) {
   const meta = CORE.locales[locale].metadata;
+  const destination = CORE.destinations[locale];
   const text = [
     `TITLE\n${meta.title}`,
     `DESCRIPTION\n${meta.description}`,
     `PINNED COMMENT\n${meta.pinnedComment}`,
-    `CTA ZALO\n${CORE.cta.url}`,
+    `CTA ${destination.channel.toUpperCase()}\n${destination.handle}\n${destination.url}`,
   ].join('\n\n');
   writeFileSync(join(OUT, `metadata-${locale}.txt`), text, 'utf8');
   writeFileSync(join(OUT, `props-short-${locale}.json`), JSON.stringify({locale}, null, 2));
@@ -58,11 +63,12 @@ writeFileSync(join(OUT, 'README.txt'), [
   '- vi.srt / en.srt: subtitle Shorts.',
   '- thumb-vi.png / thumb-en.png: thumbnail 1280x720.',
   '- metadata-vi.txt / metadata-en.txt: title, description, bình luận ghim và CTA.',
-  '- zalo-qr.svg: QR vector nguồn.',
+  '- zalo-qr.svg / telegram-qr.svg: QR vector theo từng thị trường.',
   '- qa.json: nguồn dữ liệu, probe video, audio, layout, QR và license.',
   '',
   'Lưu ý dữ liệu: Yahoo GC=F là COMEX Gold Futures proxy, không phải XAUUSD spot.',
   `Zalo: ${CORE.cta.url}`,
+  `Global Telegram: ${CORE.destinations.en.handle} · ${CORE.destinations.en.url}`,
   '',
   'Không tự đăng công khai. Nội dung giáo dục, không phải khuyến nghị đầu tư.',
 ].join('\n'), 'utf8');
