@@ -23,6 +23,20 @@
     "shortSeconds": 43,
     "longSeconds": 300
   },
+  "output": {
+    "shortVi": true,
+    "shortEn": false,
+    "longVi": true,
+    "thumbnails": true
+  },
+  "longVideo": {
+    "enabled": true,
+    "durationSeconds": 300,
+    "chapters": {
+      "vi": ["MỞ VẤN ĐỀ", "BỐI CẢNH", "GIẢI PHẪU", "CÁCH ĐỌC", "LỖI THƯỜNG GẶP", "TỔNG KẾT"],
+      "en": ["THE QUESTION", "CONTEXT", "ANATOMY", "HOW TO READ", "COMMON MISTAKES", "RECAP"]
+    }
+  },
   "content": {
     "type": "market-case",
     "template": "decision-lab",

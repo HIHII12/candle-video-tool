@@ -16,6 +16,8 @@ import type {ForexChartProps} from './data/types';
 import defaultProps from './data/config.json';
 import {CaseFile, CaseShort, CaseThumbnail} from './Showcase/CaseShowcase';
 import {UniversalContentShort, UniversalContentThumbnail} from './ContentStudio/UniversalContentShort';
+import {UniversalContentLong} from './ContentStudio/UniversalContentLong';
+import showcaseCore from './content/case001.json';
 
 // XauChart is the production composition: candles are rendered by TradingView's
 // lightweight-charts, annotations by an SVG overlay. ForexChart is the earlier
@@ -23,6 +25,15 @@ import {UniversalContentShort, UniversalContentThumbnail} from './ContentStudio/
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <Composition
+        id="UniversalContentLong"
+        component={UniversalContentLong}
+        durationInFrames={showcaseCore.duration.longSeconds * 30}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{locale: 'vi' as const}}
+      />
       <Composition
         id="UniversalContentShort"
         component={UniversalContentShort}

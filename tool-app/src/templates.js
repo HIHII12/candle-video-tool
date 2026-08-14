@@ -46,5 +46,27 @@ export function applyContentType(project, type) {
   if (narrations[type]) {
     for (const locale of ['vi','en']) next.core.locales[locale].shortNarration=narrations[type][locale].map(([at,text])=>({at,text}));
   }
+  if (type !== 'market-case') {
+    next.core.duration.longSeconds=180; next.core.longVideo.durationSeconds=180;
+    const topic=next.core.content.topic; const checks=next.core.content.lessonChecks.vi;
+    next.core.locales.vi.longNarration=[
+      {at:.5,text:`Trong video này, chúng ta sẽ bóc tách ${topic} từ nền tảng đến cách áp dụng.`},
+      {at:12,text:'Mục tiêu không phải học thuộc một hình vẽ hay một con số, mà là hiểu logic đứng phía sau.'},
+      {at:25,text:`Bước đầu tiên: ${checks[0]}.`},{at:39,text:'Bối cảnh quyết định ý nghĩa của mọi tín hiệu trên biểu đồ.'},
+      {at:53,text:`Bước thứ hai: ${checks[1]}.`},{at:67,text:'Quan sát vị trí, động lượng và phản ứng của giá thay vì nhìn một điểm đơn lẻ.'},
+      {at:81,text:`Bước thứ ba: ${checks[2]}.`},{at:95,text:'Một tín hiệu tốt phải có điều kiện xác nhận và điều kiện vô hiệu rõ ràng.'},
+      {at:109,text:'Lỗi phổ biến nhất là vào lệnh chỉ vì tên mô hình, mức chỉ báo hoặc một đường Fibonacci.'},
+      {at:123,text:'Hãy dùng công cụ để tổ chức bằng chứng, không dùng nó để thay thế quyết định.'},
+      {at:138,text:'Bây giờ tóm tắt: bối cảnh trước, cấu trúc sau, xác nhận cuối cùng.'},
+      {at:152,text:'Nếu thiếu một trong ba lớp, đứng ngoài vẫn là một lựa chọn có kỷ luật.'},
+      {at:166,text:'Nếu thấy hữu ích, hãy đăng ký và bình luận chủ đề anh muốn xem tiếp.'}
+    ];
+  } else { next.core.duration.longSeconds=300; next.core.longVideo.durationSeconds=300; }
   next.name=preset.title; return next;
+}
+
+export function resizeLong(project, seconds) {
+  const next=structuredClone(project); const old=Number(next.core.duration.longSeconds)||seconds;
+  next.core.locales.vi.longNarration=next.core.locales.vi.longNarration.map((line)=>({...line,at:Math.round((line.at/old)*seconds*10)/10}));
+  next.core.duration.longSeconds=seconds; next.core.longVideo.durationSeconds=seconds; return next;
 }

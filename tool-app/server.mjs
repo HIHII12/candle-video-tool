@@ -16,6 +16,7 @@ const DATA = join(APP, 'data');
 const PROJECTS = join(DATA, 'projects');
 const PREVIEWS = join(DATA, 'previews');
 const ARCHIVES = join(ENGINE, 'out', 'projects');
+const JOBS_PATH = join(DATA, 'jobs.json');
 const PORT = Number(process.env.XAU_LAB_PORT || 4173);
 const jobs = [];
 let active = null;
@@ -70,7 +71,27 @@ async function saveProject(input) {
 }
 
 function serializeJob(job) {
-  return {id: job.id, projectId: job.projectId, status: job.status, progress: job.progress, startedAt: job.startedAt, finishedAt: job.finishedAt, error: job.error, archive: job.archive, log: job.log.slice(-28)};
+  return {id: job.id, projectId: job.projectId, batchId: job.batchId, only: job.only, status: job.status, progress: job.progress, startedAt: job.startedAt, finishedAt: job.finishedAt, error: job.error, archive: job.archive, log: job.log.slice(-28)};
+}
+
+async function persistJobs() {
+  await writeFile(JOBS_PATH, JSON.stringify(jobs.slice(-200).map(serializeJob), null, 2), 'utf8');
+}
+
+async function restoreJobs() {
+  if (!existsSync(JOBS_PATH)) return;
+  const saved = await readJson(JOBS_PATH);
+  for (const item of Array.isArray(saved) ? saved : []) {
+    jobs.push({...item, log: Array.isArray(item.log) ? item.log : []});
+  }
+  for (const job of jobs) {
+    if (job.status === 'running') {
+      job.status = 'failed';
+      job.error = 'Tool đã đóng khi job đang render. Có thể xếp lại job này.';
+      job.finishedAt = new Date().toISOString();
+    }
+  }
+  await persistJobs();
 }
 
 async function runQueue() {
@@ -80,6 +101,7 @@ async function runQueue() {
   active = job;
   job.status = 'running';
   job.startedAt = new Date().toISOString();
+  await persistJobs();
   const project = await readJson(projectPath(job.projectId));
   const [originalCore, originalMapText] = await Promise.all([readFile(CORE_PATH, 'utf8'), readFile(MAP_PATH, 'utf8')]);
   const map = JSON.parse(originalMapText);
@@ -100,10 +122,14 @@ async function runQueue() {
       if (matches.length) {
         const match = matches.at(-1);
         const current = Number(match[1]); const total = Number(match[2]);
-        const phase = total === 2580 ? (/short-en/.test(text) ? 1 : 0) : total === 9000 ? 2 : 3;
-        const phaseBase = [12, 32, 52, 88][phase] || 12;
-        const phaseSpan = [20, 20, 36, 7][phase] || 20;
-        job.progress = Math.max(job.progress, Math.round(phaseBase + (current / total) * phaseSpan));
+        if (job.only) {
+          job.progress = Math.max(job.progress, Math.round(12 + (current / total) * 83));
+        } else {
+          const phase = total === 2580 ? (/short-en/.test(text) ? 1 : 0) : total === Number(project.core.duration.longSeconds) * 30 ? 2 : 3;
+          const phaseBase = [12, 32, 52, 88][phase] || 12;
+          const phaseSpan = [20, 20, 36, 7][phase] || 20;
+          job.progress = Math.max(job.progress, Math.round(phaseBase + (current / total) * phaseSpan));
+        }
       }
       if (/make_showcase_voice|lines,/.test(text)) job.progress = Math.max(job.progress, 12);
       if (/short-en|case-file-vi|thumb-vi|thumb-en/.test(text)) job.progress = Math.min(95, job.progress + 3);
@@ -116,7 +142,11 @@ async function runQueue() {
     const archiveName = `${project.id}-${stamp}`;
     const archivePath = join(ARCHIVES, project.id, archiveName);
     await mkdir(dirname(archivePath), {recursive: true});
-    await cp(LATEST_OUT, archivePath, {recursive: true});
+    if (job.only) {
+      await mkdir(archivePath, {recursive: true});
+      const onlyFiles = {"short-vi":["short-vi.mp4","vi.srt","voice-vi.wav","metadata-vi.txt"],"short-en":["short-en.mp4","en.srt","voice-en.wav","metadata-en.txt"],"long-vi":["long-vi.mp4","metadata-vi.txt"],"thumb-vi":["thumb-vi.png"],"thumb-en":["thumb-en.png"]}[job.only] || [];
+      for (const file of onlyFiles) if (existsSync(join(LATEST_OUT,file))) await cp(join(LATEST_OUT,file),join(archivePath,file));
+    } else await cp(LATEST_OUT, archivePath, {recursive: true});
     job.archive = `/archives/${project.id}/${archiveName}`;
     job.progress = 100;
     job.status = 'complete';
@@ -128,11 +158,13 @@ async function runQueue() {
     await Promise.all([writeFile(CORE_PATH, originalCore, 'utf8'), writeFile(MAP_PATH, originalMapText, 'utf8')]);
     job.finishedAt = new Date().toISOString();
     active = null;
+    await persistJobs();
     runQueue();
   }
 }
 
 await ensureData();
+await restoreJobs();
 const app = express();
 app.use(express.json({limit: '32mb'}));
 app.use('/outputs', express.static(LATEST_OUT));
@@ -158,10 +190,28 @@ app.post('/api/render', async (req, res, next) => {
     if (req.body.project) await saveProject(req.body.project);
     const projectId = cleanId(req.body.projectId || req.body.project?.id);
     await readFile(projectPath(projectId), 'utf8');
-    const allowedOnly = ['short-vi','short-en','thumb-vi','thumb-en'].includes(req.body.only) ? req.body.only : '';
+    const allowedOnly = ['short-vi','short-en','long-vi','thumb-vi','thumb-en'].includes(req.body.only) ? req.body.only : '';
     const job = {id: `render-${Date.now().toString(36)}`, projectId, only: allowedOnly, status: 'queued', progress: 0, log: []};
-    jobs.push(job); runQueue(); res.status(202).json(serializeJob(job));
+    jobs.push(job); await persistJobs(); runQueue(); res.status(202).json(serializeJob(job));
   } catch (e) { next(e); }
+});
+app.post('/api/batch', async (req, res, next) => {
+  try {
+    const incoming = Array.isArray(req.body.projects) ? req.body.projects.slice(0, 50) : [];
+    if (!incoming.length) throw new Error('Batch cần ít nhất một nội dung.');
+    const batchId = `batch-${Date.now().toString(36)}`;
+    const fallbackLocale = req.body.locale === 'en' ? 'en' : 'vi';
+    for (let index=0; index<incoming.length; index++) {
+      const saved = await saveProject({...incoming[index], id: `${cleanId(incoming[index].id || incoming[index].name)}-${Date.now().toString(36)}-${index+1}`});
+      const itemLocale = incoming[index].batchLocale === 'en' ? 'en' : incoming[index].batchLocale === 'vi' ? 'vi' : fallbackLocale;
+      jobs.push({id:`render-${Date.now().toString(36)}-${index+1}`,projectId:saved.id,batchId,only:`short-${itemLocale}`,status:'queued',progress:0,log:[]});
+    }
+    await persistJobs(); runQueue(); res.status(202).json({batchId,count:incoming.length,jobs:jobs.filter((j)=>j.batchId===batchId).map(serializeJob)});
+  } catch (e) { next(e); }
+});
+app.get('/api/batches', (_req,res) => {
+  const ids=[...new Set(jobs.map((j)=>j.batchId).filter(Boolean))];
+  res.json(ids.map((id)=>{const items=jobs.filter((j)=>j.batchId===id);return {id,total:items.length,queued:items.filter((j)=>j.status==='queued').length,running:items.filter((j)=>j.status==='running').length,complete:items.filter((j)=>j.status==='complete').length,failed:items.filter((j)=>j.status==='failed').length,jobs:items.map(serializeJob)}}).reverse());
 });
 app.post('/api/voice-preview', async (req, res, next) => {
   try {
@@ -182,4 +232,7 @@ app.get('/api/output-files', async (_req, res, next) => { try { res.json((await 
 app.use(express.static(join(APP, 'dist')));
 app.get(/.*/, (_req, res) => res.sendFile(join(APP, 'dist', 'index.html')));
 app.use((error, _req, res, _next) => res.status(400).json({error: error.message || 'Có lỗi xảy ra.'}));
-app.listen(PORT, '127.0.0.1', () => console.log(`XAU LAB Studio: http://127.0.0.1:${PORT}`));
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`XAU LAB Studio: http://127.0.0.1:${PORT}`);
+  runQueue();
+});

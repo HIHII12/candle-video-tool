@@ -168,6 +168,8 @@ def make_track(exe: Path, locale: str, lines: list[dict], duration: float, name:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--skip-long", action="store_true")
+    parser.add_argument("--only-long", action="store_true")
+    parser.add_argument("--locale", choices=("vi", "en"))
     args = parser.parse_args()
 
     core = json.loads(CORE_PATH.read_text(encoding="utf-8"))
@@ -176,15 +178,17 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
 
     short_marks = {}
-    for locale in ("vi", "en"):
-        short_marks[locale] = make_track(
-            exe, locale, core["locales"][locale]["shortNarration"],
-            float(core["duration"]["shortSeconds"]), f"showcase-short-{locale}", settings,
-        )
-        write_srt(OUT / f"{locale}.srt", short_marks[locale])
-        shutil.copy2(PUBLIC_VOICE / f"showcase-short-{locale}.wav", OUT / f"voice-{locale}.wav")
+    if not args.only_long:
+        locales = (args.locale,) if args.locale else ("vi", "en")
+        for locale in locales:
+            short_marks[locale] = make_track(
+                exe, locale, core["locales"][locale]["shortNarration"],
+                float(core["duration"]["shortSeconds"]), f"showcase-short-{locale}", settings,
+            )
+            write_srt(OUT / f"{locale}.srt", short_marks[locale])
+            shutil.copy2(PUBLIC_VOICE / f"showcase-short-{locale}.wav", OUT / f"voice-{locale}.wav")
 
-    if not args.skip_long:
+    if not args.skip_long and (not args.locale or args.locale == "vi"):
         make_track(
             exe, "vi", core["locales"]["vi"]["longNarration"],
             float(core["duration"]["longSeconds"]), "showcase-long-vi", settings,

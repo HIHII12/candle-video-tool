@@ -52,20 +52,21 @@ for (const locale of ['vi', 'en']) {
   writeFileSync(join(OUT, `props-thumb-${locale}.json`), JSON.stringify({locale}, null, 2));
 }
 writeFileSync(join(OUT, 'props-case-file-vi.json'), JSON.stringify({locale: 'vi'}, null, 2));
+writeFileSync(join(OUT, 'props-long-vi.json'), JSON.stringify({locale: 'vi'}, null, 2));
 writeFileSync(join(OUT, 'README.txt'), [
   'XAU LAB | VĂN THẮNG INVEST — CASE 001',
   '',
   'Xem nhanh:',
   '1. short-vi.mp4 — Short tiếng Việt, 1080x1920, 60 fps, 43 giây.',
   '2. short-en.mp4 — Short tiếng Anh, cùng hình và nhịp.',
-  '3. case-file-vi.mp4 — video dài tiếng Việt, 1920x1080, 30 fps, 5 phút.',
+  `3. long-vi.mp4 — video dài tiếng Việt, 1920x1080, 30 fps, ${Math.round(CORE.duration.longSeconds / 60)} phút.`,
   '',
   'File đi kèm:',
   '- voice-vi.wav / voice-en.wav: track giọng riêng của Shorts.',
   '- vi.srt / en.srt: subtitle Shorts.',
   '- thumb-vi.png / thumb-en.png: thumbnail 1280x720.',
   '- metadata-vi.txt / metadata-en.txt: title, description, bình luận ghim và CTA.',
-  '- zalo-qr.svg / telegram-qr.svg: QR vector theo từng thị trường.',
+  ...(CORE.ctaMode === 'link' ? ['- zalo-qr.svg / telegram-qr.svg: QR vector theo từng thị trường.'] : ['- CTA tương tác: Like · Subscribe · Comment; không QR/link.']),
   '- qa.json: nguồn dữ liệu, probe video, audio, layout, QR và license.',
   '',
   'Lưu ý dữ liệu: Yahoo GC=F là COMEX Gold Futures proxy, không phải XAUUSD spot.',
@@ -75,7 +76,7 @@ writeFileSync(join(OUT, 'README.txt'), [
   'Không tự đăng công khai. Nội dung giáo dục, không phải khuyến nghị đầu tư.',
 ].join('\n'), 'utf8');
 
-if (!has('skip-voice')) {
+if (!has('skip-voice') && !onlyArg?.startsWith('thumb-')) {
   const vendor = join(ENGINE, 'vendor', 'piper');
   if (!existsSync(join(vendor, process.platform === 'win32' ? 'piper.exe' : 'piper'))) {
     run(python, ['scripts/setup_voice.py', '--voice', 'vi_VN-vais1000-medium']);
@@ -85,7 +86,13 @@ if (!has('skip-voice')) {
   if (!existsSync(join(vendor, 'en_US-norman-medium.onnx'))) {
     run(python, ['scripts/setup_voice.py', '--voice', 'en_US-norman-medium']);
   }
-  run(python, ['scripts/make_showcase_voice.py']);
+  const voiceArgs = ['scripts/make_showcase_voice.py'];
+  if (onlyArg?.startsWith('short-')) {
+    voiceArgs.push('--skip-long', '--locale', onlyArg.endsWith('-en') ? 'en' : 'vi');
+  } else if (onlyArg === 'long-vi') {
+    voiceArgs.push('--only-long');
+  }
+  run(python, voiceArgs);
 }
 
 if (!has('skip-render')) {
@@ -93,7 +100,7 @@ if (!has('skip-render')) {
   const jobs = [
     {key: 'short-vi', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-vi.mp4', props: 'props-short-vi.json'},
     {key: 'short-en', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-en.mp4', props: 'props-short-en.json'},
-    ...(marketCase ? [{key: 'case-file-vi', type: 'render', composition: 'CaseFile', file: 'case-file-vi.mp4', props: 'props-case-file-vi.json'}] : []),
+    {key: 'long-vi', type: 'render', composition: 'UniversalContentLong', file: 'long-vi.mp4', props: 'props-long-vi.json'},
     {key: 'thumb-vi', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-vi.png', props: 'props-thumb-vi.json'},
     {key: 'thumb-en', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-en.png', props: 'props-thumb-en.json'},
   ].filter((job) => !onlyArg || job.key === onlyArg);
