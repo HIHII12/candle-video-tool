@@ -13,10 +13,16 @@ CSV cần header `time,open,high,low,close` (cũng nhận `timestamp/date/dateti
 ## Ba luồng sử dụng
 
 - `Tạo 1 video Short`: chọn một trong 6 format, sửa hook/kịch bản rồi render VI hoặc EN riêng.
-- `Tạo video dài`: chọn 3, 5 hoặc 8 phút; chỉnh narration theo định dạng `giây|phụ đề|cách đọc`, render MP4 1920×1080.
+- `Tạo video dài`: chọn 3, 5 hoặc 8 phút; chỉnh narration Việt hoặc English theo định dạng `giây|phụ đề|cách đọc`, render MP4 1920×1080 riêng cho từng ngôn ngữ.
 - `Shorts theo lô`: nạp tối đa 50 nội dung từ CSV có header `type,title,topic,hook,locale`. Mỗi dòng thành một project và một job độc lập.
 
 Batch chạy tuần tự để tránh tranh chấp tài nguyên. Một job lỗi không chặn các job còn lại. Các `type` hợp lệ: `market-case`, `candle-pattern`, `candle-anatomy`, `indicator`, `smc`, `fibonacci`.
+
+## Theo dõi render
+
+Mở `Tiến độ render` ở thanh bên để xem mọi task, phần trăm, ETA và vị trí trong hàng chờ. Task hoàn tất có nút tải file; task lỗi có thể chạy lại; task đang chờ có thể hủy mà không ảnh hưởng task đang chạy.
+
+Studio được chia thành 8 bước có nút `Quay lại` / `Tiếp theo`. Bước 7 là nơi chọn chính xác một trong 6 đầu ra: Short VI, Short EN, Long VI, Long EN, thumbnail VI hoặc thumbnail EN.
 
 ## Routing mặc định
 

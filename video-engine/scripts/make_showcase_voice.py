@@ -188,11 +188,13 @@ def main() -> None:
             write_srt(OUT / f"{locale}.srt", short_marks[locale])
             shutil.copy2(PUBLIC_VOICE / f"showcase-short-{locale}.wav", OUT / f"voice-{locale}.wav")
 
-    if not args.skip_long and (not args.locale or args.locale == "vi"):
-        make_track(
-            exe, "vi", core["locales"]["vi"]["longNarration"],
-            float(core["duration"]["longSeconds"]), "showcase-long-vi", settings,
-        )
+    if not args.skip_long:
+        long_locales = (args.locale,) if args.locale else ("vi", "en")
+        for long_locale in long_locales:
+            make_track(
+                exe, long_locale, core["locales"][long_locale]["longNarration"],
+                float(core["duration"]["longSeconds"]), f"showcase-long-{long_locale}", settings,
+            )
 
 
 if __name__ == "__main__":

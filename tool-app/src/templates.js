@@ -39,6 +39,36 @@ const narrations = {
   }
 };
 
+const placeLongLines = (lines, seconds) => lines.map((text,index)=>({at:Math.round((.5+(index*(seconds-14)/(lines.length-1)))*10)/10,text}));
+const buildLongNarration = (next, locale, seconds) => {
+  const checks=next.core.content.lessonChecks[locale];
+  const topic=locale==='vi'?next.core.content.topic:(next.core.locales.en.metadata?.title||next.core.locales.en.hook);
+  const lines=locale==='vi' ? [
+    `Trong video này, chúng ta sẽ bóc tách ${topic} từ nền tảng đến cách áp dụng.`,
+    'Mục tiêu không phải học thuộc một hình vẽ hay một con số, mà là hiểu logic đứng phía sau.',
+    `Bước đầu tiên: ${checks[0]}.`,'Bối cảnh quyết định ý nghĩa của mọi tín hiệu trên biểu đồ.',
+    `Bước thứ hai: ${checks[1]}.`,'Quan sát vị trí, động lượng và phản ứng của giá thay vì nhìn một điểm đơn lẻ.',
+    `Bước thứ ba: ${checks[2]}.`,'Một tín hiệu tốt phải có điều kiện xác nhận và điều kiện vô hiệu rõ ràng.',
+    'Lỗi phổ biến nhất là vào lệnh chỉ vì tên mô hình, mức chỉ báo hoặc một đường Fibonacci.',
+    'Hãy dùng công cụ để tổ chức bằng chứng, không dùng nó để thay thế quyết định.',
+    'Bây giờ tóm tắt: bối cảnh trước, cấu trúc sau, xác nhận cuối cùng.',
+    'Nếu thiếu một trong ba lớp, đứng ngoài vẫn là một lựa chọn có kỷ luật.',
+    'Nếu thấy hữu ích, hãy đăng ký và bình luận chủ đề anh muốn xem tiếp.'
+  ] : [
+    `In this lesson, we will break down ${topic} from first principles to practical use.`,
+    'The goal is not to memorize a shape or a number, but to understand the logic behind it.',
+    `Step one: ${checks[0]}.`,'Context determines whether a signal matters or should be ignored.',
+    `Step two: ${checks[1]}.`,'Read location, momentum, and price reaction instead of one isolated point.',
+    `Step three: ${checks[2]}.`,'A useful setup needs a clear confirmation condition and a clear invalidation condition.',
+    'The most common mistake is entering only because a familiar pattern or indicator appears.',
+    'Use the tool to organize evidence, not to replace your decision process.',
+    'To recap: context first, structure second, confirmation last.',
+    'When one layer is missing, staying out is still a disciplined decision.',
+    'Subscribe and comment with the trading concept you want us to explain next.'
+  ];
+  return placeLongLines(lines,seconds);
+};
+
 export function applyContentType(project, type) {
   const next=structuredClone(project); const preset=typeCopy[type]; next.core.content.type=type; next.core.content.title=preset.title; next.core.content.topic=preset.topic;
   next.core.locales.vi.hook=preset.hook; next.core.locales.vi.reason=preset.reason;
@@ -46,27 +76,16 @@ export function applyContentType(project, type) {
   if (narrations[type]) {
     for (const locale of ['vi','en']) next.core.locales[locale].shortNarration=narrations[type][locale].map(([at,text])=>({at,text}));
   }
-  if (type !== 'market-case') {
-    next.core.duration.longSeconds=180; next.core.longVideo.durationSeconds=180;
-    const topic=next.core.content.topic; const checks=next.core.content.lessonChecks.vi;
-    next.core.locales.vi.longNarration=[
-      {at:.5,text:`Trong video này, chúng ta sẽ bóc tách ${topic} từ nền tảng đến cách áp dụng.`},
-      {at:12,text:'Mục tiêu không phải học thuộc một hình vẽ hay một con số, mà là hiểu logic đứng phía sau.'},
-      {at:25,text:`Bước đầu tiên: ${checks[0]}.`},{at:39,text:'Bối cảnh quyết định ý nghĩa của mọi tín hiệu trên biểu đồ.'},
-      {at:53,text:`Bước thứ hai: ${checks[1]}.`},{at:67,text:'Quan sát vị trí, động lượng và phản ứng của giá thay vì nhìn một điểm đơn lẻ.'},
-      {at:81,text:`Bước thứ ba: ${checks[2]}.`},{at:95,text:'Một tín hiệu tốt phải có điều kiện xác nhận và điều kiện vô hiệu rõ ràng.'},
-      {at:109,text:'Lỗi phổ biến nhất là vào lệnh chỉ vì tên mô hình, mức chỉ báo hoặc một đường Fibonacci.'},
-      {at:123,text:'Hãy dùng công cụ để tổ chức bằng chứng, không dùng nó để thay thế quyết định.'},
-      {at:138,text:'Bây giờ tóm tắt: bối cảnh trước, cấu trúc sau, xác nhận cuối cùng.'},
-      {at:152,text:'Nếu thiếu một trong ba lớp, đứng ngoài vẫn là một lựa chọn có kỷ luật.'},
-      {at:166,text:'Nếu thấy hữu ích, hãy đăng ký và bình luận chủ đề anh muốn xem tiếp.'}
-    ];
-  } else { next.core.duration.longSeconds=300; next.core.longVideo.durationSeconds=300; }
+  const longSeconds=type==='market-case'?300:180; next.core.duration.longSeconds=longSeconds; next.core.longVideo.durationSeconds=longSeconds;
+  for (const locale of ['vi','en']) next.core.locales[locale].longNarration=buildLongNarration(next,locale,longSeconds);
   next.name=preset.title; return next;
 }
 
 export function resizeLong(project, seconds) {
-  const next=structuredClone(project); const old=Number(next.core.duration.longSeconds)||seconds;
-  next.core.locales.vi.longNarration=next.core.locales.vi.longNarration.map((line)=>({...line,at:Math.round((line.at/old)*seconds*10)/10}));
+  const next=structuredClone(project);
+  for (const locale of ['vi','en']) {
+    const lines=next.core.locales[locale].longNarration; const last=Number(lines.at(-1)?.at)||1; const target=Math.max(1,seconds-14);
+    next.core.locales[locale].longNarration=lines.map((line)=>({...line,at:Math.round((line.at/last)*target*10)/10}));
+  }
   next.core.duration.longSeconds=seconds; next.core.longVideo.durationSeconds=seconds; return next;
 }

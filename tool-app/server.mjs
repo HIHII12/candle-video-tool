@@ -31,17 +31,29 @@ const mergeDefaults = (defaults, value) => {
   const source = value && typeof value === 'object' ? value : {};
   return Object.fromEntries(Object.keys(defaults).map((key) => [key, mergeDefaults(defaults[key], source[key])]).concat(Object.keys(source).filter((key) => !(key in defaults)).map((key) => [key, source[key]])));
 };
+const fillLongTimeline = (lines, seconds) => {
+  if (!Array.isArray(lines) || lines.length < 2) return lines || [];
+  const last = Number(lines.at(-1).at) || 1;
+  if (last >= seconds * .82) return lines;
+  const target = Math.max(1, seconds - 14);
+  return lines.map((line) => ({...line, at: Math.round((Number(line.at || 0) / last) * target * 10) / 10}));
+};
 
 async function ensureData() {
   await Promise.all([mkdir(PROJECTS, {recursive: true}), mkdir(PREVIEWS, {recursive: true}), mkdir(ARCHIVES, {recursive: true})]);
+  const [core, map] = await Promise.all([readJson(CORE_PATH), readJson(MAP_PATH)]);
   const path = projectPath('case-001');
   if (!existsSync(path)) {
-    const [core, map] = await Promise.all([readJson(CORE_PATH), readJson(MAP_PATH)]);
     await writeFile(path, JSON.stringify({id: 'case-001', name: 'Gold H1 · WAIT', updatedAt: new Date().toISOString(), core, candles: map.candles}, null, 2), 'utf8');
-  } else {
-    const [current, core] = await Promise.all([readJson(path), readJson(CORE_PATH)]);
+  }
+  const names = (await readdir(PROJECTS)).filter((name) => extname(name) === '.json');
+  for (const name of names) {
+    const projectFile = join(PROJECTS, name);
+    const current = await readJson(projectFile);
     current.core = mergeDefaults(core, current.core);
-    await writeFile(path, JSON.stringify(current, null, 2), 'utf8');
+    if (!current.core.locales?.en?.longNarration?.length) current.core.locales.en.longNarration = core.locales.en.longNarration;
+    for (const locale of ['vi', 'en']) current.core.locales[locale].longNarration = fillLongTimeline(current.core.locales[locale].longNarration, Number(current.core.duration.longSeconds));
+    await writeFile(projectFile, JSON.stringify(current, null, 2), 'utf8');
   }
 }
 
@@ -71,7 +83,8 @@ async function saveProject(input) {
 }
 
 function serializeJob(job) {
-  return {id: job.id, projectId: job.projectId, batchId: job.batchId, only: job.only, status: job.status, progress: job.progress, startedAt: job.startedAt, finishedAt: job.finishedAt, error: job.error, archive: job.archive, log: job.log.slice(-28)};
+  const queued = jobs.filter((item) => item.status === 'queued');
+  return {id: job.id, projectId: job.projectId, batchId: job.batchId, only: job.only, status: job.status, progress: job.progress, queuePosition: job.status === 'queued' ? queued.indexOf(job) + 1 : 0, startedAt: job.startedAt, finishedAt: job.finishedAt, error: job.error, archive: job.archive, log: job.log.slice(-28)};
 }
 
 async function persistJobs() {
@@ -86,9 +99,12 @@ async function restoreJobs() {
   }
   for (const job of jobs) {
     if (job.status === 'running') {
-      job.status = 'failed';
-      job.error = 'Tool đã đóng khi job đang render. Có thể xếp lại job này.';
-      job.finishedAt = new Date().toISOString();
+      job.status = 'queued';
+      job.progress = 0;
+      job.startedAt = undefined;
+      job.finishedAt = undefined;
+      job.error = undefined;
+      job.log.push('Tool đã mở lại: task được đưa về hàng chờ để chạy từ đầu.');
     }
   }
   await persistJobs();
@@ -118,6 +134,7 @@ async function runQueue() {
       const lines = buffer.toString('utf8').split(/\r?\n/).filter(Boolean);
       job.log.push(...lines);
       const text = lines.join(' ');
+      for (const key of ['short-vi','short-en','long-vi','long-en','thumb-vi','thumb-en']) if (text.includes(`${key}.`)) job.renderPhase = key;
       const matches = [...text.matchAll(/Rendered\s+(\d+)\/(\d+)/ig)];
       if (matches.length) {
         const match = matches.at(-1);
@@ -125,14 +142,12 @@ async function runQueue() {
         if (job.only) {
           job.progress = Math.max(job.progress, Math.round(12 + (current / total) * 83));
         } else {
-          const phase = total === 2580 ? (/short-en/.test(text) ? 1 : 0) : total === Number(project.core.duration.longSeconds) * 30 ? 2 : 3;
-          const phaseBase = [12, 32, 52, 88][phase] || 12;
-          const phaseSpan = [20, 20, 36, 7][phase] || 20;
+          const phases = {'short-vi':[8,12],'short-en':[20,12],'long-vi':[32,27],'long-en':[59,29],'thumb-vi':[88,3],'thumb-en':[92,3]};
+          const [phaseBase,phaseSpan] = phases[job.renderPhase] || [8,12];
           job.progress = Math.max(job.progress, Math.round(phaseBase + (current / total) * phaseSpan));
         }
       }
-      if (/make_showcase_voice|lines,/.test(text)) job.progress = Math.max(job.progress, 12);
-      if (/short-en|case-file-vi|thumb-vi|thumb-en/.test(text)) job.progress = Math.min(95, job.progress + 3);
+      if (/make_showcase_voice|lines,/.test(text)) job.progress = Math.max(job.progress, 7);
     };
     child.stdout.on('data', onData);
     child.stderr.on('data', onData);
@@ -144,7 +159,7 @@ async function runQueue() {
     await mkdir(dirname(archivePath), {recursive: true});
     if (job.only) {
       await mkdir(archivePath, {recursive: true});
-      const onlyFiles = {"short-vi":["short-vi.mp4","vi.srt","voice-vi.wav","metadata-vi.txt"],"short-en":["short-en.mp4","en.srt","voice-en.wav","metadata-en.txt"],"long-vi":["long-vi.mp4","metadata-vi.txt"],"thumb-vi":["thumb-vi.png"],"thumb-en":["thumb-en.png"]}[job.only] || [];
+      const onlyFiles = {"short-vi":["short-vi.mp4","vi.srt","voice-vi.wav","metadata-vi.txt"],"short-en":["short-en.mp4","en.srt","voice-en.wav","metadata-en.txt"],"long-vi":["long-vi.mp4","metadata-vi.txt"],"long-en":["long-en.mp4","metadata-en.txt"],"thumb-vi":["thumb-vi.png"],"thumb-en":["thumb-en.png"]}[job.only] || [];
       for (const file of onlyFiles) if (existsSync(join(LATEST_OUT,file))) await cp(join(LATEST_OUT,file),join(archivePath,file));
     } else await cp(LATEST_OUT, archivePath, {recursive: true});
     job.archive = `/archives/${project.id}/${archiveName}`;
@@ -184,15 +199,33 @@ app.post('/api/projects', async (req, res, next) => {
 });
 app.put('/api/projects/:id', async (req, res, next) => { try { res.json(await saveProject({...req.body, id: req.params.id})); } catch (e) { next(e); } });
 app.get('/api/qr', async (req, res, next) => { try { res.type('image/svg+xml').send(await QRCode.toString(String(req.query.url || ''), {type: 'svg', margin: 2, errorCorrectionLevel: 'H', color: {dark: '#061317ff', light: '#ffffffff'}})); } catch (e) { next(e); } });
-app.get('/api/jobs', (_req, res) => res.json(jobs.slice(-12).reverse().map(serializeJob)));
+app.get('/api/jobs', (_req, res) => res.json(jobs.slice(-100).reverse().map(serializeJob)));
 app.post('/api/render', async (req, res, next) => {
   try {
     if (req.body.project) await saveProject(req.body.project);
     const projectId = cleanId(req.body.projectId || req.body.project?.id);
     await readFile(projectPath(projectId), 'utf8');
-    const allowedOnly = ['short-vi','short-en','long-vi','thumb-vi','thumb-en'].includes(req.body.only) ? req.body.only : '';
+    const allowedOnly = ['short-vi','short-en','long-vi','long-en','thumb-vi','thumb-en'].includes(req.body.only) ? req.body.only : '';
     const job = {id: `render-${Date.now().toString(36)}`, projectId, only: allowedOnly, status: 'queued', progress: 0, log: []};
     jobs.push(job); await persistJobs(); runQueue(); res.status(202).json(serializeJob(job));
+  } catch (e) { next(e); }
+});
+app.post('/api/jobs/:id/retry', async (req, res, next) => {
+  try {
+    const original = jobs.find((job) => job.id === req.params.id);
+    if (!original) throw new Error('Không tìm thấy task cần chạy lại.');
+    await readFile(projectPath(original.projectId), 'utf8');
+    const job = {id:`render-${Date.now().toString(36)}`,projectId:original.projectId,batchId:original.batchId,only:original.only,status:'queued',progress:0,log:['Chạy lại từ task trước.']};
+    jobs.push(job); await persistJobs(); runQueue(); res.status(202).json(serializeJob(job));
+  } catch (e) { next(e); }
+});
+app.post('/api/jobs/:id/cancel', async (req, res, next) => {
+  try {
+    const job = jobs.find((item) => item.id === req.params.id);
+    if (!job) throw new Error('Không tìm thấy task.');
+    if (job.status !== 'queued') throw new Error('Chỉ có thể hủy task đang chờ.');
+    job.status = 'canceled'; job.finishedAt = new Date().toISOString(); job.log.push('Đã hủy khỏi hàng chờ.');
+    await persistJobs(); res.json(serializeJob(job));
   } catch (e) { next(e); }
 });
 app.post('/api/batch', async (req, res, next) => {

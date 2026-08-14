@@ -53,6 +53,7 @@ for (const locale of ['vi', 'en']) {
 }
 writeFileSync(join(OUT, 'props-case-file-vi.json'), JSON.stringify({locale: 'vi'}, null, 2));
 writeFileSync(join(OUT, 'props-long-vi.json'), JSON.stringify({locale: 'vi'}, null, 2));
+writeFileSync(join(OUT, 'props-long-en.json'), JSON.stringify({locale: 'en'}, null, 2));
 writeFileSync(join(OUT, 'README.txt'), [
   'XAU LAB | VĂN THẮNG INVEST — CASE 001',
   '',
@@ -60,6 +61,7 @@ writeFileSync(join(OUT, 'README.txt'), [
   '1. short-vi.mp4 — Short tiếng Việt, 1080x1920, 60 fps, 43 giây.',
   '2. short-en.mp4 — Short tiếng Anh, cùng hình và nhịp.',
   `3. long-vi.mp4 — video dài tiếng Việt, 1920x1080, 30 fps, ${Math.round(CORE.duration.longSeconds / 60)} phút.`,
+  `4. long-en.mp4 — long-form English video, 1920x1080, 30 fps, ${Math.round(CORE.duration.longSeconds / 60)} minutes.`,
   '',
   'File đi kèm:',
   '- voice-vi.wav / voice-en.wav: track giọng riêng của Shorts.',
@@ -89,8 +91,8 @@ if (!has('skip-voice') && !onlyArg?.startsWith('thumb-')) {
   const voiceArgs = ['scripts/make_showcase_voice.py'];
   if (onlyArg?.startsWith('short-')) {
     voiceArgs.push('--skip-long', '--locale', onlyArg.endsWith('-en') ? 'en' : 'vi');
-  } else if (onlyArg === 'long-vi') {
-    voiceArgs.push('--only-long');
+  } else if (onlyArg?.startsWith('long-')) {
+    voiceArgs.push('--only-long', '--locale', onlyArg.endsWith('-en') ? 'en' : 'vi');
   }
   run(python, voiceArgs);
 }
@@ -101,6 +103,7 @@ if (!has('skip-render')) {
     {key: 'short-vi', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-vi.mp4', props: 'props-short-vi.json'},
     {key: 'short-en', type: 'render', composition: CORE.content?.type === 'market-case' ? 'CaseShort' : 'UniversalContentShort', file: 'short-en.mp4', props: 'props-short-en.json'},
     {key: 'long-vi', type: 'render', composition: 'UniversalContentLong', file: 'long-vi.mp4', props: 'props-long-vi.json'},
+    {key: 'long-en', type: 'render', composition: 'UniversalContentLong', file: 'long-en.mp4', props: 'props-long-en.json'},
     {key: 'thumb-vi', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-vi.png', props: 'props-thumb-vi.json'},
     {key: 'thumb-en', type: 'still', composition: marketCase ? 'CaseThumbnail' : 'UniversalContentThumbnail', file: 'thumb-en.png', props: 'props-thumb-en.json'},
   ].filter((job) => !onlyArg || job.key === onlyArg);
