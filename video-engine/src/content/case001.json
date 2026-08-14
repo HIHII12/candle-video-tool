@@ -9,7 +9,7 @@
     "instrument": "COMEX Gold Futures",
     "status": "historical snapshot",
     "sourceFile": "src/data/map_xau_h1.json",
-    "lastPrice": 4042,
+    "lastPrice": 4042.0,
     "decisionZoneLow": 4049.8,
     "decisionZoneHigh": 4052.4,
     "buyConfirmation": 4052.4,
@@ -27,28 +27,15 @@
     "shortVi": true,
     "shortEn": false,
     "longVi": true,
+    "longEn": true,
     "thumbnails": true
   },
   "longVideo": {
     "enabled": true,
     "durationSeconds": 300,
     "chapters": {
-      "vi": [
-        "MỞ VẤN ĐỀ",
-        "BỐI CẢNH",
-        "GIẢI PHẪU",
-        "CÁCH ĐỌC",
-        "LỖI THƯỜNG GẶP",
-        "TỔNG KẾT"
-      ],
-      "en": [
-        "THE QUESTION",
-        "CONTEXT",
-        "ANATOMY",
-        "HOW TO READ",
-        "COMMON MISTAKES",
-        "RECAP"
-      ]
+      "vi": ["MỞ VẤN ĐỀ", "BỐI CẢNH", "GIẢI PHẪU", "CÁCH ĐỌC", "LỖI THƯỜNG GẶP", "TỔNG KẾT"],
+      "en": ["THE QUESTION", "CONTEXT", "ANATOMY", "HOW TO READ", "COMMON MISTAKES", "RECAP"]
     }
   },
   "content": {
@@ -64,16 +51,8 @@
     "fibonacciLow": 4040.7,
     "fibonacciDirection": "down",
     "lessonChecks": {
-      "vi": [
-        "Xác định bối cảnh trước mô hình",
-        "Đọc cấu trúc thân và râu nến",
-        "Chờ xác nhận thay vì đoán"
-      ],
-      "en": [
-        "Read context before the pattern",
-        "Inspect body and wick structure",
-        "Wait for confirmation"
-      ]
+      "vi": ["Xác định bối cảnh trước mô hình", "Đọc cấu trúc thân và râu nến", "Chờ xác nhận thay vì đoán"],
+      "en": ["Read context before the pattern", "Inspect body and wick structure", "Wait for confirmation"]
     }
   },
   "branding": {
@@ -112,7 +91,7 @@
   },
   "voice": {
     "pace": 0.94,
-    "gainDb": 3,
+    "gainDb": 3.0,
     "clarity": 0.72,
     "musicGain": 0.1
   },
@@ -143,15 +122,7 @@
       "ctaSub": "Link nhóm Zalo ở bình luận ghim",
       "scan": "QUÉT ĐỂ VÀO NHÓM ZALO",
       "longTitle": "HỒ SƠ KÈO #001",
-      "chapters": [
-        "CÂU HỎI",
-        "BỐI CẢNH",
-        "CẤU TRÚC",
-        "HAI KỊCH BẢN",
-        "QUẢN LÝ VỐN",
-        "REPLAY",
-        "BÀI HỌC"
-      ],
+      "chapters": ["CÂU HỎI", "BỐI CẢNH", "CẤU TRÚC", "HAI KỊCH BẢN", "QUẢN LÝ VỐN", "REPLAY", "BÀI HỌC"],
       "lesson": "Không có xác nhận cũng là một dữ kiện. WAIT bảo vệ vốn cho cơ hội rõ hơn.",
       "formula": "Kích thước vị thế = Số tiền chấp nhận rủi ro ÷ Khoảng dừng lỗ",
       "discipline": "Không vào lệnh = không có TP, không có SL, không bịa kết quả.",
@@ -161,100 +132,48 @@
         "pinnedComment": "Nhận khung quản lý vốn và kế hoạch giao dịch mỗi phiên trong nhóm Zalo: https://zalo.me/g/vuqtnr406"
       },
       "shortNarration": [
-        {
-          "at": 0.3,
-          "text": "Hai cây nến này có thật sự tạo tín hiệu đảo chiều?"
-        },
-        {
-          "at": 3.4,
-          "text": "Trước tiên, nhìn bối cảnh: giá vừa trải qua một nhịp giảm rõ."
-        },
-        {
-          "at": 7.2,
-          "text": "Thân nến xanh bao trọn thân nến đỏ trước đó."
-        },
-        {
-          "at": 11.4,
-          "text": "Nhưng hình dạng đẹp vẫn chưa đủ."
-        },
-        {
-          "at": 16.3,
-          "text": "Kiểm tra ba lớp: bối cảnh, cấu trúc thân nến và xác nhận."
-        },
-        {
-          "at": 23.2,
-          "text": "Đây là Bullish Engulfing đúng hình thái."
-        },
-        {
-          "at": 26.4,
-          "text": "Nó cho thấy bên mua đã xóa phần thân bán của phiên trước."
-        },
-        {
-          "at": 31,
-          "text": "Đừng vào lệnh chỉ vì tên mô hình; hãy chờ giá xác nhận."
-        },
-        {
-          "at": 35.3,
-          "text": "Thấy hữu ích, hãy đăng ký để học mô hình tiếp theo."
-        },
-        {
-          "at": 39.2,
-          "text": "Bình luận mô hình nến anh muốn xem."
-        }
+        {"at": 0.3, "text": "Nếu chỉ được chọn một, anh chọn BUY, SELL hay ĐỨNG NGOÀI?", "tts": "Nếu chỉ được chọn một, anh chọn bai, seo, hay đứng ngoài?"},
+        {"at": 3.4, "text": "Đây là dữ liệu Gold Futures proxy khung H1, không phải XAUUSD spot.", "tts": "Đây là dữ liệu vàng kỳ hạn đại diện, khung một giờ, không phải vàng giao ngay."},
+        {"at": 7.2, "text": "Cấu trúc đang giảm, nhưng giá đã tiến sát vùng quyết định.", "tts": "Cấu trúc đang giảm, nhưng giá đã tiến sát vùng quyết định."},
+        {"at": 11.4, "text": "Hai mức vô hiệu đã có. Điều còn thiếu là xác nhận.", "tts": "Hai mức vô hiệu đã có. Điều còn thiếu là xác nhận."},
+        {"at": 16.3, "text": "Ba giây. Chọn một phương án.", "tts": "Ba giây. Chọn một phương án."},
+        {"at": 23.2, "text": "Đáp án là ĐỨNG NGOÀI.", "tts": "Đáp án là đứng ngoài."},
+        {"at": 26.4, "text": "Chưa có nến H1 xác nhận khỏi vùng quyết định.", "tts": "Chưa có nến một giờ xác nhận khỏi vùng quyết định."},
+        {"at": 31.0, "text": "Không vào lệnh cũng là một quyết định quản lý vốn.", "tts": "Không vào lệnh cũng là một quyết định quản lý vốn."},
+        {"at": 35.3, "text": "Nhận khung quản lý vốn và kế hoạch giao dịch mỗi phiên.", "tts": "Nhận khung quản lý vốn và kế hoạch giao dịch mỗi phiên."},
+        {"at": 39.2, "text": "Link nhóm Zalo ở bình luận ghim.", "tts": "Link nhóm Za lô ở bình luận ghim."}
       ],
       "longNarration": [
-        {
-          "at": 0.5,
-          "text": "Trong video này, chúng ta sẽ bóc tách Mô hình Bullish Engulfing từ nền tảng đến cách áp dụng."
-        },
-        {
-          "at": 12,
-          "text": "Mục tiêu không phải học thuộc một hình vẽ hay một con số, mà là hiểu logic đứng phía sau."
-        },
-        {
-          "at": 25,
-          "text": "Bước đầu tiên: Xác định bối cảnh trước mô hình."
-        },
-        {
-          "at": 39,
-          "text": "Bối cảnh quyết định ý nghĩa của mọi tín hiệu trên biểu đồ."
-        },
-        {
-          "at": 53,
-          "text": "Bước thứ hai: Đọc cấu trúc thân và râu nến."
-        },
-        {
-          "at": 67,
-          "text": "Quan sát vị trí, động lượng và phản ứng của giá thay vì nhìn một điểm đơn lẻ."
-        },
-        {
-          "at": 81,
-          "text": "Bước thứ ba: Chờ xác nhận thay vì đoán."
-        },
-        {
-          "at": 95,
-          "text": "Một tín hiệu tốt phải có điều kiện xác nhận và điều kiện vô hiệu rõ ràng."
-        },
-        {
-          "at": 109,
-          "text": "Lỗi phổ biến nhất là vào lệnh chỉ vì tên mô hình, mức chỉ báo hoặc một đường Fibonacci."
-        },
-        {
-          "at": 123,
-          "text": "Hãy dùng công cụ để tổ chức bằng chứng, không dùng nó để thay thế quyết định."
-        },
-        {
-          "at": 138,
-          "text": "Bây giờ tóm tắt: bối cảnh trước, cấu trúc sau, xác nhận cuối cùng."
-        },
-        {
-          "at": 152,
-          "text": "Nếu thiếu một trong ba lớp, đứng ngoài vẫn là một lựa chọn có kỷ luật."
-        },
-        {
-          "at": 166,
-          "text": "Nếu thấy hữu ích, hãy đăng ký và bình luận chủ đề anh muốn xem tiếp."
-        }
+        {"at": 0.5, "text": "BUY, SELL hay ĐỨNG NGOÀI? Cuối video, anh sẽ biết vùng nào mới cho phép vào lệnh.", "tts": "Bai, seo, hay đứng ngoài? Cuối video, anh sẽ biết vùng nào mới cho phép vào lệnh."},
+        {"at": 8, "text": "Case này không cố đoán đúng hướng. Mục tiêu là bảo vệ vốn trước một quyết định chưa đủ xác nhận."},
+        {"at": 16, "text": "Nguồn là Yahoo, mã GC bằng F, dữ liệu COMEX Gold Futures dùng làm proxy.", "tts": "Nguồn là Yahoo, mã gi xi bằng ép, dữ liệu vàng kỳ hạn Cô méc dùng làm đại diện."},
+        {"at": 24, "text": "Đây không phải dữ liệu XAUUSD spot. Mọi mức giá trong video đều được lấy và tính bằng code từ snapshot lịch sử."},
+        {"at": 34, "text": "Khung thời gian là H1. Giá cuối snapshot là 4042.0.", "tts": "Khung thời gian là một giờ. Giá cuối snapshot là bốn nghìn không trăm bốn mươi hai phẩy không."},
+        {"at": 43, "text": "Video này là bài học quản lý quyết định, không phải tín hiệu giao dịch hay lời hứa lợi nhuận."},
+        {"at": 51, "text": "Bắt đầu từ cấu trúc. Chuỗi đỉnh sau thấp hơn và nhịp giảm đã phá vùng hỗ trợ gần nhất."},
+        {"at": 61, "text": "Đường xu hướng và các điểm đổi tính chất cho thấy lực bán đang kiểm soát phần cuối biểu đồ."},
+        {"at": 72, "text": "Nhưng bias giảm không đồng nghĩa với việc được quyền SELL ngay tại bất kỳ mức giá nào."},
+        {"at": 82, "text": "Vùng quyết định nằm từ 4049.8 đến 4052.4. Đây là order block được tính từ dữ liệu đầu vào.", "tts": "Vùng quyết định nằm từ bốn nghìn không trăm bốn mươi chín phẩy tám đến bốn nghìn không trăm năm mươi hai phẩy bốn. Đây là vùng lệnh được tính từ dữ liệu đầu vào."},
+        {"at": 93, "text": "Giá đang ở dưới vùng. Chúng ta có bối cảnh, có vị trí, nhưng chưa có nến xác nhận."},
+        {"at": 102, "text": "Kịch bản A là BUY có điều kiện. Chỉ cân nhắc khi nến H1 đóng rõ trên 4052.4.", "tts": "Kịch bản A là bai có điều kiện. Chỉ cân nhắc khi nến một giờ đóng rõ trên bốn nghìn không trăm năm mươi hai phẩy bốn."},
+        {"at": 113, "text": "Nếu BUY, mức vô hiệu là dưới 4040.7. Mức này phải có trước khi tính kích thước vị thế.", "tts": "Nếu bai, mức vô hiệu là dưới bốn nghìn không trăm bốn mươi phẩy bảy. Mức này phải có trước khi tính kích thước vị thế."},
+        {"at": 124, "text": "Kịch bản B là SELL có điều kiện. Chờ giá từ chối vùng và đóng dưới 4040.7.", "tts": "Kịch bản B là seo có điều kiện. Chờ giá từ chối vùng và đóng dưới bốn nghìn không trăm bốn mươi phẩy bảy."},
+        {"at": 135, "text": "Nếu SELL, mức vô hiệu là trên 4055.6. Một cú đóng ngược điều kiện sẽ hủy kịch bản.", "tts": "Nếu seo, mức vô hiệu là trên bốn nghìn không trăm năm mươi lăm phẩy sáu. Một cú đóng ngược điều kiện sẽ hủy kịch bản."},
+        {"at": 146, "text": "Khi chưa có một trong hai xác nhận, lựa chọn mặc định là ĐỨNG NGOÀI."},
+        {"at": 156, "text": "Quản lý vốn bắt đầu trước entry. Case này dùng trần rủi ro minh họa là 0.5 phần trăm tài khoản.", "tts": "Quản lý vốn bắt đầu trước điểm vào. Case này dùng trần rủi ro minh họa là không phẩy năm phần trăm tài khoản."},
+        {"at": 168, "text": "Số tiền chấp nhận rủi ro bằng vốn tài khoản nhân với tỷ lệ rủi ro."},
+        {"at": 178, "text": "Kích thước vị thế bằng số tiền chấp nhận rủi ro chia cho khoảng dừng lỗ và giá trị mỗi bước giá."},
+        {"at": 190, "text": "Tool không nhờ AI tính giá, R trên R, backtest, thắng thua hay position size. Các phép tính phải xác định và truy ngược được.", "tts": "Tool không nhờ AI tính giá, tỷ lệ lời lỗ, kiểm thử, thắng thua hay kích thước vị thế. Các phép tính phải xác định và truy ngược được."},
+        {"at": 205, "text": "Bây giờ tới replay. Snapshot này kết thúc trước khi có xác nhận hợp lệ."},
+        {"at": 214, "text": "Vì vậy không có entry. Không có entry thì không được kể một mức chạm sau đó như TP hoặc SL."},
+        {"at": 226, "text": "Kết quả đúng của quy trình là WAIT. Đây là một outcome thật, không phải nút trang trí."},
+        {"at": 237, "text": "Reality check: một kế hoạch tốt không bắt buộc phải tạo ra giao dịch. Nó bắt buộc phải chỉ ra điều kiện và mức vô hiệu."},
+        {"at": 249, "text": "Nếu một trong hai kịch bản kích hoạt ở dữ liệu sau, chúng ta mới tính size rồi mới đánh giá replay."},
+        {"at": 260, "text": "Bài học của case một: không có xác nhận cũng là một dữ kiện."},
+        {"at": 270, "text": "WAIT bảo vệ vốn, giữ kỷ luật và để dành sức mua cho cơ hội rõ hơn."},
+        {"at": 280, "text": "Đó là cách một lệnh không tồn tại vẫn có thể là quyết định tốt nhất trong phiên."},
+        {"at": 290, "text": "Nhận khung quản lý vốn và kế hoạch giao dịch mỗi phiên trong nhóm Zalo.", "tts": "Nhận khung quản lý vốn và kế hoạch giao dịch mỗi phiên trong nhóm Za lô."},
+        {"at": 296, "text": "Link ở bình luận ghim.", "tts": "Link ở bình luận ghim."}
       ]
     },
     "en": {
@@ -274,15 +193,7 @@
       "ctaSub": "Global Telegram: @goldfather_fxhub",
       "scan": "SCAN TO JOIN TELEGRAM",
       "longTitle": "CASE FILE #001",
-      "chapters": [
-        "THE QUESTION",
-        "CONTEXT",
-        "STRUCTURE",
-        "TWO SCENARIOS",
-        "RISK",
-        "REPLAY",
-        "THE LESSON"
-      ],
+      "chapters": ["THE QUESTION", "CONTEXT", "STRUCTURE", "TWO SCENARIOS", "RISK", "REPLAY", "THE LESSON"],
       "lesson": "No confirmation is still information. WAIT preserves capital for a clearer setup.",
       "formula": "Position size = accepted account risk ÷ stop distance",
       "discipline": "No entry means no TP, no SL, and no invented result.",
@@ -292,48 +203,32 @@
         "pinnedComment": "Join the global Goldfather FX Hub on Telegram: https://t.me/goldfather_fxhub"
       },
       "shortNarration": [
-        {
-          "at": 0.3,
-          "text": "Do these two candles really signal a reversal?"
-        },
-        {
-          "at": 3.4,
-          "text": "Start with context: price has completed a clear down leg."
-        },
-        {
-          "at": 7.2,
-          "text": "The green body fully engulfs the previous red body."
-        },
-        {
-          "at": 11.4,
-          "text": "But a clean shape is still not enough."
-        },
-        {
-          "at": 16.3,
-          "text": "Check context, body structure, and confirmation."
-        },
-        {
-          "at": 23.2,
-          "text": "This is a textbook Bullish Engulfing shape."
-        },
-        {
-          "at": 26.4,
-          "text": "Buyers erased the previous session body."
-        },
-        {
-          "at": 31,
-          "text": "Never enter from the pattern name alone; wait for confirmation."
-        },
-        {
-          "at": 35.3,
-          "text": "Subscribe for the next pattern breakdown."
-        },
-        {
-          "at": 39.2,
-          "text": "Comment the candle pattern you want next."
-        }
+        {"at": 0.3, "text": "If you could choose only one: BUY, SELL, or WAIT?"},
+        {"at": 3.4, "text": "This is H1 Gold Futures proxy data, not XAUUSD spot."},
+        {"at": 7.2, "text": "Structure is bearish, but price is close to the decision zone."},
+        {"at": 11.4, "text": "Both invalidation levels are known. Confirmation is not."},
+        {"at": 16.3, "text": "Three seconds. Choose one."},
+        {"at": 23.2, "text": "The answer is WAIT."},
+        {"at": 26.4, "text": "There is no confirmed H1 close away from the decision zone."},
+        {"at": 31.0, "text": "Not entering is also a risk-management decision."},
+        {"at": 35.3, "text": "Get the risk framework and a plan for every session."},
+        {"at": 39.2, "text": "Join Goldfather FX Hub on Telegram."}
       ],
-      "longNarration": []
+      "longNarration": [
+        {"at": 0.5, "text": "In this lesson, we will break down Bullish Engulfing from first principles to practical use."},
+        {"at": 24, "text": "The goal is not to memorize a shape, but to understand the logic behind it."},
+        {"at": 48, "text": "Step one: read the market context before naming the pattern."},
+        {"at": 72, "text": "Context determines whether a candle signal matters or should be ignored."},
+        {"at": 96, "text": "Step two: inspect the body, the wicks, and the strength of the close."},
+        {"at": 120, "text": "Focus on location, momentum, and price reaction instead of one isolated candle."},
+        {"at": 144, "text": "Step three: wait for confirmation instead of predicting the next move."},
+        {"at": 168, "text": "A useful setup needs a clear confirmation condition and a clear invalidation condition."},
+        {"at": 192, "text": "The most common mistake is entering only because a familiar pattern appears."},
+        {"at": 216, "text": "Use the pattern to organize evidence, not to replace your decision process."},
+        {"at": 240, "text": "To recap: context first, structure second, confirmation last."},
+        {"at": 264, "text": "When one layer is missing, staying out is still a disciplined decision."},
+        {"at": 286, "text": "Subscribe and comment with the trading concept you want us to explain next."}
+      ]
     }
   }
 }
