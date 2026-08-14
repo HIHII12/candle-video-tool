@@ -26,3 +26,10 @@ __pycache__/
 *.temp
 .DS_Store
 Thumbs.db
+
+# Du an dang lam do - CAN di theo khi doi may (previews/*.wav tao lai duoc nen van chan)
+!tool-app/data/
+!tool-app/data/jobs.json
+!tool-app/data/projects/
+!tool-app/data/projects/**
+tool-app/data/previews/
