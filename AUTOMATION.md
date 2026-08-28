@@ -75,6 +75,44 @@ video-engine/out/batch/<ngày>/manifest.json
 `manifest.json` ghi lại từng video: thành công hay hỏng, mất bao lâu, caption
 lấy từ model hay dự phòng. Một job hỏng **không** làm chết cả batch.
 
+## Muốn 100 video một lượt
+
+```bash
+node tool/batch.mjs --format candle-lesson --count 100 --workers 2
+```
+
+`--format candle-lesson` chuyển sang **kế hoạch mục lục** (`candlePlan`) thay
+cho kế hoạch một ngày: kế hoạch ngày chỉ có 13 video dạy nến, mục lục thì bao
+nhiêu cũng được, mỗi cái một seed riêng.
+
+Chỉ format này chạy được số lượng lớn khi **không có mạng** — ba format kia cần
+dữ liệu giá thật.
+
+Trên Windows: nháy đúp `run-100-roi-tat-may.bat` (render → soi sạn → tắt máy).
+
+## Âm lượng — bước cuối, tự động
+
+Sau mỗi video, batch chạy `scripts/chuan_am_luong.py` đưa file về
+**-14 LUFS / -1.5 dBTP** (chuẩn YouTube, TikTok). Đo hai lượt: lượt 1 đo, lượt 2
+chỉnh đúng bằng số vừa đo — một lượt là bóp mất transient của hiệu ứng.
+
+Tắt đi: `--no-loudness`.
+
+Vì sao không chỉnh trong engine: cân bằng giữa nhạc nền / hiệu ứng / giọng đọc
+phải đúng ở mọi khung hình và thuộc về engine; còn **âm lượng tuyệt đối** chỉ đo
+được khi cả bản mix đã xong. Đo trước khi có bước này: -30 dB trung bình, tức
+thấp hơn chuẩn nền tảng ~16 dB.
+
+## Soi sạn
+
+```bash
+python3 video-engine/scripts/kiem_video.py "video-engine/out/batch/*/*.mp4" \
+        --json bao-cao-san.json
+```
+
+Bắt: tràn khung · chữ nằm dưới giao diện Shorts · bố cục lệch · **đứng hình** ·
+âm lượng lệch chuẩn. Mã thoát 1 nếu có LOI, nên cắm được vào CI.
+
 ## Còn thiếu
 
 - **Đã có tiếng.** Music bed, SFX, narration và subtitle đều có trong engine;

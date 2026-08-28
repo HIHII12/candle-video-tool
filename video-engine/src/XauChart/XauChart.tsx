@@ -7,7 +7,8 @@ import {Cursor, LevelLine, PositionBox} from './Overlay';
 import {FiboLevels, FvgBox, OrderBlockBox} from './Zones';
 import {Flash, ResultStrip} from './Beats';
 import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark} from './Chrome';
-import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt} from './storyboard';
+import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt, shownFloatAt} from './storyboard';
+import {visibleCandles} from '../camera';
 import {logicalWindowAt} from './logicalWindow';
 import {CHART_BOX, TV, FONT} from './chartTheme';
 import {interpolate} from 'remotion';
@@ -39,11 +40,12 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
 
+  const shownFloat = shownFloatAt(props, frame);
   const shown = shownAt(props, frame);
   const priceWindow = priceWindowAt(props, frame);
   const {containerRef, coords} = useLightweightChart(
     props,
-    shown,
+    shownFloat,
     priceWindow,
     undefined,
     logicalWindowAt(props.setupCount, lastRevealIndex(props), ramp(frame, SB.reveal)),
@@ -73,7 +75,10 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
   const win = props.outcome.result === 'TP';
   const revealing = frame >= SB.reveal[0] && frame < SB.reveal[1];
 
-  const lastShown = props.candles[shown - 1];
+  // The bar as it is drawn right now, not as it will close. Reading the closed
+  // candle here put a price on screen that the chart had not printed yet.
+  const visible = visibleCandles(props.candles, shownFloat);
+  const lastShown = visible[visible.length - 1] ?? props.candles[0];
 
   // A slight jitter while the outcome plays reads as tension on a static chart.
   const shake = revealing ? Math.sin(frame * 1.9) * 1.8 : 0;

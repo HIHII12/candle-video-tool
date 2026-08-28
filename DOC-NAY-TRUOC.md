@@ -73,6 +73,71 @@ market map dùng H1 và D1. Thứ tự xoay theo ngày nên hôm nay khác hôm 
 
 ---
 
+## Làm 100 video một lượt (chạy qua đêm)
+
+Nháy đúp **`run-100-roi-tat-may.bat`**. Nó render 100 video short, soi sạn toàn
+bộ, rồi **tự tắt máy** sau 60 giây. Muốn huỷ tắt máy: mở CMD gõ `shutdown /a`.
+
+Mất khoảng **2,5–3,5 tiếng** trên máy 4 nhân.
+
+100 video này chỉ dùng **một format: dạy mẫu nến** — vì đó là format duy nhất
+**không cần mạng**. Một cú rớt mạng lúc 3 giờ sáng không làm hỏng cả đêm. 13 mẫu
+nến × ~8 lượt, mỗi lượt một seed khác nên chuỗi giá, mẫu nến và đoạn sau đều khác.
+
+> **Có video kèo thua, và đó là chủ ý.** Trước đây đoạn sau luôn được dựng để
+> chạm target, nên **mọi** video đều cho thấy quy tắc đúng. Giờ seed quyết định:
+> khoảng 40% số video bị quét stop. Video thua mới là video dạy được nhiều nhất —
+> đủ cả 3 điều kiện mà vẫn thua, đó chính là nghĩa của chữ *tín hiệu vào lệnh*.
+
+---
+
+## Soi sạn — bằng máy, không bằng mắt
+
+Nháy đúp **`soi-san.bat`**, hoặc:
+
+```
+python video-engine\scripts\kiem_video.py "out\batch\*\*.mp4"
+```
+
+Năm phép đo, mỗi phép ứng với một kiểu hỏng:
+
+| Đo | Bắt được gì |
+|---|---|
+| `bleed` | có thứ tràn ra ngoài khung |
+| `safe` | chữ nằm dưới thanh điều khiển / cột nút của Shorts |
+| `drift` | bố cục lệch hẳn về một bên |
+| `freeze` | video đứng hình — dấu hiệu "không ai dựng" |
+| `audio` | có tiếng không, **-14 LUFS** chưa, đỉnh có sát ngưỡng không |
+
+Soi tay 10 khung hình thì bỏ sót đúng cái khung hình hỏng. Máy soi 70 khung.
+
+---
+
+## Âm thanh
+
+Gói này **tự tổng hợp** nhạc nền và hiệu ứng bằng công thức — không cần mạng,
+không vướng giấy phép. Âm lượng cuối được đặt về **-14 LUFS / -1.5 dBTP** (đúng
+chuẩn YouTube & TikTok) ở bước cuối, tự động trong batch.
+
+Muốn thay bằng âm thanh thật từ **Pixabay**:
+
+```
+python video-engine\scripts\nap_am_thanh.py C:\Users\AD\Downloads\sfx --map
+python video-engine\scripts\nap_am_thanh.py C:\Users\AD\Downloads\sfx --apply
+```
+
+Lệnh `--map` in ra 8 ô âm thanh cần có và **từ khoá tìm trên Pixabay** cho từng
+ô. Tải về bỏ chung một thư mục rồi chạy `--apply`: máy tự đổi sang WAV, cắt đúng
+độ dài, fade hai đầu cho khỏi lách cách, chuẩn hoá, và ghi nguồn vào
+`video-engine\public\audio\NGUON-AM-THANH.md`.
+
+Bản tổng hợp cũ được giữ lại thành `*.synth.wav` — muốn quay về thì đổi tên lại.
+
+> Pixabay **không mở API cho sound effects** (API công khai của họ chỉ có ảnh và
+> video), nên bước tải về phải do anh làm bằng tay. Phần biên tập thì máy làm.
+
+---
+
 ## Nếu có lỗi
 
 Tool **kiểm tra máy trước khi chạy** và nói rõ thiếu gì. Vài trường hợp hay gặp:

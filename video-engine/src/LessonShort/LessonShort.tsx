@@ -87,9 +87,10 @@ const shownAt = (props: ForexChartProps, frame: number) => {
     // Opens part-drawn: see the note in XauChart's storyboard. An empty first
     // frame is the cheapest way to lose a short-form viewer.
     const OPEN_AT = 0.55;
-    return Math.max(1, Math.round((OPEN_AT + (1 - OPEN_AT) * lramp(frame, LSB.replay)) * setup));
+    return Math.max(1, (OPEN_AT + (1 - OPEN_AT) * lramp(frame, LSB.replay)) * setup);
   }
-  return Math.min(total, setup + Math.round(lramp(frame, LSB.reveal) * span));
+  // Fractional: the newest bar forms rather than appearing whole. See camera.ts.
+  return Math.min(total, setup + lramp(frame, LSB.reveal) * span);
 };
 
 export const LessonShort: React.FC<ForexChartProps> = (props) => {

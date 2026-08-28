@@ -81,7 +81,8 @@ export const mapShownAt = (total: number, frame: number) => {
   // be a blank chart.
   const OPEN_AT = 0.55;
   const t = OPEN_AT + (1 - OPEN_AT) * mease(mramp(frame, MB.candles));
-  return Math.max(1, Math.round(t * total));
+  // Fractional: the newest bar forms rather than appearing whole. See camera.ts.
+  return Math.max(1, t * total);
 };
 
 export const zoneColor = (kind: 'liquidity' | 'ob' | 'gap') =>
