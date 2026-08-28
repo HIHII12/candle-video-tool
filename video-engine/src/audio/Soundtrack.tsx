@@ -13,6 +13,19 @@ import {Audio, Sequence, staticFile} from 'remotion';
  * be swapped for licensed audio of the same name without touching this.
  */
 
+/**
+ * Bed level in the mix.
+ *
+ * The synthesized bed sits at about -27 dBFS RMS, which was chosen so nothing
+ * could ever fight the narration. Measured on a finished file the whole mix came
+ * out near -30 dB mean — roughly 16 dB under what a phone speaker needs, and far
+ * enough under platform loudness that the normaliser lifts the video and its
+ * noise floor together. The bed carries the video whenever nobody is speaking,
+ * so it is raised here and ducked under speech as before; absolute level is then
+ * set once, on the finished file, by scripts/chuan_am_luong.py.
+ */
+const BED_GAIN = 1.7;
+
 export type Cue = {
   /** Frame the cue fires on. */
   at: number;
@@ -55,7 +68,7 @@ export const Soundtrack: React.FC<{
             f / fadeFrames,
             Math.max(0, (durationInFrames - f) / fadeFrames),
           ) *
-          0.9 *
+          BED_GAIN *
           (bedGain ? bedGain(f) : 1)
         }
       />

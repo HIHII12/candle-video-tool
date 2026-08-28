@@ -4,7 +4,9 @@ import type {CandleLessonProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {AnatomyLabels, Spotlight, TradeLevels} from './Annotations';
 import {RealityCheck} from './RealityCheck';
-import {CB, CFONT, CHART, CT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
+import {BeatRail} from './BeatRail';
+import {ChartEdges} from '../ChartEdges';
+import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
 import {SAFE} from '../safeArea';
 import {candleCues} from '../audio/cues';
@@ -35,7 +37,17 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   const bullish = pattern.bias === 'bullish';
   const win = props.outcome.result === 'TP';
 
-  const titleIn = spring({frame: frame - 6, fps, config: {damping: 200}, durationInFrames: 28});
+  /**
+   * The header is legible on frame zero and only *settles* after it.
+   *
+   * It used to fade in from nothing over the first half-second, which meant the
+   * cover frame — the still a feed shows before anyone presses play, and the one
+   * frame that decides whether they do — was a bare chart with no title on it.
+   * Motion on the opening frame is worth having; an unlabelled opening frame is
+   * not what it costs.
+   */
+  const settle = spring({frame, fps, config: {damping: 200}, durationInFrames: 26});
+  const titleIn = 1;
   // Title shrinks out of the way once the chart becomes the subject.
   const titleOut = interpolate(frame, [CB.focus[0], CB.focus[1]], [1, 0.62], clamp);
 
@@ -56,7 +68,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
     clamp,
   );
   const ruleProgress = cramp(frame, CB.rule);
-  const tradeProgress = cramp(frame, [CB.zoomOut[0] + 40, CB.zoomOut[1] + 90] as const);
+  const tradeProgress = cramp(frame, [CB.zoomOut[1], CB.zoomOut[1] + 130] as const);
 
   const range = focusRange(props);
 
@@ -85,12 +97,13 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          top: 96,
+          zIndex: LAYER.overlay,
+          top: LAYOUT.headerTop,
           left: 60,
-          right: 60,
+          right: SAFE.right,
           opacity: titleIn * (0.45 + 0.55 * titleOut),
-          transform: `translateY(${interpolate(titleIn, [0, 1], [-22, 0])}px) scale(${
-            0.94 + 0.06 * titleOut
+          transform: `translateY(${interpolate(settle, [0, 1], [-14, 0])}px) scale(${
+            (0.985 + 0.015 * settle) * (0.94 + 0.06 * titleOut)
           })`,
           transformOrigin: 'left top',
         }}
@@ -128,6 +141,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         }}
       />
 
+      <ChartEdges box={CHART} bg={CT.bg} zIndex={LAYER.chart + 5} />
+
       {/* zIndex: the chart canvas paints over siblings without it. */}
       {coords && (
         <svg
@@ -138,7 +153,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             left: CHART.left,
             top: CHART.top,
             pointerEvents: 'none',
-            zIndex: 10,
+            zIndex: LAYER.marks,
           }}
         >
           <Spotlight coords={coords} from={range.from} to={range.to} opacity={spotlight * 0.92} />
@@ -157,14 +172,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         </svg>
       )}
 
+      <BeatRail frame={frame} marks={props.voiceMarks ?? undefined} />
+
       {/* Rule + checklist */}
       {rulePanel > 0 && (
         <div
           style={{
             position: 'absolute',
-            bottom: 150,
+            // Without this the panel is *behind* the chart canvas, and since the
+            // panel grows upward from its bottom edge it is the top of it that
+            // disappears — which is the rule itself, the one sentence the beat
+            // exists to deliver. It rendered, it was simply painted over.
+            zIndex: LAYER.overlay,
+            bottom: SAFE.bottom,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             background: CT.panel,
             border: `1.5px solid ${CT.panelLine}`,
             borderRadius: 20,
@@ -216,14 +238,18 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         </div>
       )}
 
-      {/* Follow-through caption */}
-      {frame >= CB.reveal[0] && frame < CB.result[0] && (
+      {/* Follow-through caption.
+          Only when there is no narration: with a voice track the same band holds
+          the subtitle, and "Buyers follow through…" is the kind of line that
+          fills a slot without telling anyone anything. */}
+      {!props.voiceMarks?.length && frame >= CB.reveal[0] && frame < CB.result[0] && (
         <div
           style={{
             position: 'absolute',
-            bottom: SAFE.bottom + 40,
+            zIndex: LAYER.overlay,
+            top: LAYOUT.captionTop,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             textAlign: 'center',
             fontSize: 34,
             fontWeight: 600,
@@ -251,9 +277,10 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         <div
           style={{
             position: 'absolute',
+            zIndex: LAYER.overlay,
             bottom: SAFE.bottom,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             textAlign: 'center',
           }}
         >
@@ -267,6 +294,23 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             }}
           >
             {win ? 'Target reached' : 'Target not reached'}
+          </div>
+
+          {/* The honesty beat, for the videos that could not measure one.
+              With statistics the panel says what the pattern really does across
+              every occurrence; without them the least this can do is refuse to
+              let one worked example stand in for evidence. Ending on "it worked"
+              is how a teaching channel turns into a highlight reel. */}
+          <div
+            style={{
+              marginTop: 14,
+              fontSize: 30,
+              fontWeight: 600,
+              color: CT.inkSoft,
+              opacity: interpolate(resultIn, [0.4, 1], [0, 1], clamp),
+            }}
+          >
+            One trade is not evidence — the pattern is a trigger, not a system.
           </div>
 
           <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
@@ -328,7 +372,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          bottom: 42,
+          zIndex: LAYER.overlay,
+          top: LAYOUT.disclaimerY,
           left: 56,
           right: 56,
           textAlign: 'center',
@@ -349,7 +394,16 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           tone="dark"
           // Clear of the statistics panel, which owns the bottom of the frame
           // from the result beat onward.
-          bottom={660}
+          // The caption band under the chart. At 660 the subtitle floated in the
+          // middle of the chart and lay across the trade box during the one beat
+          // where the levels are the subject.
+          bottom={SAFE.bottom}
+          // The final lines are the statistics headline, word for word. Printing
+          // them again as a subtitle put two copies of one sentence on screen,
+          // the higher one sitting across the panel that earns it.
+          hideCaptionFrom={CB.result[0]}
+          // The rule beat prints the same sentence in the panel below, at length.
+          hideCaptionBetween={CB.rule}
         />
       ) : null}
 

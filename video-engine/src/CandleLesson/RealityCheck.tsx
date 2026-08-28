@@ -49,7 +49,10 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
         position: 'absolute',
         bottom: SAFE.bottom,
         left: 52,
-        right: 52,
+        // The break-even marker lives at this panel's right edge, and at right:52
+        // it sat under the Shorts button column — the one number in the video a
+        // viewer must be able to read, covered on every phone.
+        right: SAFE.right,
         zIndex: 20,
       }}
     >

@@ -2,7 +2,13 @@ import React from 'react';
 import {interpolate} from 'remotion';
 import type {Anatomy, Candle, CandleLessonProps, RiskReward} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
+import {SAFE} from '../safeArea';
 import {CHART, CFONT, CT, cramp} from './theme';
+
+/** Right-hand limit for anything the viewer has to read. */
+const READ_RIGHT = CHART.width - SAFE.right;
+/** Keep labels off the exact top and bottom edges of the chart box. */
+const clampY = (y: number) => Math.max(30, Math.min(CHART.height - 26, y));
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -89,6 +95,18 @@ export const AnatomyLabels: React.FC<{
     };
   });
 
+  /**
+   * Which side the labels go on.
+   *
+   * They were always placed to the right of the candle, which is fine until the
+   * pattern is one of the last bars on screen — then the leader lines ran into
+   * the Shorts button column and the text ran off the frame. Deciding per video
+   * costs one comparison and removes a whole class of clipped label.
+   */
+  const anchorX = items.length ? items[0].x : 0;
+  const LABEL_RUN = 330;
+  const toLeft = anchorX + LABEL_RUN > READ_RIGHT;
+
   // Resolve label collisions top-down with a minimum gap.
   const GAP = 74;
   const sorted = [...items].sort((p, q) => p.mid - q.mid);
@@ -111,18 +129,18 @@ export const AnatomyLabels: React.FC<{
         );
         if (step <= 0) return null;
 
-        const bracketX = item.x + 34;
-        const ly = labelY.get(item.a) ?? item.mid;
-        const labelX = bracketX + 58;
+        const bracketX = item.x + (toLeft ? -34 : 34);
+        const ly = clampY(labelY.get(item.a) ?? item.mid);
+        const labelX = bracketX + (toLeft ? -58 : 58);
         const grow = interpolate(step, [0, 0.6], [0, 1], clamp);
 
         return (
           <g key={`${item.a.index}-${item.a.part}`} opacity={step}>
             {/* extent bracket */}
             <path
-              d={`M${bracketX - 9},${item.yTop} L${bracketX},${item.yTop} L${bracketX},${
+              d={`M${bracketX + (toLeft ? 9 : -9)},${item.yTop} L${bracketX},${item.yTop} L${bracketX},${
                 item.yTop + (item.yBottom - item.yTop) * grow
-              } L${bracketX - 9},${item.yTop + (item.yBottom - item.yTop) * grow}`}
+              } L${bracketX + (toLeft ? 9 : -9)},${item.yTop + (item.yBottom - item.yTop) * grow}`}
               fill="none"
               stroke={CT.accent}
               strokeWidth={2}
@@ -130,7 +148,7 @@ export const AnatomyLabels: React.FC<{
             {/* leader */}
             <line
               x1={bracketX}
-              x2={labelX - 8}
+              x2={labelX + (toLeft ? 8 : -8)}
               y1={item.mid}
               y2={ly}
               stroke={CT.accent}
@@ -144,6 +162,7 @@ export const AnatomyLabels: React.FC<{
               fontFamily={CFONT}
               fontSize={30}
               fontWeight={600}
+              textAnchor={toLeft ? 'end' : 'start'}
             >
               {item.a.label}
             </text>
@@ -164,7 +183,9 @@ export const TradeLevels: React.FC<{
   if (progress <= 0) return null;
 
   const x0 = coords.indexToX(trade.entryIndex);
-  const x1 = interpolate(progress, [0, 1], [x0, CHART.width - 28]);
+  // Stopping at width - 28 put the Target and Stop figures under the platform's
+  // like/comment column, where they are covered on every phone rather than read.
+  const x1 = interpolate(progress, [0, 1], [x0, READ_RIGHT - 14]);
   const w = Math.max(0, x1 - x0);
   const yEntry = coords.priceToY(trade.entry);
   const yStop = coords.priceToY(trade.stop);
@@ -177,7 +198,7 @@ export const TradeLevels: React.FC<{
     <g opacity={labels}>
       <text
         x={x1 - 10}
-        y={y + dy}
+        y={clampY(y + dy)}
         fill={color}
         fontFamily={CFONT}
         fontSize={28}

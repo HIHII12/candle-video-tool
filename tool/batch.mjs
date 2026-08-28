@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor } from './variants.mjs';
+import { planFor, candlePlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -38,6 +38,12 @@ const workers = Math.max(1, Number(flag('workers', '1')));
 const dryRun = has('dry-run');
 // Operational escape hatch: re-run one job after a fix without the whole day.
 const only = flag('only', '');
+// One format only. `candle-lesson` also switches to the catalogue plan, which is
+// the only way to ask for more videos than a single day contains.
+const format = flag('format', '');
+// The finished file gets its absolute level set once; see
+// video-engine/scripts/chuan_am_luong.py for why that is not done in the engine.
+const skipLoudness = has('no-loudness');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -203,10 +209,26 @@ async function runJob(job) {
     },
   );
 
+  // Level is the last thing done, on the finished file, because integrated
+  // loudness is only measurable once every track is in the mix. Skipping it is
+  // not fatal: the video is watchable, just quieter than the platform expects.
+  let loudness = 'skipped';
+  if (!skipLoudness) {
+    try {
+      await sh(python, ['scripts/chuan_am_luong.py', target], (line) => {
+        const m = line.match(/(-?\d+\.\d+)\s*->\s*(-?\d+\.\d+)\s*LUFS/);
+        if (m) loudness = `${m[1]} -> ${m[2]} LUFS`;
+      });
+    } catch (err) {
+      loudness = `failed: ${String(err.message ?? err).split('\n')[0]}`;
+    }
+  }
+
   return {
     ...job,
     status: 'rendered',
     file: target,
+    loudness,
     composition,
     caption: { title: caption.title, hook: caption.hook, source: caption.source },
     renderSeconds: Math.round((Date.now() - started) / 1000),
@@ -295,7 +317,8 @@ function preflight() {
 
 if (!dryRun) preflight();
 
-let plan = planFor(date, count);
+let plan = format === 'candle-lesson' ? candlePlan(date, count) : planFor(date, count);
+if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
 if (only) plan = plan.filter((j) => j.id.includes(only));
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }
 console.log(`Plan for ${date}: ${plan.length} videos, ${workers} at a time\n`);
@@ -313,7 +336,7 @@ let done = 0;
 const results = await pool(plan, workers, runJob, (r) => {
   done += 1;
   const mark = r.status === 'rendered' ? 'ok' : r.status === 'skipped' ? '--' : 'FAIL';
-  const extra = r.status === 'rendered' ? `${r.renderSeconds}s render · ${r.videoDurationSeconds}s video · caption: ${r.caption.source}`
+  const extra = r.status === 'rendered' ? `${r.renderSeconds}s render · ${r.videoDurationSeconds}s video · caption: ${r.caption.source} · ${r.loudness}`
     : r.status === 'failed' ? r.error.split('\n')[0] : r.reason;
   console.log(`[${String(done).padStart(2)}/${plan.length}] ${mark.padEnd(4)} ${r.id.padEnd(30)} ${extra}`);
 });

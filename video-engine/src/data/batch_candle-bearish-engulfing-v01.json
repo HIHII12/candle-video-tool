@@ -1,0 +1,291 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Bearish Engulfing",
+    "tagline": "What a bearish engulfing actually tells you",
+    "bias": "bearish",
+    "rule": "A red body that completely swallows the previous green body — sellers erased a whole session of buying.",
+    "checks": [
+      "Comes after a clear up leg",
+      "Opens at or above the prior close",
+      "Closes below the prior open"
+    ],
+    "bodyLow": 1973.51,
+    "bodyHigh": 1985.21,
+    "indices": [
+      16,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Real body"
+    },
+    {
+      "index": 17,
+      "part": "upperWick",
+      "label": "Upper wick"
+    },
+    {
+      "index": 17,
+      "part": "lowerWick",
+      "label": "Lower wick"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 1960,
+      "high": 1963.02,
+      "low": 1959.37,
+      "close": 1962.07
+    },
+    {
+      "time": 1700000900,
+      "open": 1962.07,
+      "high": 1963.35,
+      "low": 1957.72,
+      "close": 1959.05
+    },
+    {
+      "time": 1700001800,
+      "open": 1959.05,
+      "high": 1959.45,
+      "low": 1957.69,
+      "close": 1958.09
+    },
+    {
+      "time": 1700002700,
+      "open": 1958.09,
+      "high": 1965.65,
+      "low": 1956.53,
+      "close": 1962.42
+    },
+    {
+      "time": 1700003600,
+      "open": 1962.42,
+      "high": 1965.94,
+      "low": 1961.19,
+      "close": 1964.66
+    },
+    {
+      "time": 1700004500,
+      "open": 1964.66,
+      "high": 1966.42,
+      "low": 1961.2,
+      "close": 1962.02
+    },
+    {
+      "time": 1700005400,
+      "open": 1962.02,
+      "high": 1966.92,
+      "low": 1961.02,
+      "close": 1965.52
+    },
+    {
+      "time": 1700006300,
+      "open": 1965.52,
+      "high": 1968.09,
+      "low": 1965.12,
+      "close": 1967.65
+    },
+    {
+      "time": 1700007200,
+      "open": 1967.65,
+      "high": 1970.7,
+      "low": 1966.41,
+      "close": 1970.19
+    },
+    {
+      "time": 1700008100,
+      "open": 1970.19,
+      "high": 1977,
+      "low": 1969.15,
+      "close": 1974.24
+    },
+    {
+      "time": 1700009000,
+      "open": 1974.24,
+      "high": 1975.76,
+      "low": 1971.46,
+      "close": 1972.15
+    },
+    {
+      "time": 1700009900,
+      "open": 1972.15,
+      "high": 1977.58,
+      "low": 1970.91,
+      "close": 1975.97
+    },
+    {
+      "time": 1700010800,
+      "open": 1975.97,
+      "high": 1977.9,
+      "low": 1975.57,
+      "close": 1977.1
+    },
+    {
+      "time": 1700011700,
+      "open": 1977.1,
+      "high": 1977.5,
+      "low": 1974.42,
+      "close": 1975.26
+    },
+    {
+      "time": 1700012600,
+      "open": 1975.26,
+      "high": 1979.65,
+      "low": 1974.15,
+      "close": 1977.91
+    },
+    {
+      "time": 1700013500,
+      "open": 1977.91,
+      "high": 1981.25,
+      "low": 1976.66,
+      "close": 1980.01
+    },
+    {
+      "time": 1700014400,
+      "open": 1980.01,
+      "high": 1985.61,
+      "low": 1978.61,
+      "close": 1984.01
+    },
+    {
+      "time": 1700015300,
+      "open": 1985.21,
+      "high": 1987.21,
+      "low": 1971.31,
+      "close": 1973.51
+    },
+    {
+      "time": 1700016200,
+      "open": 1973.51,
+      "high": 1974.28,
+      "low": 1968.02,
+      "close": 1969.02
+    },
+    {
+      "time": 1700017100,
+      "open": 1969.02,
+      "high": 1969.83,
+      "low": 1964.1,
+      "close": 1965.65
+    },
+    {
+      "time": 1700018000,
+      "open": 1965.65,
+      "high": 1968.68,
+      "low": 1965.25,
+      "close": 1967.81
+    },
+    {
+      "time": 1700018900,
+      "open": 1967.81,
+      "high": 1969.5,
+      "low": 1964.33,
+      "close": 1965.22
+    },
+    {
+      "time": 1700019800,
+      "open": 1965.22,
+      "high": 1966.75,
+      "low": 1961.85,
+      "close": 1963.18
+    },
+    {
+      "time": 1700020700,
+      "open": 1963.18,
+      "high": 1964,
+      "low": 1958.15,
+      "close": 1960.24
+    },
+    {
+      "time": 1700021600,
+      "open": 1960.24,
+      "high": 1962.14,
+      "low": 1956.31,
+      "close": 1957.41
+    },
+    {
+      "time": 1700022500,
+      "open": 1957.41,
+      "high": 1960.17,
+      "low": 1951.9,
+      "close": 1953.45
+    },
+    {
+      "time": 1700023400,
+      "open": 1953.45,
+      "high": 1954.41,
+      "low": 1953.05,
+      "close": 1954.01
+    },
+    {
+      "time": 1700024300,
+      "open": 1954.01,
+      "high": 1957,
+      "low": 1953.61,
+      "close": 1955.82
+    },
+    {
+      "time": 1700025200,
+      "open": 1955.82,
+      "high": 1956.56,
+      "low": 1951.67,
+      "close": 1953.06
+    },
+    {
+      "time": 1700026100,
+      "open": 1953.06,
+      "high": 1954.08,
+      "low": 1947.9,
+      "close": 1950.06
+    },
+    {
+      "time": 1700027000,
+      "open": 1950.06,
+      "high": 1950.83,
+      "low": 1947.34,
+      "close": 1947.86
+    },
+    {
+      "time": 1700027900,
+      "open": 1947.86,
+      "high": 1950.55,
+      "low": 1946.7,
+      "close": 1950.14
+    },
+    {
+      "time": 1700028800,
+      "open": 1950.14,
+      "high": 1950.83,
+      "low": 1946.25,
+      "close": 1947.23
+    },
+    {
+      "time": 1700029700,
+      "open": 1947.23,
+      "high": 1947.86,
+      "low": 1941.49,
+      "close": 1943.68
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 1973.51,
+    "stop": 1987.81,
+    "target": 1944.91,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 33
+  },
+  "note": "Illustration - constructed price series, not a live chart",
+  "stats": null
+}

@@ -37,6 +37,38 @@ export const TIMEFRAMES = [
 export const dayIndex = (isoDate) => Math.floor(Date.parse(`${isoDate}T00:00:00Z`) / 86_400_000);
 
 /**
+ * A run of candlestick lessons only — as many as asked for.
+ *
+ * The daily plan gives thirteen of these, because a day is thirteen of these.
+ * A back catalogue is a different job: it wants a hundred at once, and the three
+ * other formats cannot supply it because they need live market data and a
+ * machine behind a blocked network has none. This format needs nothing but a
+ * seed, so it is the one that can fill a catalogue offline.
+ *
+ * Every job gets its own seed, so the same pattern comes back with a different
+ * approach leg, a different pattern candle and a different follow-through rather
+ * than the same video with a new number on it.
+ */
+export function candlePlan(isoDate, count = 100) {
+  const day = dayIndex(isoDate);
+  const jobs = [];
+  for (let n = 0; n < count; n += 1) {
+    const pattern = PATTERNS[n % PATTERNS.length];
+    const round = Math.floor(n / PATTERNS.length) + 1;
+    jobs.push({
+      id: `candle-${pattern}-v${String(round).padStart(2, '0')}`,
+      format: 'candle-lesson',
+      pattern,
+      // Coprime step so consecutive rounds of the same pattern are far apart in
+      // seed space rather than adjacent integers.
+      seed: day * 1000 + n * 37 + 11,
+      label: `${pattern.replace(/-/g, ' ')} · ${round}`,
+    });
+  }
+  return jobs;
+}
+
+/**
  * Build the plan for one date.
  *
  * Rotation offsets by the day index so consecutive days do not open with the
