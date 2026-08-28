@@ -33,3 +33,8 @@ Thumbs.db
 !tool-app/data/projects/
 !tool-app/data/projects/**
 tool-app/data/previews/
+
+# Catalogue runs generate one config per video; they are rebuilt from the seed.
+video-engine/src/data/batch_candle-*-v*.json
+video-engine/src/data/_probe.json
+video-engine/out/qa/
