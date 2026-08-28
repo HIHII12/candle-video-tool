@@ -95,8 +95,29 @@ def check(name: str, cfg: dict) -> list[str]:
     risk = abs(t["stop"] - t["entry"])
     if risk <= 0:
         bad.append("stop sits on the wrong side of entry")
-    if cfg["outcome"]["result"] not in ("TP", "OPEN"):
-        bad.append(f"unexpected outcome {cfg['outcome']['result']}")
+    result = cfg["outcome"]["result"]
+    if result not in ("TP", "SL", "OPEN"):
+        bad.append(f"unexpected outcome {result}")
+    else:
+        # The verdict has to be a reading of the drawn series, not a label put on
+        # it. Re-scan the follow-through here: whichever level printed first is
+        # the answer, and it must be the one the video is about to announce.
+        bullish = cfg["pattern"]["bias"] == "bullish"
+        first, at = "OPEN", None
+        for i in range(cfg["setupCount"], len(candles)):
+            c = candles[i]
+            stop_hit = c["low"] <= t["stop"] if bullish else c["high"] >= t["stop"]
+            target_hit = c["high"] >= t["target"] if bullish else c["low"] <= t["target"]
+            if stop_hit:
+                first, at = "SL", i
+                break
+            if target_hit:
+                first, at = "TP", i
+                break
+        if first != result:
+            bad.append(f"outcome says {result} but the series prints {first} first")
+        if at is not None and cfg["outcome"]["index"] != at:
+            bad.append(f"outcome index {cfg['outcome']['index']}, series resolves at {at}")
 
     return bad
 

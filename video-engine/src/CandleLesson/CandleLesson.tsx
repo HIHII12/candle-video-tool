@@ -36,6 +36,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   const {pattern, trade} = props;
   const bullish = pattern.bias === 'bullish';
   const win = props.outcome.result === 'TP';
+  /**
+   * What the series actually printed, said plainly.
+   *
+   * "Target not reached" covered two very different endings — the stop being
+   * taken out, and the clip simply running out with the trade still live — and
+   * blurred the more useful of the two. A stop-out on a textbook-perfect pattern
+   * is the most instructive frame this format produces; it should not be phrased
+   * as an absence.
+   */
+  const verdict =
+    props.outcome.result === 'TP'
+      ? 'Target reached'
+      : props.outcome.result === 'SL'
+        ? 'Stop hit'
+        : 'Still open at the end';
 
   /**
    * The header is legible on frame zero and only *settles* after it.
@@ -240,7 +255,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
 
       {/* Follow-through caption.
           Only when there is no narration: with a voice track the same band holds
-          the subtitle, and "Buyers follow through…" is the kind of line that
+          the subtitle, and a line naming a direction is the kind of copy that
           fills a slot without telling anyone anything. */}
       {!props.voiceMarks?.length && frame >= CB.reveal[0] && frame < CB.result[0] && (
         <div
@@ -257,7 +272,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             opacity: interpolate(frame, [CB.reveal[0], CB.reveal[0] + 24], [0, 1], clamp),
           }}
         >
-          {bullish ? 'Buyers follow through…' : 'Sellers follow through…'}
+          {/* Neutral on purpose: the follow-through is where the trade is
+              decided, and about four in ten of them decide against it. */}
+          The follow-through
         </div>
       )}
 
@@ -288,12 +305,17 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             style={{
               fontSize: 52,
               fontWeight: 800,
-              color: win ? CT.up : CT.down,
+              color:
+                props.outcome.result === 'TP'
+                  ? CT.up
+                  : props.outcome.result === 'SL'
+                    ? CT.down
+                    : CT.inkSoft,
               opacity: resultIn,
               transform: `translateY(${interpolate(resultIn, [0, 1], [44, 0])}px)`,
             }}
           >
-            {win ? 'Target reached' : 'Target not reached'}
+            {verdict}
           </div>
 
           {/* The honesty beat, for the videos that could not measure one.
@@ -310,7 +332,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
               opacity: interpolate(resultIn, [0.4, 1], [0, 1], clamp),
             }}
           >
-            One trade is not evidence — the pattern is a trigger, not a system.
+            {props.outcome.result === 'SL'
+              ? 'Every check passed and it still lost. That is what a trigger is.'
+              : 'One trade is not evidence — the pattern is a trigger, not a system.'}
           </div>
 
           <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>

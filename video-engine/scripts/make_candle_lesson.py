@@ -551,8 +551,66 @@ BUILDERS = {
 }
 
 
+# How often the constructed follow-through goes against the trade.
+#
+# It used to be never. Every builder ended with a drift running the pattern's own
+# way, and `make` only had to find which bar crossed the target — so every one of
+# these videos, on every pattern, showed the rule working. A channel whose
+# textbook examples win 100% of the time is teaching survivorship bias with a
+# chart attached, and it is the same defect the reality-check beat exists to
+# correct, reproduced in the illustration itself.
+#
+# The rate is not a measurement and is not presented as one. It is close to what
+# the measured hit rates come back as, and it exists so the series contains
+# losses at all. What the loser teaches is the point of the whole format: the
+# pattern was valid, every check passed, and the trade still lost. That is what a
+# trigger is, as opposed to a system.
+LOSS_RATE = 0.4
+
+# Alternative taglines, chosen by seed.
+#
+# A hundred videos come from thirteen patterns, so each pattern comes round about
+# eight times. With one fixed line per pattern, eight of those videos open with
+# the same sentence under the same title — which is what a channel looks like
+# when nobody wrote it. The builders keep their own line; these sit alongside it,
+# and they are written to say a different true thing about the same shape rather
+# than to reword the first one.
+TAGLINES = {
+    "bullish-engulfing": ["One bar takes back the whole of the last one",
+                          "Yesterday's selling, erased in a session"],
+    "bearish-engulfing": ["One bar swallows the last one whole",
+                          "Yesterday's buying, erased in a session"],
+    "hammer": ["Sellers had it, and gave every bit of it back",
+               "A long tail into the low with nothing to show for it"],
+    "shooting-star": ["Buyers had it, and gave every bit of it back",
+                      "A long tail into the high with nothing to show for it"],
+    "morning-star": ["Down, pause, up — and the order is the signal",
+                     "A turn takes three bars, not one"],
+    "evening-star": ["Up, pause, down — and the order is the signal",
+                     "A top takes three bars, not one"],
+    "doji": ["Open and close in the same place",
+             "A whole session, and no ground taken"],
+    "dragonfly-doji": ["All the way down, and all the way back",
+                       "The low was tested and refused"],
+    "gravestone-doji": ["All the way up, and all the way back",
+                        "The high was tested and refused"],
+    "marubozu": ["No wicks, no argument",
+                 "Open at one end, close at the other"],
+    "pin-bar": ["Poked through the level and pulled straight back",
+                "The wick is the whole story"],
+    "tweezer-bottom": ["Twice into the same low, twice refused",
+                       "Two bars that stop at the same price"],
+    "tweezer-top": ["Twice into the same high, twice refused",
+                    "Two bars that stop at the same price"],
+}
+
+
 def make(name: str, seed: int) -> dict:
     candles, setup_count, indices, meta, anatomy = BUILDERS[name](Rng(seed))
+
+    # The builder's own line stays in the rotation as the first option.
+    options = [meta["tagline"], *TAGLINES.get(name, [])]
+    meta = {**meta, "tagline": options[Rng(seed * 17 + 3).state % len(options)]}
 
     decisive = candles[indices[-1]]
     bullish = meta["bias"] == "bullish"
@@ -568,20 +626,39 @@ def make(name: str, seed: int) -> dict:
     risk = abs(entry - stop)
     target = entry + risk * 2.0 if bullish else entry - risk * 2.0
 
-    # The follow-through is constructed to reach the target; find where.
-    hit = None
+    # Decide, from the seed, whether this instance is one that works.
+    verdict_rng = Rng(seed * 31 + 7)
+    losing = verdict_rng.next() < LOSS_RATE
+
+    if losing:
+        # Rebuild the follow-through against the trade. Paced to take out the
+        # stop around the fifth or sixth bar: sooner and the pattern looks like
+        # a drawing error, later and the video ends before the stop prints.
+        span = len(candles) - setup_count
+        per_bar = (risk / 5.0) * (-1 if bullish else 1)
+        candles[setup_count:] = drift(
+            verdict_rng, decisive["close"], span, per_bar, 0, setup_count
+        )
+
+    # Find whichever level printed first. Scanning for both is what makes the
+    # verdict a reading of the series rather than an assertion about it.
+    hit, result = None, "OPEN"
     for i in range(setup_count, len(candles)):
         c = candles[i]
-        if (bullish and c["high"] >= target) or (not bullish and c["low"] <= target):
-            hit = i
+        target_hit = c["high"] >= target if bullish else c["low"] <= target
+        stop_hit = c["low"] <= stop if bullish else c["high"] >= stop
+        # Within one bar the order is unknowable, so the loss is assumed. Any
+        # other choice flatters the result on exactly the bars that decide it.
+        if stop_hit:
+            hit, result = i, "SL"
+            break
+        if target_hit:
+            hit, result = i, "TP"
             break
     if hit is None:
         # Keep the claim truthful: if the drift fell short, say it stayed open
-        # rather than asserting a target that never printed.
+        # rather than asserting a level that never printed.
         hit = len(candles) - 1
-        result = "OPEN"
-    else:
-        result = "TP"
 
     return {
         "kind": "candleLesson",

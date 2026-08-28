@@ -158,7 +158,14 @@ function applyCaption(cfgPath, cfg, caption, format) {
   if (format === 'market-map') return;
 
   if (format === 'candle-lesson') {
-    cfg.pattern.tagline = caption.hook;
+    // Only a model's line replaces the generator's.
+    //
+    // The fallback for this format is `What a <pattern> actually tells you` —
+    // one template, filled in a hundred times, which is exactly the sameness the
+    // seeded taglines in make_candle_lesson.py exist to break. Overwriting a
+    // written line with a generated template is a downgrade, so it does not
+    // happen: with no key configured, the generator's own tagline ships.
+    if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
   } else {
     cfg.title = caption.title;
     cfg.hook = caption.hook;
