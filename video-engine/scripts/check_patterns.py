@@ -23,9 +23,32 @@ def parts(c):
     return body, upper, lower, c["high"] - c["low"]
 
 
+def ohlc_sane(candles: list[dict]) -> list[str]:
+    """Every bar must be a bar.
+
+    The renderer reconstructs a part-formed candle from OHLC (src/camera.ts), and
+    that reconstruction assumes high and low really do bound the open and the
+    close. A generator that ever emitted a bar where they did not would produce a
+    forming candle that jumps outside its own range — visible as a flicker, and
+    impossible to trace back from the video. Cheap to assert here instead.
+    """
+    bad = []
+    for i, c in enumerate(candles):
+        top, bottom = max(c["open"], c["close"]), min(c["open"], c["close"])
+        if c["high"] < top - 1e-9:
+            bad.append(f"bar {i}: high {c['high']} below body top {top}")
+        if c["low"] > bottom + 1e-9:
+            bad.append(f"bar {i}: low {c['low']} above body bottom {bottom}")
+        if c["high"] < c["low"]:
+            bad.append(f"bar {i}: high below low")
+        if i and c["time"] <= candles[i - 1]["time"]:
+            bad.append(f"bar {i}: time not increasing")
+    return bad[:3]
+
+
 def check(name: str, cfg: dict) -> list[str]:
     """Return a list of violations; empty means the drawing matches the claim."""
-    bad = []
+    bad = ohlc_sane(cfg["candles"])
     idx = cfg["pattern"]["indices"]
     candles = cfg["candles"]
     key = candles[idx[-1]]
