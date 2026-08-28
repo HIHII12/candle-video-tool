@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {ForexChartProps, RiskReward} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
+import {ChartEdges} from '../ChartEdges';
 import {logicalWindowAt} from '../XauChart/logicalWindow';
 import {EntryZone, Neckline, PatternLabels, TradeZone, ZigZag} from './Markup';
 import {LESSON_BOX, LFONT, LSB, LT, STEPS, lramp} from './theme';
@@ -204,6 +205,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           height: LESSON_BOX.height,
         }}
       />
+
+      <ChartEdges box={LESSON_BOX} bg={LT.bg} zIndex={5} />
 
       {/* zIndex: the chart canvas paints over siblings without it. */}
       {coords && (

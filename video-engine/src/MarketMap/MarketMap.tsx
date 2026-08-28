@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {MarketMapProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
+import {ChartEdges} from '../ChartEdges';
 import {ChochMark, PlanPath, TrendLine, ZoneBand} from './Marks';
 import {
   MAP_BOX,
@@ -161,6 +162,8 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         }}
       />
 
+      <ChartEdges box={MAP_BOX} bg={MT.bg} zIndex={5} />
+
       {/* Marks overlay. zIndex matters: the chart canvas paints over siblings. */}
       {coords && (
         <svg
@@ -189,7 +192,9 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               zone={z}
               coords={coords}
               width={MAP_BOX.width}
-              labelRight={MAP_BOX.width - 16}
+              // Clear of the platform's button column: a zone whose name is
+              // covered is a zone the viewer cannot use. See src/safeArea.ts.
+              labelRight={MAP_BOX.width - SAFE.right - 14}
               reveal={zoneProgress(frame, i, props.zones.length)}
             />
           ))}

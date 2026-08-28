@@ -9,6 +9,7 @@ import {Flash, ResultStrip} from './Beats';
 import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark} from './Chrome';
 import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt, shownFloatAt} from './storyboard';
 import {visibleCandles} from '../camera';
+import {ChartEdges} from '../ChartEdges';
 import {logicalWindowAt} from './logicalWindow';
 import {CHART_BOX, TV, FONT} from './chartTheme';
 import {interpolate} from 'remotion';
@@ -212,6 +213,8 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           transform: `translateX(${shake}px)`,
         }}
       />
+
+      <ChartEdges box={CHART_BOX} bg={TV.bg} zIndex={5} transform={`translateX(${shake}px)`} />
 
       {/* Annotation overlay, aligned to the chart canvas.
           zIndex matters: the chart canvas paints over siblings without it. */}

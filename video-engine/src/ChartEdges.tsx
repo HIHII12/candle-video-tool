@@ -31,7 +31,9 @@ export const ChartEdges: React.FC<{
    */
   solid?: number;
   zIndex?: number;
-}> = ({box, bg, side = 92, top = 40, bottom = 44, solid = 20, zIndex = 5}) => (
+  /** Must match any transform on the chart element, or the fade drifts off it. */
+  transform?: string;
+}> = ({box, bg, side = 92, top = 40, bottom = 44, solid = 20, zIndex = 5, transform}) => (
   <div
     style={{
       position: 'absolute',
@@ -41,6 +43,7 @@ export const ChartEdges: React.FC<{
       height: box.height,
       pointerEvents: 'none',
       zIndex,
+      transform,
       background: [
         `linear-gradient(90deg, ${bg} 0px, ${bg} ${solid}px, transparent ${side}px,` +
           ` transparent calc(100% - ${side}px), ${bg} calc(100% - ${solid}px), ${bg} 100%)`,
