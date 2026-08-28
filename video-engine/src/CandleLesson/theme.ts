@@ -122,6 +122,27 @@ const patternStart = (props: CandleLessonProps) => props.pattern.indices[0];
 const drift = (frame: number) => ramp(frame, CB.focus[1], CB.zoomOut[0]);
 
 /**
+ * How far in the close-up is allowed to go.
+ *
+ * The close-up frames the pattern's own price range, which is fine until the
+ * pattern barely has one. A doji's body is a few cents, so padding *its* range
+ * produced a window a few cents tall — the neighbouring bars became hundreds of
+ * pixels of solid colour running straight off both edges, and the frame check
+ * called it exactly that. The magnification is capped against the window the
+ * camera was already tracking, so a flat pattern gets a close-up of its
+ * surroundings instead of a wall.
+ */
+const MAX_ZOOM = 3.2;
+
+const capZoom = (near: PriceWindow, track: PriceWindow): PriceWindow => {
+  const floor = (track.maxValue - track.minValue) / MAX_ZOOM;
+  const span = near.maxValue - near.minValue;
+  if (span >= floor) return near;
+  const mid = (near.minValue + near.maxValue) / 2;
+  return {minValue: mid - floor / 2, maxValue: mid + floor / 2};
+};
+
+/**
  * Squeeze a window toward its centre, with a touch of pan.
  *
  * The size of the move is set by what it has to beat, not by taste: at 7% over
@@ -219,7 +240,7 @@ const priceTargetAt = (props: CandleLessonProps, frame: number): PriceWindow => 
   const vis = visibleCandles(props.candles, shownAt(props, frame));
   const track = extentOf(vis, [], 0.09);
   const patternCandles = props.pattern.indices.map((i) => props.candles[i]);
-  const near = extentOf(patternCandles, [], 0.55);
+  const near = capZoom(extentOf(patternCandles, [], 0.55), track);
 
   if (frame < CB.focus[0]) return track;
   if (frame < CB.zoomOut[0]) {

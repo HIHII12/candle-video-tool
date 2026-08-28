@@ -20,8 +20,18 @@ export const ChartEdges: React.FC<{
   side?: number;
   top?: number;
   bottom?: number;
+  /**
+   * Opaque band before the fade begins.
+   *
+   * A pure linear ramp never quite reaches zero at the frame edge: a bar sitting
+   * in the outermost few pixels still shows a few per cent of itself, which is
+   * faint to look at and still reads as ink to the frame check. A short solid
+   * band first makes the edge genuinely empty, and the dissolve then happens
+   * where there is room for it to look like a dissolve.
+   */
+  solid?: number;
   zIndex?: number;
-}> = ({box, bg, side = 46, top = 30, bottom = 34, zIndex = 5}) => (
+}> = ({box, bg, side = 92, top = 40, bottom = 44, solid = 20, zIndex = 5}) => (
   <div
     style={{
       position: 'absolute',
@@ -32,8 +42,10 @@ export const ChartEdges: React.FC<{
       pointerEvents: 'none',
       zIndex,
       background: [
-        `linear-gradient(90deg, ${bg} 0px, transparent ${side}px, transparent calc(100% - ${side}px), ${bg} 100%)`,
-        `linear-gradient(180deg, ${bg} 0px, transparent ${top}px, transparent calc(100% - ${bottom}px), ${bg} 100%)`,
+        `linear-gradient(90deg, ${bg} 0px, ${bg} ${solid}px, transparent ${side}px,` +
+          ` transparent calc(100% - ${side}px), ${bg} calc(100% - ${solid}px), ${bg} 100%)`,
+        `linear-gradient(180deg, ${bg} 0px, ${bg} ${Math.min(solid, top - 4)}px, transparent ${top}px,` +
+          ` transparent calc(100% - ${bottom}px), ${bg} calc(100% - ${Math.min(solid, bottom - 4)}px), ${bg} 100%)`,
       ].join(', '),
     }}
   />
