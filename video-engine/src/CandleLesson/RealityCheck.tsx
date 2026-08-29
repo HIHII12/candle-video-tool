@@ -3,6 +3,7 @@ import {interpolate, spring} from 'remotion';
 import type {PatternStats} from '../data/types';
 import {CB, CT} from './theme';
 import {SAFE} from '../safeArea';
+import {strings, type Locale} from '../i18n';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -20,13 +21,15 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
  * reward-to-risk it was earned at: at 1:2, 34% is the line, so 41% is a good
  * pattern and 25% is not, and a viewer shown only "41%" would guess wrong.
  */
-export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: number}> = ({
-  stats,
-  frame,
-  fps,
-}) => {
+export const RealityCheck: React.FC<{
+  stats: PatternStats;
+  frame: number;
+  fps: number;
+  locale?: Locale;
+}> = ({stats, frame, fps, locale}) => {
   const at = CB.result[0];
   if (frame < at) return null;
+  const t = strings(locale).reality;
 
   const step = (delay: number, damping = 18) =>
     spring({frame: frame - (at + delay), fps, config: {damping}, durationInFrames: 26});
@@ -66,7 +69,7 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
           transform: `translateY(${interpolate(headline, [0, 1], [26, 0])}px)`,
         }}
       >
-        But once is not evidence.
+        {t.headline}
       </div>
       <div
         style={{
@@ -78,8 +81,7 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
           opacity: headline,
         }}
       >
-        Every {stats.pattern.replace(/-/g, ' ')} on {stats.pair} {stats.timeframe}, last{' '}
-        {stats.windowLabel} — {stats.settled} trades
+        {t.source(stats)}
       </div>
 
       {/* Hit rate against break-even */}
@@ -125,7 +127,7 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
               fontVariantNumeric: 'tabular-nums',
             }}
           >
-            {stats.wins}W · {stats.losses}L · {Math.round(fill)}%
+            {t.tally(stats.wins, stats.losses, Math.round(fill))}
           </div>
         </div>
         <div
@@ -137,7 +139,7 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
             textAlign: 'right',
           }}
         >
-          break-even at 1:{stats.rewardRisk} is {breakEven.toFixed(0)}%
+          {t.breakEven(stats.rewardRisk, breakEven.toFixed(0))}
         </div>
       </div>
 
@@ -153,8 +155,8 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
         }}
       >
         {edge
-          ? `Edge: ${stats.expectancyR > 0 ? '+' : ''}${stats.expectancyR}R per trade`
-          : `No edge alone: ${stats.expectancyR}R per trade`}
+          ? t.edge(stats.expectancyR)
+          : t.noEdge(stats.expectancyR)}
       </div>
       <div
         style={{
@@ -167,8 +169,8 @@ export const RealityCheck: React.FC<{stats: PatternStats; frame: number; fps: nu
         }}
       >
         {edge
-          ? 'Confluence and context still decide the entry'
-          : 'The pattern is a trigger, not a system — it needs context'}
+          ? t.footEdge
+          : t.foot}
       </div>
     </div>
   );

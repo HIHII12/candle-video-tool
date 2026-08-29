@@ -49,14 +49,17 @@ export const dayIndex = (isoDate) => Math.floor(Date.parse(`${isoDate}T00:00:00Z
  * approach leg, a different pattern candle and a different follow-through rather
  * than the same video with a new number on it.
  */
-export function candlePlan(isoDate, count = 100) {
+export function candlePlan(isoDate, count = 100, locale = 'en') {
   const day = dayIndex(isoDate);
   const jobs = [];
   for (let n = 0; n < count; n += 1) {
     const pattern = PATTERNS[n % PATTERNS.length];
     const round = Math.floor(n / PATTERNS.length) + 1;
     jobs.push({
-      id: `candle-${pattern}-v${String(round).padStart(2, '0')}`,
+      // The locale is part of the id, so the two tracks can be built for the
+      // same date into the same folder without one overwriting the other.
+      id: `${locale}-candle-${pattern}-v${String(round).padStart(2, '0')}`,
+      locale,
       format: 'candle-lesson',
       pattern,
       // Coprime step so consecutive rounds of the same pattern are far apart in

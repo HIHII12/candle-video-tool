@@ -1,6 +1,8 @@
 // Data contract between the Python pipeline and the Remotion renderer.
 // The Python script emits a config.json matching this shape; the video reads it.
 
+import type {Locale} from '../i18n';
+
 export type Candle = {
   // Unix seconds or any monotonic index — only ordering matters for X layout.
   time: number;
@@ -191,6 +193,13 @@ export type PatternStats = {
 export type CandleLessonProps = {
   kind: 'candleLesson';
   instrument: string;
+  /**
+   * Which track this video belongs to. Absent means the global one, so every
+   * config written before the Vietnam track existed still means what it did.
+   */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
   pattern: CandlePattern;
   anatomy: Anatomy[];
   candles: Candle[];

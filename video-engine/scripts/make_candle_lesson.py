@@ -565,6 +565,178 @@ BUILDERS = {
 # losses at all. What the loser teaches is the point of the whole format: the
 # pattern was valid, every check passed, and the trade still lost. That is what a
 # trigger is, as opposed to a system.
+# --------------------------------------------------------------------------
+# Ban tieng Viet.
+#
+# Khong phai ban dich. Ten mau nen dung dung ten ma dan trade Viet goi nhau
+# hang ngay — "Sao Mai", "Nhan Chim Tang", "Day Nhip" — chu khong phai ten dich
+# tu tu dien; con nhung cai da thanh ten rieng trong nghe (Doji, Pin Bar,
+# Marubozu) thi giu nguyen, vi dich chung ra moi la thu khong ai noi.
+#
+# Cac dong "checks" giu nguyen cach doc so lieu, vi do la cho khong duoc phep
+# dich thoang: "2x than nen" phai van la 2x.
+# --------------------------------------------------------------------------
+VI = {
+    "hammer": {
+        "name": "Nến Búa",
+        "taglines": ["Giá bị từ chối ở vùng đáy",
+                     "Bên bán cầm được, rồi trả lại sạch",
+                     "Một cái đuôi dài xuống đáy mà không mang về được gì"],
+        "rule": "Bóng dưới dài, thân nhỏ nằm trên. Bên bán đạp giá xuống, "
+                "bên mua lấy lại toàn bộ trước khi nến đóng.",
+        "checks": ["Bóng dưới ít nhất gấp 2 lần thân",
+                   "Bóng trên dưới 5% thân nến",
+                   "Chỉ có giá trị sau một nhịp giảm"],
+        "anatomy": ["Thân nhỏ", "Bóng dưới dài", "Gần như không có bóng trên"],
+    },
+    "shooting-star": {
+        "name": "Sao Băng",
+        "taglines": ["Giá bị từ chối ở vùng đỉnh",
+                     "Bên mua cầm được, rồi trả lại sạch",
+                     "Một cái đuôi dài lên đỉnh mà không mang về được gì"],
+        "rule": "Bóng trên dài, thân nhỏ nằm dưới. Bên mua kéo giá lên, "
+                "bên bán lấy lại toàn bộ trước khi nến đóng.",
+        "checks": ["Bóng trên ít nhất gấp 2 lần thân",
+                   "Bóng dưới dưới 5% thân nến",
+                   "Chỉ có giá trị sau một nhịp tăng"],
+        "anatomy": ["Thân nhỏ", "Bóng trên dài", "Gần như không có bóng dưới"],
+    },
+    "bullish-engulfing": {
+        "name": "Nhấn Chìm Tăng",
+        "taglines": ["Bên bán mất quyền kiểm soát trong một cây nến",
+                     "Một cây nến nuốt trọn cây trước đó",
+                     "Cả phiên bán hôm trước bị xoá sạch"],
+        "rule": "Một thân xanh trùm hết thân đỏ liền trước — bên mua xoá sạch "
+                "cả phiên bán trong đúng một cây nến.",
+        "checks": ["Đi sau một nhịp giảm rõ ràng",
+                   "Mở cửa bằng hoặc thấp hơn giá đóng cây trước",
+                   "Đóng cửa cao hơn giá mở cây trước"],
+        "anatomy": ["Thân nến", "Bóng trên", "Bóng dưới"],
+    },
+    "bearish-engulfing": {
+        "name": "Nhấn Chìm Giảm",
+        "taglines": ["Bên mua mất quyền kiểm soát trong một cây nến",
+                     "Một cây nến nuốt trọn cây trước đó",
+                     "Cả phiên mua hôm trước bị xoá sạch"],
+        "rule": "Một thân đỏ trùm hết thân xanh liền trước — bên bán xoá sạch "
+                "cả phiên mua trong đúng một cây nến.",
+        "checks": ["Đi sau một nhịp tăng rõ ràng",
+                   "Mở cửa bằng hoặc cao hơn giá đóng cây trước",
+                   "Đóng cửa thấp hơn giá mở cây trước"],
+        "anatomy": ["Thân nến", "Bóng trên", "Bóng dưới"],
+    },
+    "morning-star": {
+        "name": "Sao Mai",
+        "taglines": ["Ba cây nến bẻ một xu hướng",
+                     "Giảm, chững, tăng — và thứ tự đó mới là tín hiệu",
+                     "Một cú đảo chiều cần ba cây nến, không phải một"],
+        "rule": "Một cây đỏ mạnh, rồi một cây thân nhỏ do dự, rồi một cây xanh "
+                "lấy lại phần lớn cây đầu. Đà bán chững lại rồi đảo chiều.",
+        "checks": ["Cây 1 là nến đỏ mạnh",
+                   "Cây 2 thân nhỏ — đà giảm chững lại",
+                   "Cây 3 đóng vào trong thân cây 1"],
+        "anatomy": ["Nến do dự", "Nến đảo chiều"],
+    },
+    "evening-star": {
+        "name": "Sao Hôm",
+        "taglines": ["Ba cây nến kết thúc một nhịp chạy",
+                     "Tăng, chững, giảm — và thứ tự đó mới là tín hiệu",
+                     "Một cái đỉnh cần ba cây nến, không phải một"],
+        "rule": "Một cây xanh mạnh, rồi một cây thân nhỏ do dự, rồi một cây đỏ "
+                "trả lại phần lớn cây đầu. Đà mua chững lại rồi đảo chiều.",
+        "checks": ["Cây 1 là nến xanh mạnh",
+                   "Cây 2 thân nhỏ — đà tăng chững lại",
+                   "Cây 3 đóng vào trong thân cây 1"],
+        "anatomy": ["Nến do dự", "Nến đảo chiều"],
+    },
+    "doji": {
+        "name": "Doji",
+        "taglines": ["Không bên nào thắng",
+                     "Giá mở và giá đóng về đúng một chỗ",
+                     "Cả một phiên, và không ai lấy được đất"],
+        "rule": "Giá mở và giá đóng về đúng một chỗ. Giá đi cả hai hướng rồi "
+                "quay lại điểm xuất phát — đó là thế giằng co, không phải tín hiệu.",
+        "checks": ["Thân dưới 5% biên độ cây nến",
+                   "Có bóng ở cả hai phía",
+                   "Nghĩa là tạm dừng, không phải đảo chiều — chờ cây kế tiếp"],
+        "anatomy": ["Thân rất nhỏ", "Bóng trên", "Bóng dưới"],
+    },
+    "dragonfly-doji": {
+        "name": "Doji Chuồn Chuồn",
+        "taglines": ["Bên bán đẩy được, rồi mất sạch",
+                     "Xuống hết đường, rồi về hết đường",
+                     "Vùng đáy đã bị thử và bị từ chối"],
+        "rule": "Giá mở và giá đóng gặp nhau ở sát đỉnh cây nến, bên dưới là "
+                "một cái bóng dài. Bên bán đẩy được cả phiên rồi mất sạch.",
+        "checks": ["Thân mỏng như một vạch, nằm sát đỉnh",
+                   "Bóng dưới dài, gần như không có bóng trên",
+                   "Chỉ đọc ở vùng hỗ trợ, không đọc giữa biên"],
+        "anatomy": ["Thân nằm sát đỉnh", "Toàn bộ biên độ nằm dưới"],
+    },
+    "gravestone-doji": {
+        "name": "Doji Bia Mộ",
+        "taglines": ["Bên mua đẩy được, rồi mất sạch",
+                     "Lên hết đường, rồi về hết đường",
+                     "Vùng đỉnh đã bị thử và bị từ chối"],
+        "rule": "Giá mở và giá đóng gặp nhau ở sát đáy cây nến, bên trên là "
+                "một cái bóng dài. Bên mua đẩy được cả phiên rồi mất sạch.",
+        "checks": ["Thân mỏng như một vạch, nằm sát đáy",
+                   "Bóng trên dài, gần như không có bóng dưới",
+                   "Chỉ đọc ở vùng kháng cự, không đọc giữa biên"],
+        "anatomy": ["Thân nằm sát đáy", "Toàn bộ biên độ nằm trên"],
+    },
+    "marubozu": {
+        "name": "Marubozu Tăng",
+        "taglines": ["Một bên cầm trịch cả phiên",
+                     "Không bóng, không tranh cãi",
+                     "Mở ở một đầu, đóng ở đầu kia"],
+        "rule": "Thân dài, gần như không có bóng. Giá mở ở một đầu, đóng ở đầu "
+                "kia, và không ngoái lại. Đây là nến xác nhận đà, không phải đảo chiều.",
+        "checks": ["Thân dài hơn hẳn mức trung bình gần đây",
+                   "Cả hai bóng dưới 5% thân nến",
+                   "Xác nhận xu hướng chứ không bẻ xu hướng"],
+        "anatomy": ["Thân chiếm trọn biên độ", "Gần như không có bóng"],
+    },
+    "pin-bar": {
+        "name": "Pin Bar",
+        "taglines": ["Vùng giá đã bị thử và bị từ chối",
+                     "Chọc thủng rồi bị kéo ngược về ngay",
+                     "Cái bóng nến mới là toàn bộ câu chuyện"],
+        "rule": "Một cái bóng đâm xuyên qua vùng giá rồi giá đóng ngược về phía "
+                "bên kia. Cú xuyên đó bị từ chối, không được chấp nhận.",
+        "checks": ["Bóng chiếm hơn 70% toàn bộ biên độ",
+                   "Bóng chọc qua vùng mà các nến khác đều tôn trọng",
+                   "Thân đóng lại vào trong biên độ"],
+        "anatomy": ["Bóng xuyên qua vùng giá", "Giá đóng quay về"],
+    },
+    "tweezer-bottom": {
+        "name": "Đáy Nhíp",
+        "taglines": ["Hai cây nến, một cái sàn",
+                     "Hai lần xuống đúng một đáy, hai lần bị từ chối",
+                     "Hai cây nến dừng ở đúng một mức giá"],
+        "rule": "Hai cây nến liền nhau chạm đúng một đáy và cả hai đều không "
+                "phá nổi. Lần từ chối thứ hai mới là thứ làm vùng đó đáng đánh dấu.",
+        "checks": ["Hai đáy về gần như đúng một mức giá",
+                   "Cây thứ hai đóng ngược lên",
+                   "Đi sau một nhịp giảm"],
+        "anatomy": ["Lần từ chối thứ nhất", "Lại đúng cái đáy đó"],
+    },
+    "tweezer-top": {
+        "name": "Đỉnh Nhíp",
+        "taglines": ["Hai cây nến, một cái trần",
+                     "Hai lần lên đúng một đỉnh, hai lần bị từ chối",
+                     "Hai cây nến dừng ở đúng một mức giá"],
+        "rule": "Hai cây nến liền nhau chạm đúng một đỉnh và cả hai đều không "
+                "phá nổi. Lần từ chối thứ hai mới là thứ làm vùng đó đáng đánh dấu.",
+        "checks": ["Hai đỉnh về gần như đúng một mức giá",
+                   "Cây thứ hai đóng ngược xuống",
+                   "Đi sau một nhịp tăng"],
+        "anatomy": ["Lần từ chối thứ nhất", "Lại đúng cái đỉnh đó"],
+    },
+}
+
+VI_NOTE = "Minh hoạ - chuỗi giá dựng lại, không phải biểu đồ thật"
+
 LOSS_RATE = 0.4
 
 # Alternative taglines, chosen by seed.
@@ -605,12 +777,28 @@ TAGLINES = {
 }
 
 
-def make(name: str, seed: int) -> dict:
+def make(name: str, seed: int, locale: str = "en") -> dict:
     candles, setup_count, indices, meta, anatomy = BUILDERS[name](Rng(seed))
 
     # The builder's own line stays in the rotation as the first option.
     options = [meta["tagline"], *TAGLINES.get(name, [])]
     meta = {**meta, "tagline": options[Rng(seed * 17 + 3).state % len(options)]}
+
+    if locale == "vi":
+        vi = VI.get(name)
+        if vi:
+            # Anatomy labels are matched by position, not by (index, part): a
+            # three-bar pattern names bars, a one-bar pattern names parts of a
+            # bar, and position is the only key both shapes share.
+            anatomy = [{**a, "label": vi["anatomy"][i]} if i < len(vi["anatomy"]) else a
+                       for i, a in enumerate(anatomy)]
+            meta = {
+                **meta,
+                "name": vi["name"],
+                "tagline": vi["taglines"][Rng(seed * 17 + 3).state % len(vi["taglines"])],
+                "rule": vi["rule"],
+                "checks": vi["checks"],
+            }
 
     decisive = candles[indices[-1]]
     bullish = meta["bias"] == "bullish"
@@ -674,7 +862,9 @@ def make(name: str, seed: int) -> dict:
             "entryIndex": indices[-1],
         },
         "outcome": {"result": result, "index": hit},
-        "note": "Illustration - constructed price series, not a live chart",
+        "locale": locale,
+        "note": VI_NOTE if locale == "vi"
+        else "Illustration - constructed price series, not a live chart",
         # Filled in by --stats. Absent means the video simply omits that beat,
         # which keeps this generator usable with no network.
         "stats": None,
@@ -686,6 +876,8 @@ def main() -> None:
     ap.add_argument("--pattern", choices=sorted(BUILDERS), default="bullish-engulfing")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--locale", choices=("en", "vi"), default="en",
+                    help="ngon ngu cua chu tren video")
     ap.add_argument("--stats", action="store_true",
                     help="measure how this pattern actually performed on real data")
     ap.add_argument("--stats-symbol", default="GC=F")
@@ -694,7 +886,7 @@ def main() -> None:
     ap.add_argument("--stats-range", default="60d")
     args = ap.parse_args()
 
-    cfg = make(args.pattern, args.seed)
+    cfg = make(args.pattern, args.seed, args.locale)
 
     # The illustration teaches the rule; the statistic says whether the rule pays.
     # Network failure must never fail the build: this generator is the one format

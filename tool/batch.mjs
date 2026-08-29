@@ -58,6 +58,16 @@ const skipLoudness = has('no-loudness');
  * Pass --crf 18 to get the old masters back.
  */
 const crf = flag('crf', '23');
+/**
+ * Which track to build: `en` for global, `vi` for Vietnam.
+ *
+ * Not a translation switch. The Vietnam track uses the pattern names Vietnamese
+ * traders actually say, its own written rules, and the channel's mark in the
+ * corner; the global track stays exactly what it was. See video-engine/src/i18n.ts.
+ */
+const locale = flag('locale', 'en');
+/** Corner mark, a file under video-engine/public/brand. `none` turns it off. */
+const brand = flag('brand', locale === 'vi' ? 'van-thang-trading.png' : 'none');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -115,7 +125,8 @@ async function buildData(job) {
     // It needs network; the generator degrades to no stats rather than failing,
     // which keeps this the one format that still works offline.
     await sh(python, ['scripts/make_candle_lesson.py',
-      '--pattern', job.pattern, '--seed', String(job.seed), '--out', out, '--stats']);
+      '--pattern', job.pattern, '--seed', String(job.seed), '--out', out,
+      '--locale', job.locale ?? locale, '--stats']);
     const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
     return {
       composition: 'CandleLesson',
@@ -164,6 +175,13 @@ async function buildData(job) {
   };
 }
 
+/** Stamp the track's own settings onto a config before it is rendered. */
+function applyTrack(cfg) {
+  cfg.locale = locale;
+  cfg.brandMark = brand === 'none' ? null : brand;
+  return cfg;
+}
+
 /** Write the model's copy back into the config the renderer reads. */
 function applyCaption(cfgPath, cfg, caption, format) {
   // The market map has no model-written line on screen: every word on it is
@@ -200,7 +218,7 @@ async function runJob(job) {
     job.format === 'market-map'
       ? { title: `${job.pair} ${job.timeframe} market map`, hook: null, source: 'none' }
       : await writeCaption(job, facts);
-  applyCaption(configPath, cfg, caption, job.format);
+  applyCaption(configPath, applyTrack(cfg), caption, job.format);
 
   // Narration is opt-in and best-effort. The engine is installed per machine by
   // scripts/setup_voice.py; without it the video renders exactly as before, so a
@@ -339,7 +357,7 @@ function preflight() {
 
 if (!dryRun) preflight();
 
-let plan = format === 'candle-lesson' ? candlePlan(date, count) : planFor(date, count);
+let plan = format === 'candle-lesson' ? candlePlan(date, count, locale) : planFor(date, count);
 if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
 if (only) plan = plan.filter((j) => j.id.includes(only));
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }

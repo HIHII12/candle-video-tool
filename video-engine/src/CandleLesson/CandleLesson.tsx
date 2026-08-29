@@ -5,6 +5,8 @@ import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {AnatomyLabels, Spotlight, TradeLevels} from './Annotations';
 import {RealityCheck} from './RealityCheck';
 import {BeatRail} from './BeatRail';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {ChartEdges} from '../ChartEdges';
 import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
@@ -34,6 +36,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   );
 
   const {pattern, trade} = props;
+  const t = strings(props.locale);
   const bullish = pattern.bias === 'bullish';
   const win = props.outcome.result === 'TP';
   /**
@@ -47,10 +50,10 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
    */
   const verdict =
     props.outcome.result === 'TP'
-      ? 'Target reached'
+      ? t.verdict.TP
       : props.outcome.result === 'SL'
-        ? 'Stop hit'
-        : 'Still open at the end';
+        ? t.verdict.SL
+        : t.verdict.OPEN;
 
   /**
    * The header is legible on frame zero and only *settles* after it.
@@ -115,7 +118,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           zIndex: LAYER.overlay,
           top: LAYOUT.headerTop,
           left: 60,
-          right: SAFE.right,
+          // Give the corner mark its own column when there is one, so a long
+          // pattern name wraps rather than running under the badge.
+          right: props.brandMark ? SAFE.right + 130 : SAFE.right,
           opacity: titleIn * (0.45 + 0.55 * titleOut),
           transform: `translateY(${interpolate(settle, [0, 1], [-14, 0])}px) scale(${
             (0.985 + 0.015 * settle) * (0.94 + 0.06 * titleOut)
@@ -135,12 +140,33 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             padding: '6px 14px',
           }}
         >
-          CANDLE ANATOMY
+          {t.badge}
         </div>
-        <div style={{fontSize: 74, fontWeight: 800, color: CT.ink, marginTop: 22, lineHeight: 1.05}}>
+        <div
+          style={{
+            fontSize: 74,
+            fontWeight: 800,
+            color: CT.ink,
+            marginTop: 22,
+            lineHeight: 1.05,
+            textWrap: 'balance',
+          }}
+        >
           {pattern.name}
         </div>
-        <div style={{fontSize: 34, fontWeight: 500, color: CT.inkSoft, marginTop: 12}}>
+        {/* Balanced rather than ragged: Vietnamese pattern names and taglines run
+            longer than the English ones and wrap to two lines, and the default
+            break leaves a single word stranded on the second. */}
+        <div
+          style={{
+            fontSize: 34,
+            fontWeight: 500,
+            color: CT.inkSoft,
+            marginTop: 12,
+            lineHeight: 1.28,
+            textWrap: 'balance',
+          }}
+        >
           {pattern.tagline}
         </div>
       </div>
@@ -183,11 +209,12 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             bias={pattern.bias}
             coords={coords}
             progress={tradeProgress}
+            locale={props.locale}
           />
         </svg>
       )}
 
-      <BeatRail frame={frame} marks={props.voiceMarks ?? undefined} />
+      <BeatRail frame={frame} marks={props.voiceMarks ?? undefined} locale={props.locale} />
 
       {/* Rule + checklist */}
       {rulePanel > 0 && (
@@ -274,7 +301,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         >
           {/* Neutral on purpose: the follow-through is where the trade is
               decided, and about four in ten of them decide against it. */}
-          The follow-through
+          {t.followThrough}
         </div>
       )}
 
@@ -286,7 +313,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           nothing was edited. Staggering the lines means something arrives every
           few frames right to the end, and a recap is worth watching: it is the
           rule restated at the moment the viewer has just seen it pay off. */}
-      {props.stats && <RealityCheck stats={props.stats} frame={frame} fps={fps} />}
+      {props.stats && (
+        <RealityCheck stats={props.stats} frame={frame} fps={fps} locale={props.locale} />
+      )}
 
       {/* The recap is the fallback for when no statistic could be measured — no
           network, or too few settled trades to quote honestly. */}
@@ -333,8 +362,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             }}
           >
             {props.outcome.result === 'SL'
-              ? 'Every check passed and it still lost. That is what a trigger is.'
-              : 'One trade is not evidence — the pattern is a trigger, not a system.'}
+              ? t.caveatLoss
+              : t.caveatDefault}
           </div>
 
           <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
@@ -385,7 +414,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
                   transform: `scale(${interpolate(cta, [0, 1], [0.8, 1])})`,
                 }}
               >
-                Follow for one pattern a day
+                {t.cta}
               </div>
             );
           })()}
@@ -406,7 +435,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           color: CT.inkFaint,
         }}
       >
-        {props.note} · Educational only, not financial advice
+        {props.note} · {t.disclaimer}
       </div>
       {/* Narration is optional: no voice files means no track, no subtitle, and
           an unducked bed. The video is complete without it. */}
@@ -429,6 +458,10 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           // The rule beat prints the same sentence in the panel below, at length.
           hideCaptionBetween={CB.rule}
         />
+      ) : null}
+
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} />
       ) : null}
 
       <Soundtrack

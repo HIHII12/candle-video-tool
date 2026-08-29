@@ -3,6 +3,7 @@ import {interpolate} from 'remotion';
 import type {Anatomy, Candle, CandleLessonProps, RiskReward} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
 import {SAFE} from '../safeArea';
+import {strings, type Locale} from '../i18n';
 import {CHART, CFONT, CT, cramp} from './theme';
 
 /** Right-hand limit for anything the viewer has to read. */
@@ -179,8 +180,10 @@ export const TradeLevels: React.FC<{
   bias: 'bullish' | 'bearish';
   coords: Coords;
   progress: number;
-}> = ({trade, bias, coords, progress}) => {
+  locale?: Locale;
+}> = ({trade, bias, coords, progress, locale}) => {
   if (progress <= 0) return null;
+  const t = strings(locale);
 
   const x0 = coords.indexToX(trade.entryIndex);
   // Stopping at width - 28 put the Target and Stop figures under the platform's
@@ -237,9 +240,9 @@ export const TradeLevels: React.FC<{
         strokeWidth={1.5}
         strokeDasharray="6 7"
       />
-      {row(yTarget, CT.up, `Target · ${trade.target.toFixed(2)}`, -12)}
-      {row(yStop, CT.down, `Stop · ${trade.stop.toFixed(2)}`, 30)}
-      {row(yEntry, CT.inkSoft, `Entry · 1:${ratio.toFixed(0)} reward`, -12)}
+      {row(yTarget, CT.up, t.target(trade.target.toFixed(2)), -12)}
+      {row(yStop, CT.down, t.stop(trade.stop.toFixed(2)), 30)}
+      {row(yEntry, CT.inkSoft, t.entry(ratio.toFixed(0)), -12)}
     </g>
   );
 };

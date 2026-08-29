@@ -4,6 +4,7 @@ import {CB, CFONT, CT, LAYER, LAYOUT} from './theme';
 import {SAFE} from '../safeArea';
 import {ramp} from '../camera';
 import {speakingAt, type VoiceMark} from '../audio/Narration';
+import {strings, type Locale} from '../i18n';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -22,14 +23,13 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
  * reason to stay, and it is an honest one: those beats really are coming, and
  * the last of them is the measured hit rate rather than another winning example.
  */
-const STOPS = [
-  {label: 'Pattern', at: CB.patternIn[0]},
-  {label: 'Rule', at: CB.rule[0]},
-  {label: 'Trade', at: CB.zoomOut[0]},
-  {label: 'Reality', at: CB.result[0]},
-] as const;
+const BEATS = [CB.patternIn[0], CB.rule[0], CB.zoomOut[0], CB.result[0]] as const;
 
-export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]}> = ({frame, marks}) => {
+export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]; locale?: Locale}> = ({
+  frame,
+  marks,
+  locale,
+}) => {
   // Up from just after the title lands, gone before the rule panel needs the band.
   // It also yields to a subtitle: they share the band, and of the two the rail is
   // the one nobody needs to read.
@@ -42,8 +42,9 @@ export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]}> = ({frame,
 
   // Progress runs on the beats themselves, so the rail cannot claim to be
   // somewhere the video is not.
-  const span = STOPS[STOPS.length - 1].at - STOPS[0].at;
-  const progress = interpolate(frame, [STOPS[0].at, STOPS[STOPS.length - 1].at], [0, 1], clamp);
+  const labels = strings(locale).rail;
+  const span = BEATS[BEATS.length - 1] - BEATS[0];
+  const progress = interpolate(frame, [BEATS[0], BEATS[BEATS.length - 1]], [0, 1], clamp);
 
   return (
     <div
@@ -72,13 +73,13 @@ export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]}> = ({frame,
         />
       </div>
       <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 18}}>
-        {STOPS.map((stop) => {
-          const reached = frame >= stop.at - 30;
-          const position = (stop.at - STOPS[0].at) / span;
+        {BEATS.map((at, i) => {
+          const reached = frame >= at - 30;
+          const position = (at - BEATS[0]) / span;
           const active = reached && progress - position < 0.34;
           return (
             <div
-              key={stop.label}
+              key={labels[i]}
               style={{
                 fontSize: 25,
                 fontWeight: 700,
@@ -87,7 +88,7 @@ export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]}> = ({frame,
                 color: active ? CT.accent : reached ? CT.inkSoft : CT.inkFaint,
               }}
             >
-              {stop.label}
+              {labels[i]}
             </div>
           );
         })}
