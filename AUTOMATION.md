@@ -113,6 +113,17 @@ python3 video-engine/scripts/kiem_video.py "video-engine/out/batch/*/*.mp4" \
 Bắt: tràn khung · chữ nằm dưới giao diện Shorts · bố cục lệch · **đứng hình** ·
 âm lượng lệch chuẩn. Mã thoát 1 nếu có LOI, nên cắm được vào CI.
 
+## Đã chạy thật — 100 video, 28/08/2026
+
+| | |
+|---|---|
+| Render | **100/100, 0 hỏng, 159 phút** (máy 4 nhân, 2 luồng) |
+| Soi sạn | **0 LỖI**, 13 cảnh báo dưới ngưỡng |
+| Âm lượng | -13,9 … -13,8 LUFS, đỉnh thật max -1,03 dBTP |
+| Đứng hình | max 1,5 s (ngưỡng lỗi là 2,4 s) |
+| Kết quả kèo | 58 thắng · 37 thua · 5 còn mở |
+| Đa dạng | 13 mẫu nến · 38 tagline khác nhau |
+
 ## Còn thiếu
 
 - **Đã có tiếng.** Music bed, SFX, narration và subtitle đều có trong engine;
