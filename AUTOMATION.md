@@ -90,6 +90,28 @@ dữ liệu giá thật.
 
 Trên Windows: nháy đúp `run-100-roi-tat-may.bat` (render → soi sạn → tắt máy).
 
+## Hai luồng ngôn ngữ
+
+```bash
+node tool/batch.mjs --format candle-lesson --count 50 --workers 2               # global
+node tool/batch.mjs --format candle-lesson --count 50 --workers 2 --locale vi   # Việt Nam
+```
+
+`--locale vi` đổi ba thứ cùng lúc: chữ giao diện (`video-engine/src/i18n.ts`),
+nội dung mẫu nến (bảng `VI` trong `make_candle_lesson.py`), và bật logo kênh ở
+góc trên phải.
+
+Logo lấy từ `video-engine/public/brand/`, đổi bằng `--brand <tên-file>.png`,
+hoặc `--brand none` để tắt. Cắt nền cho file mới:
+
+```bash
+python3 video-engine/scripts/lam_sach_logo.py logo-moi.png \
+        --out video-engine/public/brand/van-thang-trading.png
+```
+
+Id job có tiền tố locale (`vi-candle-hammer-v01`), nên hai luồng build cùng một
+ngày vào cùng một thư mục mà không cái nào đè cái nào.
+
 ## Âm lượng — bước cuối, tự động
 
 Sau mỗi video, batch chạy `scripts/chuan_am_luong.py` đưa file về

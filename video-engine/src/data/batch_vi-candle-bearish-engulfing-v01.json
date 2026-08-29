@@ -1,0 +1,293 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "pattern": {
+    "name": "Nhấn Chìm Giảm",
+    "tagline": "Bên mua mất quyền kiểm soát trong một cây nến",
+    "bias": "bearish",
+    "rule": "Một thân đỏ trùm hết thân xanh liền trước — bên bán xoá sạch cả phiên mua trong đúng một cây nến.",
+    "checks": [
+      "Đi sau một nhịp tăng rõ ràng",
+      "Mở cửa bằng hoặc cao hơn giá đóng cây trước",
+      "Đóng cửa thấp hơn giá mở cây trước"
+    ],
+    "bodyLow": 1997.15,
+    "bodyHigh": 2008.85,
+    "indices": [
+      16,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Thân nến"
+    },
+    {
+      "index": 17,
+      "part": "upperWick",
+      "label": "Bóng trên"
+    },
+    {
+      "index": 17,
+      "part": "lowerWick",
+      "label": "Bóng dưới"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 1960,
+      "high": 1962.08,
+      "low": 1959.01,
+      "close": 1961.52
+    },
+    {
+      "time": 1700000900,
+      "open": 1961.52,
+      "high": 1966.89,
+      "low": 1959.88,
+      "close": 1965.65
+    },
+    {
+      "time": 1700001800,
+      "open": 1965.65,
+      "high": 1966.68,
+      "low": 1963.06,
+      "close": 1964.1
+    },
+    {
+      "time": 1700002700,
+      "open": 1964.1,
+      "high": 1969.87,
+      "low": 1961.56,
+      "close": 1967.92
+    },
+    {
+      "time": 1700003600,
+      "open": 1967.92,
+      "high": 1968.32,
+      "low": 1965.4,
+      "close": 1966.25
+    },
+    {
+      "time": 1700004500,
+      "open": 1966.25,
+      "high": 1969.15,
+      "low": 1965.84,
+      "close": 1968.65
+    },
+    {
+      "time": 1700005400,
+      "open": 1968.65,
+      "high": 1973.8,
+      "low": 1968.06,
+      "close": 1972.05
+    },
+    {
+      "time": 1700006300,
+      "open": 1972.05,
+      "high": 1973.99,
+      "low": 1971.65,
+      "close": 1973.34
+    },
+    {
+      "time": 1700007200,
+      "open": 1973.34,
+      "high": 1980.08,
+      "low": 1972.11,
+      "close": 1977.3
+    },
+    {
+      "time": 1700008100,
+      "open": 1977.3,
+      "high": 1979.52,
+      "low": 1976.53,
+      "close": 1979.12
+    },
+    {
+      "time": 1700009000,
+      "open": 1979.12,
+      "high": 1986.21,
+      "low": 1977.34,
+      "close": 1983.7
+    },
+    {
+      "time": 1700009900,
+      "open": 1983.7,
+      "high": 1991.19,
+      "low": 1980.53,
+      "close": 1988.45
+    },
+    {
+      "time": 1700010800,
+      "open": 1988.45,
+      "high": 1991.76,
+      "low": 1987.8,
+      "close": 1990.81
+    },
+    {
+      "time": 1700011700,
+      "open": 1990.81,
+      "high": 1996.25,
+      "low": 1990.13,
+      "close": 1994.99
+    },
+    {
+      "time": 1700012600,
+      "open": 1994.99,
+      "high": 2001.12,
+      "low": 1993.84,
+      "close": 1998.91
+    },
+    {
+      "time": 1700013500,
+      "open": 1998.91,
+      "high": 2006.82,
+      "low": 1997.88,
+      "close": 2003.65
+    },
+    {
+      "time": 1700014400,
+      "open": 2003.65,
+      "high": 2009.25,
+      "low": 2002.25,
+      "close": 2007.65
+    },
+    {
+      "time": 1700015300,
+      "open": 2008.85,
+      "high": 2010.85,
+      "low": 1994.95,
+      "close": 1997.15
+    },
+    {
+      "time": 1700016200,
+      "open": 1997.15,
+      "high": 1999.68,
+      "low": 1996.54,
+      "close": 1998.97
+    },
+    {
+      "time": 1700017100,
+      "open": 1998.97,
+      "high": 2000,
+      "low": 1992.29,
+      "close": 1993.6
+    },
+    {
+      "time": 1700018000,
+      "open": 1993.6,
+      "high": 1995.8,
+      "low": 1988.16,
+      "close": 1990.31
+    },
+    {
+      "time": 1700018900,
+      "open": 1990.31,
+      "high": 1990.76,
+      "low": 1987.22,
+      "close": 1988.53
+    },
+    {
+      "time": 1700019800,
+      "open": 1988.53,
+      "high": 1989.5,
+      "low": 1985.15,
+      "close": 1985.82
+    },
+    {
+      "time": 1700020700,
+      "open": 1985.82,
+      "high": 1986.69,
+      "low": 1980,
+      "close": 1981.15
+    },
+    {
+      "time": 1700021600,
+      "open": 1981.15,
+      "high": 1982.98,
+      "low": 1976.78,
+      "close": 1978.24
+    },
+    {
+      "time": 1700022500,
+      "open": 1978.24,
+      "high": 1978.64,
+      "low": 1975.76,
+      "close": 1976.45
+    },
+    {
+      "time": 1700023400,
+      "open": 1976.45,
+      "high": 1978.39,
+      "low": 1968.8,
+      "close": 1971.57
+    },
+    {
+      "time": 1700024300,
+      "open": 1971.57,
+      "high": 1976.82,
+      "low": 1970.47,
+      "close": 1975.38
+    },
+    {
+      "time": 1700025200,
+      "open": 1975.38,
+      "high": 1979.7,
+      "low": 1974.63,
+      "close": 1978.03
+    },
+    {
+      "time": 1700026100,
+      "open": 1978.03,
+      "high": 1981.22,
+      "low": 1971.42,
+      "close": 1972.52
+    },
+    {
+      "time": 1700027000,
+      "open": 1972.52,
+      "high": 1974.07,
+      "low": 1972.05,
+      "close": 1973.67
+    },
+    {
+      "time": 1700027900,
+      "open": 1973.67,
+      "high": 1975.76,
+      "low": 1972.97,
+      "close": 1974.96
+    },
+    {
+      "time": 1700028800,
+      "open": 1974.96,
+      "high": 1976.19,
+      "low": 1970.64,
+      "close": 1972.42
+    },
+    {
+      "time": 1700029700,
+      "open": 1972.42,
+      "high": 1972.98,
+      "low": 1967.13,
+      "close": 1968.92
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 1997.15,
+    "stop": 2011.45,
+    "target": 1968.55,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 33
+  },
+  "locale": "vi",
+  "note": "Minh hoạ - chuỗi giá dựng lại, không phải biểu đồ thật",
+  "stats": null,
+  "brandMark": "van-thang-trading.png"
+}

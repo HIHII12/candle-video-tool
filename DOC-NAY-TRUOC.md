@@ -73,6 +73,35 @@ market map dùng H1 và D1. Thứ tự xoay theo ngày nên hôm nay khác hôm 
 
 ---
 
+## Hai luồng: global và Việt Nam
+
+Cùng một cỗ máy, hai bộ chữ.
+
+| | Luồng **global** (`en`) | Luồng **Việt Nam** (`vi`) |
+|---|---|---|
+| Chữ trên video | Tiếng Anh | Tiếng Việt |
+| Tên mẫu nến | Bullish Engulfing, Morning Star… | Nhấn Chìm Tăng, Sao Mai, Đáy Nhíp… |
+| Logo góc phải trên | không | **có** |
+| Lệnh | `--locale en` *(mặc định)* | `--locale vi` |
+| Nháy đúp | `run-100-roi-tat-may.bat` | `run-50-tieng-viet.bat` |
+
+> **Không phải bản dịch.** Tên mẫu nến dùng đúng tên dân trade Việt gọi nhau
+> hàng ngày. Những cái đã thành tên riêng trong nghề — **Doji · Pin Bar ·
+> Marubozu** — giữ nguyên, vì dịch chúng ra mới là thứ không ai nói.
+
+Hai luồng chạy được cùng một ngày mà không đè lên nhau: id video có tiền tố
+`vi-` hoặc `en-`.
+
+### Đổi logo
+
+Kéo file logo `.png` **thả thẳng vào `doi-logo.bat`**. Xong.
+
+Script tự cắt nền giả ra khỏi ảnh — file logo tải về thường bị *nướng* sẵn cái
+nền ca-rô xám-trắng mô phỏng trong suốt; trên nền trắng thì không ai thấy, trên
+video nền tối thì nó thành một ô vuông sáng bao quanh logo tròn.
+
+---
+
 ## Làm 100 video một lượt (chạy qua đêm)
 
 Nháy đúp **`run-100-roi-tat-may.bat`**. Nó render 100 video short, soi sạn toàn
