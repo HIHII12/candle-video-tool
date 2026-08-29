@@ -38,3 +38,6 @@ tool-app/data/previews/
 video-engine/src/data/batch_candle-*-v*.json
 video-engine/src/data/_probe.json
 video-engine/out/qa/
+
+# Configs stamped for one run; the sources they copy are checked in.
+video-engine/src/data/_run/

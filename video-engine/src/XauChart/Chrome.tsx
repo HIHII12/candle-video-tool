@@ -1,6 +1,7 @@
 import React from 'react';
 import {interpolate, spring} from 'remotion';
 import {TV, FONT, stroke} from './chartTheme';
+import {strings, type Locale} from '../i18n';
 import {CHANNEL_MARK} from '../brand';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -47,12 +48,15 @@ export const QuizPills: React.FC<{
   fps: number;
   answerAt: number;
   answer: 'BUY' | 'SELL';
-}> = ({frame, fps, answerAt, answer}) => {
+  locale?: Locale;
+}> = ({frame, fps, answerAt, answer, locale}) => {
+  const t = strings(locale).quiz;
   const entry = spring({frame: frame - 10, fps, config: {damping: 13}, durationInFrames: 30});
   const revealed = frame >= answerAt;
 
   const pill = (label: 'BUY' | 'SELL', color: string) => {
     const isAnswer = label === answer;
+    const text = label === 'BUY' ? t.buy : t.sell;
     const settle = revealed
       ? spring({
           frame: frame - answerAt,
@@ -86,7 +90,7 @@ export const QuizPills: React.FC<{
             ...stroke(5),
           }}
         >
-          {label}
+          {text}
         </span>
       </div>
     );
@@ -183,7 +187,8 @@ export const AnswerBadge: React.FC<{
   fps: number;
   at: number;
   answer: 'BUY' | 'SELL';
-}> = ({frame, fps, at, answer}) => {
+  locale?: Locale;
+}> = ({frame, fps, at, answer, locale}) => {
   if (frame < at) return null;
   const pop = spring({frame: frame - at, fps, config: {damping: 10, mass: 0.6}, durationInFrames: 26});
   const color = answer === 'BUY' ? TV.up : TV.down;
@@ -207,7 +212,7 @@ export const AnswerBadge: React.FC<{
     >
       {/* "SELLER!" read as a label for a person rather than a verdict on the
           move. Naming the winner is what the viewer is waiting to hear. */}
-      {answer === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'}
+      {strings(locale).quiz.won(answer)}
     </div>
   );
 };

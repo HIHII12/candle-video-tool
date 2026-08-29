@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan } from './variants.mjs';
+import { planFor, candlePlan, replayPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -68,6 +68,15 @@ const crf = flag('crf', '23');
 const locale = flag('locale', 'en');
 /** Corner mark, a file under video-engine/public/brand. `none` turns it off. */
 const brand = flag('brand', locale === 'vi' ? 'van-thang-trading.png' : 'none');
+/**
+ * Render the three market-data formats from the configs already in the repo,
+ * instead of fetching fresh ones.
+ *
+ * This is what makes a mixed batch possible without a network. The prices are
+ * as old as the checked-in config, which is fine for teaching a setup and wrong
+ * for anything presented as today's chart.
+ */
+const replay = has('replay');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -119,6 +128,31 @@ const sh = (cmd, cmdArgs, onLine) =>
 
 /** Produce the config for a job and report the facts a caption can use. */
 async function buildData(job) {
+  if (job.replay) {
+    // Nothing to generate: the data is already on disk, so this only reads it
+    // and lets applyTrack stamp the locale and the mark onto it.
+    const cfg = JSON.parse(readFileSync(join(ENGINE, job.replay), 'utf8'));
+    // Into a run folder, never back over the source. The replay configs are
+    // checked in, and stamping a locale onto them turned a render into an edit
+    // of the repo — which git noticed and a reader would not have.
+    const out = `src/data/_run/${job.id}.json`;
+    mkdirSync(join(ENGINE, 'src', 'data', '_run'), {recursive: true});
+    if (job.locale && job.locale !== 'en') {
+      // The title and hook in the file were written for the English track. Left
+      // in place they win over the localised fallback, so a Vietnamese video
+      // opens with an English headline. Clearing them hands the slot back.
+      cfg.title = '';
+      cfg.hook = '';
+    }
+    writeFileSync(join(ENGINE, out), JSON.stringify(cfg, null, 2));
+    return {
+      composition: job.composition,
+      configPath: out,
+      cfg,
+      facts: {pair: cfg.pair, timeframe: cfg.timeframe},
+    };
+  }
+
   if (job.format === 'candle-lesson') {
     const out = `src/data/batch_${job.id}.json`;
     // --stats measures how the pattern actually performed across real history.
@@ -184,11 +218,6 @@ function applyTrack(cfg) {
 
 /** Write the model's copy back into the config the renderer reads. */
 function applyCaption(cfgPath, cfg, caption, format) {
-  // The market map has no model-written line on screen: every word on it is
-  // either a measured level or a fixed disclaimer, and inventing copy about
-  // levels is how a plan starts sounding like a promise.
-  if (format === 'market-map') return;
-
   if (format === 'candle-lesson') {
     // Only a model's line replaces the generator's.
     //
@@ -198,10 +227,16 @@ function applyCaption(cfgPath, cfg, caption, format) {
     // written line with a generated template is a downgrade, so it does not
     // happen: with no key configured, the generator's own tagline ships.
     if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
-  } else {
+  } else if (format !== 'market-map') {
+    // The market map carries no model-written line: every word on it is either a
+    // measured level or a fixed disclaimer, and inventing copy about levels is
+    // how a plan starts sounding like a promise.
     cfg.title = caption.title;
     cfg.hook = caption.hook;
   }
+  // Written for every format, including the map. Returning early for the map is
+  // what left it without its locale, so the Vietnam track rendered maps in
+  // English while everything else around them was Vietnamese.
   writeFileSync(join(ENGINE, cfgPath), JSON.stringify(cfg, null, 2));
 }
 
@@ -215,8 +250,11 @@ async function runJob(job) {
   const { composition, configPath, cfg, facts } = await buildData(job);
   // The market map carries no model-written line, so it skips the LLM entirely.
   const caption =
-    job.format === 'market-map'
-      ? { title: `${job.pair} ${job.timeframe} market map`, hook: null, source: 'none' }
+    job.format === 'market-map' || job.replay
+      // A replay keeps the copy the config already carries: it was written for
+      // this exact chart, and a fresh line generated now would be about data it
+      // has never seen.
+      ? { title: cfg.title ?? job.label, hook: cfg.hook ?? null, source: 'none' }
       : await writeCaption(job, facts);
   applyCaption(configPath, applyTrack(cfg), caption, job.format);
 
@@ -367,7 +405,12 @@ if (locale !== 'en' && format !== 'candle-lesson') {
   );
 }
 
-let plan = format === 'candle-lesson' ? candlePlan(date, count, locale) : planFor(date, count);
+let plan = replay
+  ? replayPlan(join(ENGINE, 'src', 'data'), locale)
+  : format === 'candle-lesson'
+    ? candlePlan(date, count, locale)
+    : planFor(date, count);
+if (replay && format) plan = plan.filter((j) => j.format === format);
 if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
 if (only) plan = plan.filter((j) => j.id.includes(only));
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }

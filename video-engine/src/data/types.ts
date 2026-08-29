@@ -76,6 +76,10 @@ export type Outcome = {
 
 export type ForexChartProps = {
   pair: string; // e.g. "BTC/USDT"
+  /** Which track this video belongs to; absent means the global one. */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
   timeframe: string; // e.g. "15m"
   title: string; // headline caption drawn on screen
   hook: string; // first-seconds teaser question
@@ -132,6 +136,10 @@ export type MapWaypoint = {
 
 export type MarketMapProps = {
   kind: 'marketMap';
+  /** Which track this video belongs to; absent means the global one. */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
   pair: string;
   timeframe: string;
   bias: 'bullish' | 'bearish';

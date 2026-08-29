@@ -1,3 +1,5 @@
+import {readdirSync} from 'node:fs';
+
 /**
  * The day's content plan.
  *
@@ -35,6 +37,49 @@ export const TIMEFRAMES = [
 
 /** Days since epoch — a stable integer that advances once per day. */
 export const dayIndex = (isoDate) => Math.floor(Date.parse(`${isoDate}T00:00:00Z`) / 86_400_000);
+
+/**
+ * Everything the repo already holds real market data for.
+ *
+ * The three formats that are not the candle lesson need a live feed to build a
+ * config — and on a machine that cannot reach one, that used to mean they simply
+ * could not be made, so a hundred-video run came out a hundred of one format.
+ * But the configs already fetched are checked into src/data, prices and all.
+ * Rendering straight from those needs no network and no regeneration, and it is
+ * the only way to get the other three formats out of a machine that is offline.
+ *
+ * The data is as old as the config: fine for teaching a setup, wrong for
+ * anything that claims to be today's chart. The caller decides which that is.
+ */
+export function replayPlan(dataDir, locale = 'en') {
+  const KINDS = [
+    {prefix: 'batch_buy-or-sell-quiz-', format: 'buy-or-sell-quiz', composition: 'XauChart'},
+    {prefix: 'batch_named-setup-', format: 'named-setup', composition: 'LessonShort'},
+    {prefix: 'batch_market-map-', format: 'market-map', composition: 'MarketMap'},
+  ];
+  const files = readdirSync(dataDir).filter((f) => f.endsWith('.json')).sort();
+  const buckets = KINDS.map(({prefix, format, composition}) =>
+    files
+      .filter((f) => f.startsWith(prefix))
+      .map((file) => ({
+        id: `${locale}-${file.replace(/^batch_|\.json$/g, '')}`,
+        format,
+        composition,
+        replay: `src/data/${file}`,
+        locale,
+        label: file.replace(/^batch_|\.json$/g, '').replace(/-/g, ' '),
+      })),
+  );
+
+  // Round-robin, so trimming to any count keeps all three formats in the mix.
+  const jobs = [];
+  for (let i = 0; ; i += 1) {
+    const before = jobs.length;
+    for (const b of buckets) if (b[i]) jobs.push(b[i]);
+    if (jobs.length === before) break;
+  }
+  return jobs;
+}
 
 /**
  * A run of candlestick lessons only — as many as asked for.

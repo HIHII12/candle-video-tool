@@ -3,6 +3,8 @@ import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from
 import type {ForexChartProps, RiskReward} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {ChartEdges} from '../ChartEdges';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {logicalWindowAt} from '../XauChart/logicalWindow';
 import {EntryZone, Neckline, PatternLabels, TradeZone, ZigZag} from './Markup';
 import {LESSON_BOX, LFONT, LSB, LT, STEPS, lramp} from './theme';
@@ -19,13 +21,8 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
  * data, so a keyless run still varies across a day's videos instead of stamping
  * one line onto every upload.
  */
-const FALLBACK_HEADLINES = [
-  'THE SNIPER ENTRY FORMULA',
-  'WHERE SMART MONEY ENTERS',
-  'THE CONFLUENCE PLAYBOOK',
-  'READ THE STRUCTURE FIRST',
-  'THE ENTRY MOST TRADERS MISS',
-];
+// The lines themselves live in src/i18n.ts: the Vietnam track opens with its own
+// five, not with a translation of these.
 
 /** Last candle this format ever draws — where the formation's trade resolved. */
 const lastShownIndex = (props: ForexChartProps) =>
@@ -111,6 +108,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
   const pattern = props.pattern;
   const trade: RiskReward | null = props.patternTrade;
   const side = props.patternSide ?? 'LONG';
+  const t = strings(props.locale);
   const win = props.patternOutcome.result === 'TP';
 
   const titleIn = spring({frame: frame - 8, fps, config: {damping: 200}, durationInFrames: 26});
@@ -154,9 +152,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
             lineHeight: 1.08,
           }}
         >
-          {(props.title || '').trim().toUpperCase() || FALLBACK_HEADLINES[
-            (props.candles.length + props.setupCount) % FALLBACK_HEADLINES.length
-          ]}
+          {(props.title || '').trim().toUpperCase() ||
+            t.setup.hooks[(props.candles.length + props.setupCount) % t.setup.hooks.length]}
         </div>
         <div style={{marginTop: 14}}>
           <span
@@ -170,7 +167,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               lineHeight: 1.5,
             }}
           >
-            {pattern ? pattern.name : 'Structure'} + Order Block
+            {t.setup.subtitle(t.term(pattern ? pattern.name : 'Structure'))}
           </span>
         </div>
         <div style={{marginTop: 20, fontSize: 32, fontWeight: 900, color: LT.inkSoft}}>
@@ -192,7 +189,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           letterSpacing: 6,
         }}
       >
-        {CHANNEL_MARK}
+        {props.brandMark ? '' : CHANNEL_MARK}
       </div>
 
       <div
@@ -207,6 +204,12 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
       />
 
       <ChartEdges box={LESSON_BOX} bg={LT.bg} zIndex={5} />
+
+      {/* Below the headline block, which runs full width on this format and is
+          the one thing that must not be crowded. */}
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} top={352} size={78} opacity={0.85} />
+      ) : null}
 
       {/* zIndex: the chart canvas paints over siblings without it. */}
       {coords && (
@@ -231,10 +234,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               price={pattern.neckline}
               coords={coords}
               progress={lramp(frame, LSB.neckline)}
-            />
+            locale={props.locale}
+          />
           )}
           {props.orderBlock && (
-            <EntryZone ob={props.orderBlock} coords={coords} progress={lramp(frame, LSB.ob)} />
+            <EntryZone ob={props.orderBlock} coords={coords} progress={lramp(frame, LSB.ob)}
+            locale={props.locale}
+          />
           )}
           {trade && (
             <TradeZone
@@ -251,7 +257,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               pattern={pattern}
               coords={coords}
               progress={lramp(frame, LSB.labels)}
-            />
+            locale={props.locale}
+          />
           )}
         </svg>
       )}
@@ -273,7 +280,9 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
             padding: '16px 20px',
           }}
         >
-          {step.text}
+          {/* Numbered by position in the list, so a translated step keeps the
+              step number the English one had. */}
+          {t.setup.steps[STEPS.indexOf(step)] ?? step.text}
         </div>
       )}
 
@@ -297,12 +306,12 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               color: win ? LT.up : LT.down,
             }}
           >
-            {win ? 'TARGET HIT ✅' : 'STOPPED OUT ❌'}
+            {win ? t.setup.targetHit : t.setup.stopped}
           </div>
           <div style={{fontSize: 34, fontWeight: 900, color: LT.inkSoft, marginTop: 8}}>
             {win
-              ? 'The measured move played out'
-              : 'Not every valid formation works — that is why you use a stop'}
+              ? t.setup.winLine
+              : t.setup.lossLine}
           </div>
         </div>
       )}
@@ -338,7 +347,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
       >
         {/* Pair-aware: "gold setups" printed over a silver chart, same class of
             false label as the hardcoded XAU/USD above it. */}
-        Follow for daily {props.pair.split('/')[0] === 'XAU' ? 'gold' : props.pair.split('/')[0]} setups
+        {t.setup.cta(
+          props.pair.split('/')[0] === 'XAU'
+            ? props.locale === 'vi'
+              ? 'vàng'
+              : 'gold'
+            : props.pair.split('/')[0],
+        )}
       </div>
       <div
         style={{
@@ -352,7 +367,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           color: LT.inkSoft,
         }}
       >
-        Real {props.pair} data · Educational only, not financial advice
+        {t.realData(props.pair)}
       </div>
       <Soundtrack bed="light" cues={lessonCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

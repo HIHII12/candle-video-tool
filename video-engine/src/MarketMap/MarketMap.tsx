@@ -3,6 +3,8 @@ import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from
 import type {MarketMapProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {ChartEdges} from '../ChartEdges';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {ChochMark, PlanPath, TrendLine, ZoneBand} from './Marks';
 import {
   MAP_BOX,
@@ -66,6 +68,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
   );
 
   const titleIn = spring({frame: frame - 6, fps, config: {damping: 200}, durationInFrames: 26});
+  const t = strings(props.locale);
   const step = [...MAP_STEPS].reverse().find((s) => frame >= s.from);
   const bullish = props.bias === 'bullish';
   const biasColor = bullish ? MT.up : MT.down;
@@ -135,7 +138,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               letterSpacing: 1.2,
             }}
           >
-            {bullish ? 'BULLISH BIAS' : 'BEARISH BIAS'}
+            {t.map.bias(bullish)}
           </span>
           <span
             style={{
@@ -163,6 +166,12 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
       />
 
       <ChartEdges box={MAP_BOX} bg={MT.bg} zIndex={5} />
+
+      {/* The map's own header already owns the top-right with its timeframe
+          badge, so the mark drops below the header rule instead. */}
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} top={196} size={80} opacity={0.85} />
+      ) : null}
 
       {/* Marks overlay. zIndex matters: the chart canvas paints over siblings. */}
       {coords && (
@@ -232,7 +241,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             zIndex: 20,
           }}
         >
-          {step.text}
+          {t.map.steps[MAP_STEPS.indexOf(step)] ?? step.text}
         </div>
       )}
 
@@ -315,8 +324,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           lineHeight: 1.35,
         }}
       >
-        Levels are measured from real {props.pair} data. The blue path is a plan,
-        not a forecast.
+        {t.map.provenance(props.pair)}
       </div>
       <div
         style={{
@@ -330,7 +338,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           color: MT.inkFaint,
         }}
       >
-        Educational only, not financial advice
+        {t.disclaimer}
       </div>
       <Soundtrack bed="light" cues={mapCues()} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

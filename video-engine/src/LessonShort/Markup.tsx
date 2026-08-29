@@ -3,6 +3,7 @@ import {interpolate} from 'remotion';
 import type {OrderBlock, Pattern, RiskReward, SwingPoint} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
 import {SAFE} from '../safeArea';
+import {strings, type Locale} from '../i18n';
 import {LESSON_BOX, LFONT, LT} from './theme';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -56,10 +57,11 @@ export const ZigZag: React.FC<{
 
 /** Shoulder / Head / Bottom callouts on the formation's defining points. */
 export const PatternLabels: React.FC<{
+  locale?: Locale;
   pattern: Pattern;
   coords: Coords;
   progress: number;
-}> = ({pattern, coords, progress}) => {
+}> = ({pattern, coords, progress, locale}) => {
   if (progress <= 0) return null;
   const bullish = pattern.bias === 'bullish';
 
@@ -81,7 +83,8 @@ export const PatternLabels: React.FC<{
         // offset is generous because the stop sits on the right shoulder by
         // construction, and a tight label collided with the SL row.
         const dy = bullish ? 92 : -92;
-        const width = pt.label.length * 19 + 26;
+        const label = strings(locale).term(pt.label);
+        const width = label.length * 19 + 26;
 
         return (
           <g key={`${pt.index}-${pt.label}`} opacity={step}>
@@ -103,7 +106,7 @@ export const PatternLabels: React.FC<{
               fontWeight={900}
               textAnchor="middle"
             >
-              {pt.label}
+              {label}
             </text>
           </g>
         );
@@ -113,10 +116,16 @@ export const PatternLabels: React.FC<{
 };
 
 /** The trigger line the formation breaks to confirm. */
-export const Neckline: React.FC<{price: number; coords: Coords; progress: number}> = ({
+export const Neckline: React.FC<{
+  price: number;
+  coords: Coords;
+  progress: number;
+  locale?: Locale;
+}> = ({
   price,
   coords,
   progress,
+  locale,
 }) => {
   if (progress <= 0) return null;
   const y = coords.priceToY(price);
@@ -132,21 +141,35 @@ export const Neckline: React.FC<{price: number; coords: Coords; progress: number
         strokeWidth={5}
         strokeDasharray="18 12"
       />
-      <g opacity={interpolate(progress, [0.6, 1], [0, 1], clamp)}>
-        <rect x={16} y={y - 54} width={252} height={44} rx={8} fill={LT.ink} />
-        <text x={32} y={y - 22} fill="#fff" fontFamily={LFONT} fontSize={28} fontWeight={900}>
-          NECKLINE {price.toFixed(1)}
-        </text>
-      </g>
+      {(() => {
+        // Width from the text, not a constant. At a fixed 252px the Vietnamese
+        // term ran past the pill and came out as "ĐƯỜNG VIỀN C" — the kind of
+        // clipping that only appears once the words change length.
+        const label = `${strings(locale).term('NECKLINE')} ${price.toFixed(1)}`;
+        return (
+          <g opacity={interpolate(progress, [0.6, 1], [0, 1], clamp)}>
+            <rect x={16} y={y - 54} width={label.length * 15 + 32} height={44} rx={8} fill={LT.ink} />
+            <text x={32} y={y - 22} fill="#fff" fontFamily={LFONT} fontSize={28} fontWeight={900}>
+              {label}
+            </text>
+          </g>
+        );
+      })()}
     </g>
   );
 };
 
 /** Entry zone drawn on the order block candle. */
-export const EntryZone: React.FC<{ob: OrderBlock; coords: Coords; progress: number}> = ({
+export const EntryZone: React.FC<{
+  ob: OrderBlock;
+  coords: Coords;
+  progress: number;
+  locale?: Locale;
+}> = ({
   ob,
   coords,
   progress,
+  locale,
 }) => {
   if (progress <= 0) return null;
   const x0 = coords.indexToX(ob.index);
@@ -175,7 +198,7 @@ export const EntryZone: React.FC<{ob: OrderBlock; coords: Coords; progress: numb
           fontSize={27}
           fontWeight={900}
         >
-          ORDER BLOCK
+          {strings(locale).term('ORDER BLOCK')}
         </text>
       </g>
     </g>
@@ -227,10 +250,22 @@ export const TradeZone: React.FC<{
         <text x={x1 - 14} y={yStop + 36} fill={LT.down} fontSize={32} textAnchor="end">
           SL {trade.stop.toFixed(1)}
         </text>
-        <rect x={x0 + 12} y={yEntry + 12} width={296} height={50} rx={9} fill={LT.ink} />
-        <text x={x0 + 28} y={yEntry + 47} fill="#fff" fontSize={31}>
-          {side} · R:R 1:{ratio.toFixed(1)}
-        </text>
+        {(() => {
+          // Pulled back inside the readable area when the zone starts late: the
+          // pill is a fixed width anchored to the zone's left edge, so a setup
+          // that resolves near the right of the chart pushed it off frame.
+          const text = `${side} · R:R 1:${ratio.toFixed(1)}`;
+          const width = text.length * 17 + 32;
+          const boxX = Math.min(x0 + 12, RIGHT - width);
+          return (
+            <>
+              <rect x={boxX} y={yEntry + 12} width={width} height={50} rx={9} fill={LT.ink} />
+              <text x={boxX + 16} y={yEntry + 47} fill="#fff" fontSize={31}>
+                {text}
+              </text>
+            </>
+          );
+        })()}
       </g>
     </g>
   );

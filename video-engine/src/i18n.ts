@@ -50,6 +50,44 @@ type Strings = {
     foot: string;
     footEdge: string;
   };
+  /** Buy-or-sell quiz. */
+  quiz: {
+    banners: string[];
+    buy: string;
+    sell: string;
+    won: (side: 'BUY' | 'SELL') => string;
+    hitTp: string;
+    stopped: string;
+  };
+  /** Named setup walkthrough. */
+  setup: {
+    hooks: string[];
+    steps: string[];
+    subtitle: (pattern: string) => string;
+    targetHit: string;
+    stopped: string;
+    winLine: string;
+    lossLine: string;
+    cta: (asset: string) => string;
+  };
+  /** Market map. */
+  map: {
+    bias: (bullish: boolean) => string;
+    steps: string[];
+    provenance: (pair: string) => string;
+  };
+  /** Disclaimer for the formats built on live market data. */
+  realData: (pair: string) => string;
+  /**
+   * Chart terms that arrive inside the data rather than from this file.
+   *
+   * The named-setup configs carry English labels — "Shoulder", "Double Bottom" —
+   * because they were fetched for the global track and the same file feeds both.
+   * Anything not in the table is passed through unchanged, which is the right
+   * answer for the terms Vietnamese traders already say in English (OB, BSL,
+   * CHoCH): translating those would be the odd thing to do.
+   */
+  term: (english: string) => string;
 };
 
 const EN: Strings = {
@@ -75,6 +113,55 @@ const EN: Strings = {
     foot: 'The pattern is a trigger, not a system — it needs context',
     footEdge: 'Confluence and context still decide the entry',
   },
+  quiz: {
+    banners: [
+      'WOULD YOU BUY OR SELL?',
+      'BUY OR SELL THIS CHART?',
+      'YOUR CALL: BUY OR SELL?',
+      'LONG OR SHORT HERE?',
+    ],
+    buy: 'BUY',
+    sell: 'SELL',
+    won: (side) => (side === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'),
+    hitTp: 'HIT TP \u2705',
+    stopped: 'STOPPED OUT \u274c',
+  },
+  setup: {
+    hooks: [
+      'THE SNIPER ENTRY FORMULA',
+      'WHERE SMART MONEY ENTERS',
+      'THE CONFLUENCE PLAYBOOK',
+      'READ THE STRUCTURE FIRST',
+      'THE ENTRY MOST TRADERS MISS',
+    ],
+    steps: [
+      '1 · Map the market structure',
+      '2 · Name the formation',
+      '3 · Mark the neckline trigger',
+      '4 · Order block = entry zone',
+      '5 · Stop beyond the shoulder, target the measured move',
+      'What happened next?',
+    ],
+    subtitle: (pattern) => `${pattern} + Order Block`,
+    targetHit: 'TARGET HIT \u2705',
+    stopped: 'STOPPED OUT \u274c',
+    winLine: 'The measured move played out',
+    lossLine: 'Not every valid formation works — that is why you use a stop',
+    cta: (asset) => `Follow for daily ${asset} setups`,
+  },
+  map: {
+    bias: (bullish) => (bullish ? 'BULLISH BIAS' : 'BEARISH BIAS'),
+    steps: [
+      'The line price has been respecting',
+      'Where the liquidity is resting',
+      'Where structure changed character',
+      'The plan · not a prediction',
+    ],
+    provenance: (pair) =>
+      `Levels are measured from real ${pair} data. The blue path is a plan, not a forecast.`,
+  },
+  realData: (pair) => `Real ${pair} data · Educational only, not financial advice`,
+  term: (english) => english,
 };
 
 const VI: Strings = {
@@ -100,6 +187,74 @@ const VI: Strings = {
     foot: 'Mẫu nến là tín hiệu vào lệnh, không phải hệ thống — nó cần bối cảnh',
     footEdge: 'Điểm hợp lưu và bối cảnh vẫn là thứ quyết định điểm vào',
   },
+  quiz: {
+    // Kept short on purpose: the banner is one line in a fixed band, and the
+    // longer phrasings wrapped to two and lost the first off the top of frame.
+    banners: [
+      'MUA HAY BÁN?',
+      'CHART NÀY: MUA HAY BÁN?',
+      'ĐẾN LƯỢT BẠN',
+      'LONG HAY SHORT?',
+    ],
+    buy: 'MUA',
+    sell: 'BÁN',
+    won: (side) => (side === 'BUY' ? 'PHE MUA THẮNG' : 'PHE BÁN THẮNG'),
+    hitTp: 'CHẠM CHỐT LỜI \u2705',
+    stopped: 'DÍNH DỪNG LỖ \u274c',
+  },
+  setup: {
+    hooks: [
+      'CÔNG THỨC VÀO LỆNH CHÍNH XÁC',
+      'DÒNG TIỀN LỚN VÀO Ở ĐÂU',
+      'BỘ KHUNG ĐIỂM HỢP LƯU',
+      'ĐỌC CẤU TRÚC TRƯỚC ĐÃ',
+      'ĐIỂM VÀO MÀ ĐA SỐ BỎ LỠ',
+    ],
+    steps: [
+      '1 · Vẽ cấu trúc thị trường',
+      '2 · Gọi tên mô hình',
+      '3 · Đánh dấu đường kích hoạt',
+      '4 · Vùng lệnh = vùng vào',
+      '5 · Dừng lỗ qua vai, chốt lời bằng biên độ đo được',
+      'Rồi chuyện gì xảy ra?',
+    ],
+    subtitle: (pattern) => `${pattern} + Vùng lệnh`,
+    targetHit: 'CHẠM CHỐT LỜI \u2705',
+    stopped: 'DÍNH DỪNG LỖ \u274c',
+    winLine: 'Biên độ đo được đã chạy đúng',
+    lossLine: 'Không phải mô hình đúng nào cũng chạy — nên mới cần dừng lỗ',
+    cta: (asset) => `Theo dõi — setup ${asset} mỗi ngày`,
+  },
+  map: {
+    bias: (bullish) => (bullish ? 'THIÊN HƯỚNG TĂNG' : 'THIÊN HƯỚNG GIẢM'),
+    steps: [
+      'Đường mà giá vẫn đang tôn trọng',
+      'Chỗ thanh khoản đang nằm',
+      'Chỗ cấu trúc đổi tính chất',
+      'Đây là kế hoạch · không phải dự đoán',
+    ],
+    provenance: (pair) =>
+      `Các vùng giá đo từ dữ liệu ${pair} thật. Đường xanh là kế hoạch, không phải dự báo.`,
+  },
+  realData: (pair) =>
+    `Dữ liệu ${pair} thật · Chỉ mang tính giáo dục, không phải lời khuyên đầu tư`,
+  term: (english) => VI_TERMS[english] ?? english,
+};
+
+const VI_TERMS: Record<string, string> = {
+  'Shoulder': 'Vai',
+  'Head': 'Đầu',
+  'Bottom 1': 'Đáy 1',
+  'Bottom 2': 'Đáy 2',
+  'Top 1': 'Đỉnh 1',
+  'Top 2': 'Đỉnh 2',
+  'NECKLINE': 'ĐƯỜNG VIỀN CỔ',
+  'ORDER BLOCK': 'VÙNG LỆNH',
+  'Double Bottom': 'Hai Đáy',
+  'Double Top': 'Hai Đỉnh',
+  'Head & Shoulders': 'Vai Đầu Vai',
+  'Inverse Head & Shoulders': 'Vai Đầu Vai Ngược',
+  'Structure': 'Cấu trúc',
 };
 
 export const strings = (locale: Locale | undefined): Strings => (locale === 'vi' ? VI : EN);
