@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, replayPlan } from './variants.mjs';
+import { planFor, candlePlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -77,6 +77,14 @@ const brand = flag('brand', locale === 'vi' ? 'van-thang-trading.png' : 'none');
  * for anything presented as today's chart.
  */
 const replay = has('replay');
+/**
+ * Every format the machine can build offline, in one run.
+ *
+ * `--format candle-lesson --count 100` is a hundred of one thing; `--mix
+ * --count 100` is the same hundred with all four formats in it, as many of the
+ * other three as the repo holds data for.
+ */
+const mix = has('mix');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -395,22 +403,25 @@ function preflight() {
 
 if (!dryRun) preflight();
 
-// Only the candle lesson has a Vietnamese edition. Saying so out loud matters:
-// the other three formats would render perfectly and come out in English, which
-// looks like the flag was ignored rather than never implemented for them.
-if (locale !== 'en' && format !== 'candle-lesson') {
+// All four formats have a Vietnamese edition now. What is still worth saying is
+// where the *data* comes from, because the three market formats can only be
+// replayed from the configs in the repo when there is no network — and those
+// carry the prices they were fetched with, not today's.
+if (mix || replay) {
   console.log(
-    `Note: --locale ${locale} only changes the candle-lesson format. ` +
-      'The other three still render in English.\n',
+    'Note: the quiz, named-setup and market-map videos replay configs already ' +
+      'in the repo. Their prices are as old as those files.\n',
   );
 }
 
-let plan = replay
-  ? replayPlan(join(ENGINE, 'src', 'data'), locale)
-  : format === 'candle-lesson'
-    ? candlePlan(date, count, locale)
-    : planFor(date, count);
-if (replay && format) plan = plan.filter((j) => j.format === format);
+let plan = mix
+  ? mixedPlan(date, count, locale, join(ENGINE, 'src', 'data'))
+  : replay
+    ? replayPlan(join(ENGINE, 'src', 'data'), locale)
+    : format === 'candle-lesson'
+      ? candlePlan(date, count, locale)
+      : planFor(date, count);
+if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
 if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
 if (only) plan = plan.filter((j) => j.id.includes(only));
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }

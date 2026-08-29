@@ -117,6 +117,35 @@ export function candlePlan(isoDate, count = 100, locale = 'en') {
 }
 
 /**
+ * A mixed catalogue: every format the machine can build without a network.
+ *
+ * The candle lesson is the only one that can be *generated* offline, so a plain
+ * count of a hundred came out a hundred of one thing — which is what it looks
+ * like when it is unzipped, whatever the notes said. The other three do not need
+ * generating: the configs already fetched are checked into src/data, and
+ * replaying those is the difference between one format and four.
+ *
+ * That caps them at however many configs exist — 23 today. Everything past that
+ * is candle lessons, and the two are interleaved so the mix shows up in the
+ * first few files rather than being buried at the end.
+ */
+export function mixedPlan(isoDate, count, locale, dataDir) {
+  const replay = replayPlan(dataDir, locale);
+  const candles = candlePlan(isoDate, Math.max(0, count - replay.length), locale);
+  if (!replay.length) return candles.slice(0, count);
+
+  const every = Math.max(1, Math.round(candles.length / replay.length));
+  const out = [];
+  let r = 0;
+  candles.forEach((job, i) => {
+    out.push(job);
+    if (r < replay.length && (i + 1) % every === 0) out.push(replay[r++]);
+  });
+  while (r < replay.length) out.push(replay[r++]);
+  return out.slice(0, count);
+}
+
+/**
  * Build the plan for one date.
  *
  * Rotation offsets by the day index so consecutive days do not open with the
