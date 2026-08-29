@@ -44,6 +44,20 @@ const format = flag('format', '');
 // The finished file gets its absolute level set once; see
 // video-engine/scripts/chuan_am_luong.py for why that is not done in the engine.
 const skipLoudness = has('no-loudness');
+/**
+ * Video quality, as h264's constant-rate factor. Lower is bigger.
+ *
+ * Remotion defaults to 18, which is a mastering setting: visually lossless and
+ * about 5.3 MB for one of these. At 23 the same video is 2.7 MB and, compared
+ * frame against frame, indistinguishable — these are flat-coloured charts on a
+ * dark ground, which is exactly what h264 compresses well. That matters twice
+ * over: a day of thirty is 80 MB instead of 160, and every one of them is going
+ * to be re-encoded by YouTube or TikTok on upload anyway, so the extra bitrate
+ * was never going to reach a viewer.
+ *
+ * Pass --crf 18 to get the old masters back.
+ */
+const crf = flag('crf', '23');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -204,6 +218,7 @@ async function runJob(job) {
     'npx',
     ['remotion', 'render', composition, target,
       `--props=./${configPath}`,
+      `--crf=${crf}`,
       ...(browser ? [`--browser-executable=${browser}`] : [])],
     (line) => {
       const m = line.match(/Rendered (\d+)\/(\d+)/);
