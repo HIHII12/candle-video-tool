@@ -1,4 +1,5 @@
 import React from 'react';
+import {strings, type Locale} from '../i18n';
 import {interpolate} from 'remotion';
 import type {ForexChartProps} from '../data/types';
 import type {Coords} from './useLightweightChart';
@@ -10,10 +11,11 @@ import {CHART_BOX, TV, FONT} from './chartTheme';
 export const LevelLine: React.FC<{
   price: number;
   label: string;
+  locale?: Locale;
   kind: 'support' | 'resistance';
   coords: Coords;
   progress: number;
-}> = ({price, label, kind, coords, progress}) => {
+}> = ({price, label, kind, coords, progress, locale}) => {
   if (progress <= 0) return null;
   const y = coords.priceToY(price);
   const color = kind === 'support' ? TV.support : TV.resistance;
@@ -44,7 +46,7 @@ export const LevelLine: React.FC<{
           fontSize={32}
           fontWeight={900}
         >
-          {label} {price.toFixed(1)}
+          {strings(locale).term(label)} {price.toFixed(1)}
         </text>
       </g>
     </g>

@@ -242,6 +242,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
               kind="resistance"
               coords={coords}
               progress={levelProgress}
+              locale={props.locale}
             />
           )}
           {support && (
@@ -251,6 +252,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
               kind="support"
               coords={coords}
               progress={secondLevelProgress}
+              locale={props.locale}
             />
           )}
           {props.fibonacci && (

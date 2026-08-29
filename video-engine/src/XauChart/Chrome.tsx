@@ -202,7 +202,10 @@ export const AnswerBadge: React.FC<{
         right: 0,
         textAlign: 'center',
         fontFamily: FONT,
-        fontSize: 104,
+        // Sized from the text, not fixed. The English verdict is eleven
+        // characters and fits at 104; the Vietnamese one is thirteen and ran
+        // into both edges of the frame at the same size.
+        fontSize: Math.min(104, Math.round(1180 / Math.max(9, strings(locale).quiz.won(answer).length))),
         fontWeight: 900,
         color,
         transform: `scale(${interpolate(pop, [0, 1], [0.5, 1])})`,

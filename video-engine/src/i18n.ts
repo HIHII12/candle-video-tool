@@ -242,6 +242,8 @@ const VI: Strings = {
 };
 
 const VI_TERMS: Record<string, string> = {
+  'Resistance': 'Kháng cự',
+  'Support': 'Hỗ trợ',
   'Shoulder': 'Vai',
   'Head': 'Đầu',
   'Bottom 1': 'Đáy 1',
