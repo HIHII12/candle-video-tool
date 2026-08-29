@@ -102,6 +102,32 @@ video nền tối thì nó thành một ô vuông sáng bao quanh logo tròn.
 
 ---
 
+## Bốn kiểu nội dung trong một lượt chạy
+
+```
+node tool\batch.mjs --mix --locale vi --count 100 --workers 2
+```
+
+| Kiểu | Nói gì | Bao nhiêu trong 100 |
+|---|---|---|
+| **Bài học mẫu nến** | Giải phẫu → quy tắc → vào lệnh → kết quả | 77 |
+| **Đố mua hay bán** | Đếm ngược 3 giây rồi lật bài | 8 |
+| **Setup có tên** | Vai Đầu Vai, Hai Đáy… + vùng lệnh | 9 |
+| **Bản đồ thị trường** | Vùng thanh khoản, order block, gap | 6 |
+
+**Vì sao 77 : 23.** Chỉ mẫu nến **sinh** được không cần mạng. Ba kiểu kia cần
+mạng để *sinh config* — nhưng không cần mạng để *render*, và 23 config có dữ
+liệu giá thật đã nằm sẵn trong repo. 23 là trần cứng khi máy không có mạng.
+
+> **Máy anh có mạng thì khác.** `run-30.bat` chạy kế hoạch ngày với dữ liệu
+> tươi: **8 đố · 8 setup · 8 mẫu nến · 6 bản đồ** — chia đều bốn kiểu, giá của
+> hôm nay. Muốn số lượng lớn thì `--mix`; muốn dữ liệu tươi thì kế hoạch ngày.
+
+Giá trong video replay **cũ bằng tuổi config**, không phải giá hôm nay. Dạy một
+setup thì không sao; đừng đăng kèm câu nào ngụ ý đây là chart hôm nay.
+
+---
+
 ## Làm 100 video một lượt (chạy qua đêm)
 
 Nháy đúp **`run-100-roi-tat-may.bat`**. Nó render 100 video short, soi sạn toàn
