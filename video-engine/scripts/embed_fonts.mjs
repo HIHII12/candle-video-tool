@@ -21,6 +21,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FACES = [
   {name: 'INTER_WOFF2', file: 'inter-latin.woff2'},
   {name: 'ARCHIVO_WOFF2', file: 'archivo-black-latin.woff2'},
+  // Vietnamese lives in its own Google subset, and the latin files genuinely do
+  // not have it: 52 of the 70 marks Vietnamese needs — ă, ắ, ề, ố, ư, ị and the
+  // rest — are simply absent, so "VĂN THẮNG" came out as boxes. These two carry
+  // exactly that subset and nothing else, which is why they are 10 and 13 KB.
+  {name: 'INTER_VI_WOFF2', file: 'inter-vietnamese.woff2'},
+  {name: 'ARCHIVO_VI_WOFF2', file: 'archivo-vietnamese.woff2'},
 ];
 
 const parts = FACES.map(({name, file}) => {
