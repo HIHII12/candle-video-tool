@@ -357,6 +357,16 @@ function preflight() {
 
 if (!dryRun) preflight();
 
+// Only the candle lesson has a Vietnamese edition. Saying so out loud matters:
+// the other three formats would render perfectly and come out in English, which
+// looks like the flag was ignored rather than never implemented for them.
+if (locale !== 'en' && format !== 'candle-lesson') {
+  console.log(
+    `Note: --locale ${locale} only changes the candle-lesson format. ` +
+      'The other three still render in English.\n',
+  );
+}
+
 let plan = format === 'candle-lesson' ? candlePlan(date, count, locale) : planFor(date, count);
 if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
 if (only) plan = plan.filter((j) => j.id.includes(only));

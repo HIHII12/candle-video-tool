@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_candle_lesson import BUILDERS, Rng, make  # noqa: E402
+from make_candle_lesson import BUILDERS, VI, Rng, make  # noqa: E402
 
 
 def parts(c):
@@ -145,6 +145,38 @@ def check(name: str, cfg: dict) -> list[str]:
     return bad
 
 
+def check_vietnamese() -> list[str]:
+    """Every pattern must have a Vietnamese entry, and it must fit its shape.
+
+    The Vietnam track falls back to English silently when an entry is missing —
+    the worst way for it to fail, because the video renders, passes every frame
+    check, and ships with one English headline in the middle of a Vietnamese
+    batch. A pattern added later would do exactly that, so it is caught here.
+    """
+    bad = []
+    for name in sorted(BUILDERS):
+        vi = VI.get(name)
+        if not vi:
+            bad.append(f"{name}: khong co ban tieng Viet")
+            continue
+        en = make(name, seed=7)
+        for field in ("name", "rule"):
+            if not vi.get(field, "").strip():
+                bad.append(f"{name}: thieu '{field}' tieng Viet")
+        if len(vi.get("checks", [])) != len(en["pattern"]["checks"]):
+            bad.append(f"{name}: {len(vi.get('checks', []))} dieu kien tieng Viet, "
+                       f"ban goc co {len(en['pattern']['checks'])}")
+        if len(vi.get("anatomy", [])) != len(en["anatomy"]):
+            bad.append(f"{name}: {len(vi.get('anatomy', []))} nhan bo phan tieng Viet, "
+                       f"ban goc co {len(en['anatomy'])}")
+        if len(vi.get("taglines", [])) < 2:
+            bad.append(f"{name}: can it nhat 2 tagline tieng Viet de khong bi lap")
+        got = make(name, seed=7, locale="vi")["pattern"]["name"]
+        if got != vi["name"]:
+            bad.append(f"{name}: sinh ra ten '{got}', mong doi '{vi['name']}'")
+    return bad
+
+
 def main() -> None:
     failures = 0
     for name in sorted(BUILDERS):
@@ -155,6 +187,15 @@ def main() -> None:
         for p in problems:
             print(f"       - {p}")
         failures += len(problems)
+
+    vi_bad = check_vietnamese()
+    if vi_bad:
+        print("\nBan tieng Viet:")
+        for line in vi_bad:
+            print(f"  - {line}")
+        failures += len(vi_bad)
+    else:
+        print(f"\nBan tieng Viet: du ca {len(BUILDERS)} mau nen")
 
     print(f"\n{len(BUILDERS)} patterns checked, {failures} violation(s)")
     sys.exit(1 if failures else 0)
