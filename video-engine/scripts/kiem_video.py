@@ -134,6 +134,32 @@ def ink_mask(img: np.ndarray) -> np.ndarray:
     return np.abs(img - bg).sum(axis=2) > INK
 
 
+def block_motion(a: np.ndarray, b: np.ndarray, rows: int = 16, cols: int = 9) -> float:
+    """How much of the frame is moving, as a percentage of its blocks.
+
+    Two earlier attempts got this wrong in opposite directions.
+
+    The whole-frame mean answers "how much of the picture moved", which is not
+    the question — a dashed trend line drawing across a light chart is obvious
+    movement that averages down to nothing, and the market map was reported as
+    nine seconds frozen while that line was visibly growing.
+
+    Taking the loudest block instead went too far the other way: on the candle
+    lesson's genuinely frozen ending, a single checkbox ticking in one corner was
+    enough to call the whole frame alive. It was not; the chart had stopped.
+
+    Counting blocks separates the two. A line being drawn crosses a dozen blocks.
+    A ticking checkbox occupies one. The frame is alive when a real share of it
+    is changing, which is also what a viewer means by the word.
+    """
+    h, w = a.shape[:2]
+    bh, bw = max(1, h // rows), max(1, w // cols)
+    diff = np.abs(a - b).mean(axis=2)
+    diff = diff[: (h // bh) * bh, : (w // bw) * bw]
+    blocks = diff.reshape(h // bh, bh, w // bw, bw).mean(axis=(1, 3))
+    return float((blocks > 1.0).sum() * 100.0 / blocks.size)
+
+
 def check_frame(mask: np.ndarray, rep: Report, when: str) -> None:
     h, w = mask.shape
     total = mask.sum()
@@ -194,12 +220,23 @@ def check(video: Path, samples: int, freeze_seconds: float) -> Report:
     for i, mask in enumerate(masks):
         check_frame(mask, rep, f"giay {i*step:4.1f}")
 
-    # freeze: consecutive samples that are pixel-near-identical.
+    # freeze: consecutive samples where NO REGION of the frame changed.
+    #
+    # This was a whole-frame mean, and that measures the wrong thing. A format
+    # that animates a thin dashed line across a light chart changes a few hundred
+    # pixels out of two million: real, visible movement that averages down to
+    # nothing. The market map was reported as nine seconds frozen while its trend
+    # line was visibly drawing.
+    #
+    # So the frame is divided into blocks and the loudest block decides. A frame
+    # that is genuinely frozen has no block changing anywhere, which is exactly
+    # what the check should be looking for, and the formats that move the whole
+    # chart still fail it just as hard as before.
     run = 0
     worst = 0.0
     for i in range(1, len(arr)):
-        diff = np.abs(arr[i] - arr[i - 1]).mean()
-        if diff < 0.35:
+        # Under 4% of blocks moving is one small element animating on a still frame.
+        if block_motion(arr[i], arr[i - 1]) < 4.0:
             run += 1
             worst = max(worst, run * step)
         else:
@@ -210,11 +247,12 @@ def check(video: Path, samples: int, freeze_seconds: float) -> Report:
     elif worst >= freeze_seconds * 0.6:
         rep.add("CANH BAO", f"gan nhu dung hinh {worst:.1f}s lien")
 
-    # motion: a short that barely moves reads as a slideshow.
-    motion = float(np.mean([np.abs(arr[i] - arr[i - 1]).mean() for i in range(1, len(arr))]))
+    # motion: a short that barely moves reads as a slideshow. Measured the same
+    # way, on the loudest block rather than the whole frame.
+    motion = float(np.mean([block_motion(arr[i], arr[i - 1]) for i in range(1, len(arr))]))
     rep.stats["motion"] = round(motion, 3)
-    if motion < 1.2:
-        rep.add("CANH BAO", f"gan nhu khong chuyen dong (do dong {motion:.2f})")
+    if motion < 9.0:
+        rep.add("CANH BAO", f"chi {motion:.0f}% khung hinh chuyen dong")
 
     return rep
 
@@ -296,7 +334,7 @@ def main() -> int:
     for rep in reports:
         errors += rep.errors
         head = f"{Path(rep.file).name:38s} {rep.width}x{rep.height} {rep.stats.get('seconds')}s"
-        marks = f"dung hinh {rep.stats.get('freeze_seconds')}s · dong {rep.stats.get('motion')}"
+        marks = f"dung hinh {rep.stats.get('freeze_seconds')}s · dong {rep.stats.get('motion')}%"
         if rep.stats.get("lufs") is not None:
             marks += f" · {rep.stats['lufs']:.1f} LUFS / dinh {rep.stats.get('true_peak_db', 0):+.1f} dBTP"
         print(f"{'LOI ' if rep.errors else 'ok  '} {head}  {marks}")

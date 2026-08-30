@@ -3,6 +3,7 @@ import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from
 import type {MarketMapProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {ChartEdges} from '../ChartEdges';
+import {slowPush} from '../camera';
 import {BrandMark} from '../BrandMark';
 import {strings} from '../i18n';
 import {ChochMark, PlanPath, TrendLine, ZoneBand} from './Marks';
@@ -14,6 +15,7 @@ import {
   MT,
   MTEXT,
   mapShownAt,
+  mease,
   mramp,
   zoneColor,
   zoneProgress,
@@ -55,6 +57,39 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
   const hi = Math.max(...prices);
   const padY = (hi - lo) * 0.06 || 1;
 
+  /**
+   * The opening move: start on where price actually is, pull back to the map.
+   *
+   * A slow push was tried first and measured: it moved the frame by about a
+   * tenth of a pixel between sampled frames, and both the frame check and the
+   * eye read the first ten seconds as a still image — the candles finish
+   * arriving at nine seconds and nothing else lands until the trend line at ten.
+   * On a light chart a gentle zoom simply does not change enough pixels.
+   *
+   * So the camera starts tight on the most recent bars, which is where a trader
+   * looks first anyway, and widens to the full map as the bars fill in. That is
+   * a real move with real pixel change, and it says what the format is for:
+   * here is the price, now here is everything around it.
+   */
+  const recent = props.candles.slice(-18).flatMap((c) => [c.high, c.low]);
+  const rLo = Math.min(...recent);
+  const rHi = Math.max(...recent);
+  const rPad = (rHi - rLo) * 0.18 || 1;
+  const full = {minValue: lo - padY, maxValue: hi + padY};
+  const near = {minValue: rLo - rPad, maxValue: rHi + rPad};
+  const openT = mease(mramp(frame, MB.candles));
+  const openWindow = slowPush(
+    {
+      minValue: near.minValue + (full.minValue - near.minValue) * openT,
+      maxValue: near.maxValue + (full.maxValue - near.maxValue) * openT,
+    },
+    // The push carries on underneath once the pull-back has finished, so the
+    // twenty-five seconds of annotation that follow are never perfectly still.
+    frame / durationInFrames,
+    0.2,
+    0.08,
+  );
+
   // Reserve the projection space on the right from the first frame. Growing it
   // later would slide every band and marker sideways mid-video.
   const logical = {from: -0.6, to: total - 1 + props.projectBars + 0.6};
@@ -62,7 +97,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
   const {containerRef, coords} = useLightweightChart(
     props,
     shown,
-    {minValue: lo - padY, maxValue: hi + padY},
+    openWindow,
     {bg: MT.bg, up: MT.up, down: MT.down, box: MAP_BOX},
     logical,
   );

@@ -3,11 +3,12 @@ import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from
 import type {ForexChartProps, RiskReward} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {ChartEdges} from '../ChartEdges';
+import {slowPush} from '../camera';
 import {BrandMark} from '../BrandMark';
 import {strings} from '../i18n';
 import {logicalWindowAt} from '../XauChart/logicalWindow';
 import {EntryZone, Neckline, PatternLabels, TradeZone, ZigZag} from './Markup';
-import {LESSON_BOX, LFONT, LSB, LT, STEPS, lramp} from './theme';
+import {LESSON_BOX, LESSON_DURATION, LFONT, LSB, LT, STEPS, lramp} from './theme';
 import {CHANNEL_MARK} from '../brand';
 import {SAFE} from '../safeArea';
 import {Soundtrack} from '../audio/Soundtrack';
@@ -66,10 +67,16 @@ const priceWindow = (props: ForexChartProps, frame: number) => {
   const tight = pad([...setupPrices, ...nearAnchors]);
   const wide = pad([...allPrices, ...anchors]);
   const t = lramp(frame, LSB.reveal);
-  return {
-    minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
-    maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
-  };
+  // The tight -> wide move only happens during the reveal; the twenty seconds
+  // of markup before it held one fixed window, which the frame check reads as
+  // five and a half seconds of frozen video. The push runs underneath it.
+  return slowPush(
+    {
+      minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
+      maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
+    },
+    frame / LESSON_DURATION,
+  );
 };
 
 const shownAt = (props: ForexChartProps, frame: number) => {
@@ -268,9 +275,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 210,
+            // Above the Shorts title bar, not under it. At bottom 210 this step
+            // label — the one line that says which part of the setup is being
+            // drawn — sat inside the platform's own band on every phone, and the
+            // frame check measured a fifth of the video's ink down there.
+            bottom: SAFE.bottom,
             left: 46,
-            right: 46,
+            right: SAFE.right,
             textAlign: 'center',
             fontSize: 40,
             fontWeight: 900,
@@ -291,9 +302,9 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 180,
+            bottom: SAFE.bottom,
             left: 46,
-            right: 46,
+            right: SAFE.right,
             textAlign: 'center',
             opacity: resultIn,
             transform: `translateY(${interpolate(resultIn, [0, 1], [60, 0])}px)`,
@@ -320,7 +331,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 300,
+            bottom: SAFE.bottom + 96,
             left: 0,
             right: 0,
             textAlign: 'center',
@@ -333,10 +344,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         </div>
       )}
 
+      {/* The channel line sits above the step label and the verdict, which now
+          share the band just under it. Two blocks at the same offset would draw
+          straight through each other. */}
       <div
         style={{
           position: 'absolute',
-          bottom: SAFE.bottom,
+          bottom: SAFE.bottom + 62,
           left: 0,
           right: 0,
           textAlign: 'center',

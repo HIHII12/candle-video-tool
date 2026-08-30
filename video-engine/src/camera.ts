@@ -199,3 +199,49 @@ export const smoothed = <T>(
   }
   return acc;
 };
+
+/**
+ * A slow push-in across a whole composition.
+ *
+ * The candle lesson has its own camera; these three do not. Their price window
+ * is computed once and never moves, so once the candles have finished arriving
+ * the chart is a still image with labels fading onto it — nine seconds of it on
+ * the market map, which the frame check reads as a dead video and so does a
+ * viewer. This is the same move the lesson makes, factored out: squeeze the
+ * window toward its centre over the run, eased so it reads as a camera rather
+ * than a slider.
+ *
+ * Vertical only. The horizontal window on these formats reserves space for
+ * projections and markup, and moving it slides every band and label sideways.
+ *
+ * `amount` is the fraction closed in by the end. 0.12 is roughly the least that
+ * still registers as movement between sampled frames; much more and it competes
+ * with the markup being drawn over it.
+ */
+export const slowPush = (
+  w: PriceWindow,
+  t: number,
+  amount = 0.12,
+  /**
+   * Vertical pan, as a fraction of the span, on top of the zoom.
+   *
+   * A zoom alone was not enough on the light-background formats and the reason
+   * is geometric: zooming moves a point in proportion to its distance from the
+   * centre, so everything near the middle of the chart — which is most of it —
+   * barely moves at all. A pan moves every pixel by the same amount. Measured on
+   * the market map, the zoom shifted the frame about a tenth of a pixel between
+   * sampled frames and a pan of the same size shifted it nearly two.
+   */
+  drift = 0,
+): PriceWindow => {
+  const span = w.maxValue - w.minValue;
+  const mid = (w.minValue + w.maxValue) / 2 + span * drift * clamp01(t);
+  // Linear, deliberately. Smoothstep was the obvious choice and it was wrong
+  // here: it is flat at both ends, so the first and last seconds of the video
+  // got almost no movement at all — and on the market map that is exactly where
+  // the chart is otherwise stillest. A push that has to run for the whole
+  // duration has to move at the start too, and over thirty-five seconds the
+  // constant rate is slow enough that nothing reads as mechanical.
+  const k = 1 - amount * clamp01(t);
+  return {minValue: mid - (span / 2) * k, maxValue: mid + (span / 2) * k};
+};
