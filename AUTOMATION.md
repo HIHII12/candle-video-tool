@@ -209,3 +209,27 @@ Bắt: tràn khung · chữ nằm dưới giao diện Shorts · bố cục lệc
 - **Chưa tự đăng.** YouTube Data API v3 làm được; TikTok cần audit 2–6 tuần.
 - Đăng thật thì để `outcome: any` — kế hoạch đã mặc định vậy. Ép `TP` chỉ dùng
   lúc demo.
+
+## Đã chạy thật — 100 video NĂM khuôn, tiếng Việt, 31/08/2026
+
+| | |
+|---|---|
+| Render | **100/100, 0 hỏng, 153 phút** (2 luồng) |
+| Soi sạn | **0 LỖI** trên cả 100 |
+| Đứng hình | max **2,01 s** · trung bình **0,33 s** (ngưỡng lỗi 2,4 s) |
+| Chuyển động | 12,4 – 27,8% khung hình |
+| Âm lượng | -14,1 … -13,8 LUFS · đỉnh thật max **-1,0 dBTP** |
+| Khuôn | **53 mẫu nến · 24 so sánh · 9 setup · 8 đố · 6 bản đồ** |
+| Cặp so sánh | đủ **8/8** cặp |
+| Kiểu mở đầu | chia đều **18 · 18 · 17** |
+| Dung lượng | 349 MB · 100 file `.mp4` + 100 file `.txt` |
+
+Lệnh đã chạy:
+
+```bash
+node tool/batch.mjs --mix --count 100 --locale vi --date 2026-08-31 --workers 2
+```
+
+**Khác lượt 30/08 ở chỗ nào.** Lượt trước 100 video ra **một khuôn** — giải nén
+thấy đúng một kiểu. Lượt này năm khuôn, trong đó khuôn so sánh (24 video) và ba
+kiểu mở đầu là thứ trực tiếp chữa lỗi đó.
