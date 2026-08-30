@@ -200,7 +200,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         }}
       />
 
-      <ChartEdges box={MAP_BOX} bg={MT.bg} zIndex={5} />
+      {/* Above the marks, not below them. This format's zone bands are drawn
+          the full width of the chart on purpose, so they reached both frame
+          edges and painted straight over a fade that was sitting underneath
+          them. */}
+      <ChartEdges box={MAP_BOX} bg={MT.bg} zIndex={15} />
 
       {/* The map's own header already owns the top-right with its timeframe
           badge, so the mark drops below the header rule instead. */}

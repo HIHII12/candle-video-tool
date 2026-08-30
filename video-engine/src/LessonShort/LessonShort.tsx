@@ -66,16 +66,35 @@ const priceWindow = (props: ForexChartProps, frame: number) => {
 
   const tight = pad([...setupPrices, ...nearAnchors]);
   const wide = pad([...allPrices, ...anchors]);
+
+  /**
+   * Opening pull-back, then the reveal's own widen.
+   *
+   * The tight -> wide move only ever happened during the reveal, so the twenty
+   * seconds of markup before it held one fixed window and the chart sat
+   * perfectly still underneath it — nine seconds of it by the frame check, and
+   * a slow zoom was measured and was not enough to register. So the camera
+   * starts close on the most recent bars, where a trader looks first, and backs
+   * off to the whole structure as the markup is drawn onto it.
+   */
+  const recent = props.candles
+    .slice(Math.max(0, props.setupCount - 16), props.setupCount)
+    .flatMap((c) => [c.high, c.low]);
+  const near = pad(recent.length ? recent : setupPrices);
+  const open = lramp(frame, [LSB.title[0], LSB.ob[0]] as const);
+  const base = {
+    minValue: near.minValue + (tight.minValue - near.minValue) * open,
+    maxValue: near.maxValue + (tight.maxValue - near.maxValue) * open,
+  };
+
   const t = lramp(frame, LSB.reveal);
-  // The tight -> wide move only happens during the reveal; the twenty seconds
-  // of markup before it held one fixed window, which the frame check reads as
-  // five and a half seconds of frozen video. The push runs underneath it.
   return slowPush(
     {
-      minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
-      maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
+      minValue: base.minValue + (wide.minValue - base.minValue) * t,
+      maxValue: base.maxValue + (wide.maxValue - base.maxValue) * t,
     },
     frame / LESSON_DURATION,
+    0.14,
   );
 };
 
