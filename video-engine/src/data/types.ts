@@ -224,3 +224,38 @@ export type CandleLessonProps = {
   voiceId?: string | null;
   voiceMarks?: {text: string; startFrame: number; endFrame: number}[] | null;
 };
+
+/** One half of a comparison video. */
+export type CompareSide = {
+  name: string;
+  bias: 'bullish' | 'bearish';
+  candles: Candle[];
+  /** Which candles form the pattern; the measurement is drawn on the last. */
+  indices: number[];
+  verdict: string;
+};
+
+/**
+ * Two confusable patterns, and the one measurement that separates them.
+ *
+ * The other formats all answer "what is this". This one answers the question a
+ * beginner actually has — "these two look identical, which am I looking at" —
+ * and that question needs both charts on screen at once to answer at all.
+ */
+export type CandleCompareProps = {
+  kind: 'candleCompare';
+  locale?: Locale;
+  brandMark?: string | null;
+  /** Which measurement decides it: the body, or the leg that came before. */
+  metric: 'body' | 'direction';
+  title: string;
+  /** What the two have in common — said before the difference. */
+  same: string;
+  /** The instruction that separates them. */
+  diff: string;
+  /** What it costs to read it wrong. */
+  why: string;
+  left: CompareSide;
+  right: CompareSide;
+  note: string;
+};

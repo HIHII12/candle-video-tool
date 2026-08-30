@@ -35,7 +35,12 @@ Thumbs.db
 tool-app/data/previews/
 
 # Catalogue runs generate one config per video; they are rebuilt from the seed.
+# The locale prefix was added when the Vietnam track landed, so the old pattern
+# stopped matching and every run left a dozen modified files in the diff.
 video-engine/src/data/batch_candle-*-v*.json
+video-engine/src/data/batch_*-candle-*-v*.json
+video-engine/src/data/batch_*-compare-*-v*.json
+video-engine/src/data/_compare.json
 video-engine/src/data/_probe.json
 video-engine/out/qa/
 

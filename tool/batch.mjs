@@ -22,8 +22,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
+import { writeUploadNote } from './upload-kit.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ENGINE = join(ROOT, 'video-engine');
@@ -178,6 +179,20 @@ async function buildData(job) {
     };
   }
 
+  if (job.format === 'candle-compare') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_candle_compare.py',
+      '--pair', job.pair, '--seed', String(job.seed),
+      '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'CandleCompare',
+      configPath: out,
+      cfg,
+      facts: { left: cfg.left.name, right: cfg.right.name, metric: cfg.metric },
+    };
+  }
+
   if (job.format === 'market-map') {
     const out = `src/data/batch_${job.id}.json`;
     // Daily bars need a longer history window to fill the map than hourly do.
@@ -235,7 +250,7 @@ function applyCaption(cfgPath, cfg, caption, format) {
     // written line with a generated template is a downgrade, so it does not
     // happen: with no key configured, the generator's own tagline ships.
     if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
-  } else if (format !== 'market-map') {
+  } else if (format !== 'market-map' && format !== 'candle-compare') {
     // The market map carries no model-written line: every word on it is either a
     // measured level or a fixed disclaimer, and inventing copy about levels is
     // how a plan starts sounding like a promise.
@@ -258,7 +273,10 @@ async function runJob(job) {
   const { composition, configPath, cfg, facts } = await buildData(job);
   // The market map carries no model-written line, so it skips the LLM entirely.
   const caption =
-    job.format === 'market-map' || job.replay
+    // The comparison carries no model-written line either. Its copy is the
+    // argument — "same wick, measure the body" — and it has to stay true to the
+    // two series the generator just built, which a caption model has not seen.
+    job.format === 'market-map' || job.format === 'candle-compare' || job.replay
       // A replay keeps the copy the config already carries: it was written for
       // this exact chart, and a fresh line generated now would be about data it
       // has never seen.
@@ -310,10 +328,21 @@ async function runJob(job) {
     }
   }
 
+  // The caption that has to be typed into the upload box, written beside the
+  // video. Best-effort: a video that renders and has no .txt beside it is still
+  // a video, so this must never fail the job.
+  let note = null;
+  try {
+    note = writeUploadNote(ENGINE, target, job, cfg, caption);
+  } catch (err) {
+    console.log(`       upload note skipped: ${String(err.message ?? err).split('\n')[0]}`);
+  }
+
   return {
     ...job,
     status: 'rendered',
     file: target,
+    uploadNote: note ? note.replace(`${ENGINE}/`, '') : null,
     loudness,
     composition,
     caption: { title: caption.title, hook: caption.hook, source: caption.source },
@@ -420,9 +449,13 @@ let plan = mix
     ? replayPlan(join(ENGINE, 'src', 'data'), locale)
     : format === 'candle-lesson'
       ? candlePlan(date, count, locale)
-      : planFor(date, count);
+      : format === 'candle-compare'
+        ? comparePlan(date, count, locale)
+        : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && format !== 'candle-lesson') plan = plan.filter((j) => j.format === format);
+if (format && format !== 'candle-lesson' && format !== 'candle-compare') {
+  plan = plan.filter((j) => j.format === format);
+}
 if (only) plan = plan.filter((j) => j.id.includes(only));
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }
 console.log(`Plan for ${date}: ${plan.length} videos, ${workers} at a time\n`);

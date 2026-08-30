@@ -5,7 +5,7 @@ video ~35 giây. Mục tiêu: **30 video/ngày**.
 
 ---
 
-## Cần cài 2 thứ (một lần duy nhất)
+## Cài đặt: cài 2 thứ, rồi nháy đúp 1 file
 
 | | Tải ở đâu | Lưu ý |
 |---|---|---|
@@ -13,9 +13,35 @@ video ~35 giây. Mục tiêu: **30 video/ngày**.
 | **Python 3** | https://python.org | ⚠️ **NHỚ TICK "Add Python to PATH"** ở màn hình đầu |
 
 Cài xong **mở lại cửa sổ CMD/PowerShell** (hoặc khởi động lại máy) để máy nhận
-lệnh mới.
+lệnh mới. Rồi:
 
-Không cần cài gì thêm. Không cần tài khoản AWS, không cần Docker.
+### 👉 Nháy đúp **`CAI-DAT.bat`**
+
+Nó tự làm hết phần còn lại và **tự tải về** những thứ cần từ trên mạng:
+
+| Tải cái gì | Từ đâu |
+|---|---|
+| thư viện Node | npm registry |
+| thư viện Python *(numpy, pillow, ffmpeg)* | PyPI |
+| trình duyệt để render | Remotion tự tải Chromium |
+| **giọng đọc** *(tuỳ chọn)* | bản chạy Piper từ **GitHub Releases**, mô hình giọng từ **Hugging Face** (`rhasspy/piper-voices`) |
+
+Chạy xong nó **render thử một khung hình thật** rồi mới báo "xong" — nên nếu nó
+nói xong thì máy chạy được thật, không phải đoán.
+
+| Muốn gì | Nháy đúp / gõ |
+|---|---|
+| Cài lần đầu | `CAI-DAT.bat` |
+| **Nâng cấp** *(kéo bản mới từ git rồi cài lại)* | `NANG-CAP.bat` |
+| Chỉ kiểm tra máy đủ đồ chưa | `python cai-dat.py --kiem` |
+| Cài thêm giọng đọc | `python cai-dat.py --giong` |
+| macOS / Linux | `./cai-dat.sh` |
+
+Không cần tài khoản AWS, không cần Docker.
+
+> **Máy bị chặn mạng?** Nếu máy đã có sẵn Chromium, đặt biến môi trường
+> `REMOTION_BROWSER` trỏ tới file chạy của nó rồi chạy lại — tool sẽ dùng bản
+> đó thay vì tải bản riêng.
 
 ---
 
@@ -54,16 +80,28 @@ không tốn thời gian render. Chạy offline, không cần mạng.
 
 ## 30 video khác nhau ở đâu
 
-Bốn format, mỗi ngày chia đều:
+Năm format, mỗi ngày chia đều:
 
 - **8 video** dạy mẫu nến — **13 mẫu** (engulfing, hammer, shooting star,
   morning/evening star, 3 loại doji, marubozu, pin bar, tweezer top/bottom).
   Dữ liệu tự dựng nên **không cần mạng**, và đổi seed mỗi ngày.
 - **8 video** quiz "BUY or SELL" — dữ liệu thật
 - **8 video** phân tích setup có tên — dữ liệu thật
-- **6 video** *market map* (mới) — đánh dấu vùng thanh khoản BSL/SSL, order
+- **6 video** *market map* — đánh dấu vùng thanh khoản BSL/SSL, order
   block, gap chưa lấp, điểm CHoCH, rồi vẽ **kế hoạch** đi tới các vùng đó.
   Đây là format duy nhất nhìn về phía trước.
+- **video so sánh** *(format thứ 5, mới)* — hai mẫu nến **dễ nhầm nhau** xếp
+  trên dưới, một phép đo duy nhất vẽ lên cả hai cùng lúc. 6 cặp:
+  Búa/Doji Chuồn Chuồn · Sao Băng/Doji Bia Mộ · Sao Mai/Sao Hôm ·
+  Nhấn Chìm Tăng/Giảm · Đáy Nhíp/Đỉnh Nhíp · Doji/Marubozu.
+  **Không cần mạng.**
+
+> **Vì sao thêm format so sánh.** Bốn format cũ đều trả lời cùng một câu —
+> *"cái này là cái gì"*. Không cái nào trả lời câu làm người ta vào lệnh sai:
+> *"hai cái này nhìn y hệt nhau, làm sao phân biệt"*. Câu đó cần **hai chart
+> cùng lúc** mới trả lời được. Hai khung dùng **chung một thang giá**, nên thân
+> nến to gấp đôi thì vẽ ra cũng to gấp đôi — không khung nào tự co giãn cho vừa
+> khung của nó.
 
 Nhân với 3 sản phẩm (vàng, bạc, dầu) × 4 khung giờ (5m, 15m, 30m, 1H);
 market map dùng H1 và D1. Thứ tự xoay theo ngày nên hôm nay khác hôm qua.
@@ -110,14 +148,20 @@ node tool\batch.mjs --mix --locale vi --count 100 --workers 2
 
 | Kiểu | Nói gì | Bao nhiêu trong 100 |
 |---|---|---|
-| **Bài học mẫu nến** | Giải phẫu → quy tắc → vào lệnh → kết quả | 77 |
-| **Đố mua hay bán** | Đếm ngược 3 giây rồi lật bài | 8 |
+| **Bài học mẫu nến** | Giải phẫu → quy tắc → vào lệnh → kết quả | 59 |
+| **So sánh hai mẫu dễ nhầm** | Giống chỗ nào → đo cái khác nhau → chốt | 18 |
 | **Setup có tên** | Vai Đầu Vai, Hai Đáy… + vùng lệnh | 9 |
+| **Đố mua hay bán** | Đếm ngược 3 giây rồi lật bài | 8 |
 | **Bản đồ thị trường** | Vùng thanh khoản, order block, gap | 6 |
 
-**Vì sao 77 : 23.** Chỉ mẫu nến **sinh** được không cần mạng. Ba kiểu kia cần
-mạng để *sinh config* — nhưng không cần mạng để *render*, và 23 config có dữ
-liệu giá thật đã nằm sẵn trong repo. 23 là trần cứng khi máy không có mạng.
+**Vì sao chia thế này.** Hai kiểu **sinh được không cần mạng** là bài học mẫu
+nến và so sánh — nên chúng gánh phần lớn. Ba kiểu kia cần mạng để *sinh config*
+nhưng không cần mạng để *render*, và 23 config có dữ liệu giá thật đã nằm sẵn
+trong repo. 23 là trần cứng khi máy không có mạng.
+
+Lượt chạy ngắn cũng đủ cả 5 kiểu: `--mix --count 10` ra 4 bài học · 3 so sánh ·
+1 đố · 1 setup · 1 bản đồ. Phần "khách" bị chặn ở **tối đa 3/5 lượt chạy**, nên
+kiểu sinh tươi luôn còn chỗ.
 
 > **Máy anh có mạng thì khác.** `run-30.bat` chạy kế hoạch ngày với dữ liệu
 > tươi: **8 đố · 8 setup · 8 mẫu nến · 6 bản đồ** — chia đều bốn kiểu, giá của
@@ -125,6 +169,44 @@ liệu giá thật đã nằm sẵn trong repo. 23 là trần cứng khi máy kh
 
 Giá trong video replay **cũ bằng tuổi config**, không phải giá hôm nay. Dạy một
 setup thì không sao; đừng đăng kèm câu nào ngụ ý đây là chart hôm nay.
+
+---
+
+## Mỗi video có sẵn một file chữ để dán lên nền tảng
+
+Cạnh mỗi `.mp4` có một `.txt` **cùng tên**:
+
+```
+vi-compare-hammer-vs-dragonfly-v01.mp4
+vi-compare-hammer-vs-dragonfly-v01.txt   ← tiêu đề · mô tả · hashtag
+```
+
+Mở ra, copy, dán. Hết.
+
+Chữ trong đó **lấy từ chính video** — không phải viết mới. Lý do: mô tả nói một
+đằng video nói một nẻo còn tệ hơn là không có mô tả, và đó đúng là cách một kênh
+tự khẳng định thứ mình không chứng minh được. Câu miễn trừ trách nhiệm luôn có
+sẵn ở cuối.
+
+> Render 100 video mà vẫn phải ngồi gõ 100 cái tiêu đề thì chỗ chết của dây
+> chuyền nằm ở đó, không nằm ở khâu render.
+
+---
+
+## Giọng đọc — hai thứ tiếng
+
+```
+python cai-dat.py --giong          # cài cả giọng Việt lẫn giọng Anh
+```
+
+- Giọng Việt: `vi_VN-vais1000-medium` — tải từ **Hugging Face**
+- Giọng Anh: `en_US-norman-medium`
+
+Cài xong thì `--locale vi` **tự đọc tiếng Việt**, `--locale en` tự đọc tiếng
+Anh; không phải khai thêm cờ nào. Lời đọc **sinh từ chính config**, không phải
+model viết ra — con số trên màn hình và con số trong lời đọc buộc phải là một.
+
+Không cài giọng thì video vẫn render bình thường, chỉ là không có lời.
 
 ---
 

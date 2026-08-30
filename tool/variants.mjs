@@ -116,6 +116,43 @@ export function candlePlan(isoDate, count = 100, locale = 'en') {
   return jobs;
 }
 
+// The six pairs make_candle_compare.py knows. Kept in step with PAIRS there by
+// hand rather than shelled out for: the plan has to be printable by --dry-run
+// without running python, and six strings is not worth a subprocess.
+export const COMPARE_PAIRS = [
+  'hammer-vs-dragonfly', 'star-vs-gravestone', 'morning-vs-evening',
+  'engulfing-pair', 'tweezer-pair', 'doji-vs-marubozu',
+];
+
+/**
+ * A run of side-by-side comparisons.
+ *
+ * The fifth format, and the second one that needs no network — which is what
+ * makes it worth having. Everything else that can be generated offline is the
+ * candle lesson, so an offline catalogue was one format wearing thirteen hats.
+ * This one is generated the same way and answers a different question, so a
+ * mixed run stops being a single format with variety bolted on.
+ *
+ * Six pairs, re-seeded per round, same rotation logic as candlePlan.
+ */
+export function comparePlan(isoDate, count = 12, locale = 'en') {
+  const day = dayIndex(isoDate);
+  const jobs = [];
+  for (let n = 0; n < count; n += 1) {
+    const pair = COMPARE_PAIRS[n % COMPARE_PAIRS.length];
+    const round = Math.floor(n / COMPARE_PAIRS.length) + 1;
+    jobs.push({
+      id: `${locale}-compare-${pair}-v${String(round).padStart(2, '0')}`,
+      locale,
+      format: 'candle-compare',
+      pair,
+      seed: day * 1000 + n * 53 + 7,
+      label: `${pair.replace(/-/g, ' ')} · ${round}`,
+    });
+  }
+  return jobs;
+}
+
 /**
  * A mixed catalogue: every format the machine can build without a network.
  *
@@ -131,17 +168,36 @@ export function candlePlan(isoDate, count = 100, locale = 'en') {
  */
 export function mixedPlan(isoDate, count, locale, dataDir) {
   const replay = replayPlan(dataDir, locale);
-  const candles = candlePlan(isoDate, Math.max(0, count - replay.length), locale);
-  if (!replay.length) return candles.slice(0, count);
+  // A quarter of the run, capped so a short run still gets one and a long run
+  // does not become a comparison channel. Round-robin over six pairs means past
+  // about eighteen it starts repeating pairs, which is the point at which more
+  // of them stops adding variety.
+  const compare = comparePlan(isoDate, Math.min(18, Math.max(1, Math.round(count / 4))), locale);
+  const guests = [];
+  // Interleaved with each other first, so trimming does not eat one whole
+  // format off the tail — the mistake planFor already had to fix once.
+  for (let i = 0; ; i += 1) {
+    const before = guests.length;
+    if (replay[i]) guests.push(replay[i]);
+    if (compare[i]) guests.push(compare[i]);
+    if (guests.length === before) break;
+  }
+  // Never more than three fifths of the run, so the format that can be freshly
+  // generated is always in it. Without the cap a twenty-video mix came out with
+  // twenty-eight guests available and zero candle lessons — the trim took the
+  // whole tail, which is the same failure planFor was already fixed for.
+  guests.length = Math.min(guests.length, Math.max(1, Math.round(count * 0.6)));
+  const candles = candlePlan(isoDate, Math.max(0, count - guests.length), locale);
+  if (!guests.length) return candles.slice(0, count);
 
-  const every = Math.max(1, Math.round(candles.length / replay.length));
+  const every = Math.max(1, Math.round(candles.length / guests.length));
   const out = [];
   let r = 0;
   candles.forEach((job, i) => {
     out.push(job);
-    if (r < replay.length && (i + 1) % every === 0) out.push(replay[r++]);
+    if (r < guests.length && (i + 1) % every === 0) out.push(guests[r++]);
   });
-  while (r < replay.length) out.push(replay[r++]);
+  while (r < guests.length) out.push(guests[r++]);
   return out.slice(0, count);
 }
 

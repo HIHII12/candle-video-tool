@@ -76,6 +76,8 @@ type Strings = {
     steps: string[];
     provenance: (pair: string) => string;
   };
+  /** Side-by-side comparison of two confusable patterns. */
+  compare: {badge: string; body: string; bar: string};
   /** Disclaimer for the formats built on live market data. */
   realData: (pair: string) => string;
   /**
@@ -160,6 +162,7 @@ const EN: Strings = {
     provenance: (pair) =>
       `Levels are measured from real ${pair} data. The blue path is a plan, not a forecast.`,
   },
+  compare: {badge: 'TELL THEM APART', body: 'the body', bar: 'the bar'},
   realData: (pair) => `Real ${pair} data · Educational only, not financial advice`,
   term: (english) => english,
 };
@@ -236,6 +239,7 @@ const VI: Strings = {
     provenance: (pair) =>
       `Các vùng giá đo từ dữ liệu ${pair} thật. Đường xanh là kế hoạch, không phải dự báo.`,
   },
+  compare: {badge: 'PHÂN BIỆT', body: 'thân nến', bar: 'cả cây nến'},
   realData: (pair) =>
     `Dữ liệu ${pair} thật · Chỉ mang tính giáo dục, không phải lời khuyên đầu tư`,
   term: (english) => VI_TERMS[english] ?? english,
