@@ -851,6 +851,14 @@ def make(name: str, seed: int, locale: str = "en") -> dict:
     return {
         "kind": "candleLesson",
         "instrument": "ILLUSTRATION",
+        # Which of the three openings this video uses.
+        #
+        # A hundred videos that all open badge -> name -> tagline read as one
+        # batch, to a viewer and to a feed, however different the words are.
+        # Three openings from the same three pieces of text: no new copy to
+        # write and nothing that can go stale, and the first second stops being
+        # identical. Seeded, so a given video always opens the same way.
+        "open": Rng(seed * 29 + 5).state % 3,
         "pattern": {**meta, "indices": indices},
         "anatomy": anatomy,
         "candles": candles,

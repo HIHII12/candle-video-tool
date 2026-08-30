@@ -69,6 +69,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   // Title shrinks out of the way once the chart becomes the subject.
   const titleOut = interpolate(frame, [CB.focus[0], CB.focus[1]], [1, 0.62], clamp);
 
+  /**
+   * Which of the three openings this video uses; see make_candle_lesson.py.
+   *
+   * 0 — badge, name, tagline together (the original).
+   * 1 — the claim alone, the name a beat later.
+   * 2 — cold open: the name large and alone, badge and tagline arriving after.
+   *
+   * All three are built from the same three pieces of text the config already
+   * carries, so there is no second copy to keep true.
+   */
+  const open = props.open ?? 0;
+  const nameIn = interpolate(frame, [46, 82], [0, 1], clamp);
+  const tagIn = interpolate(frame, [40, 76], [0, 1], clamp);
+  const badgeIn = interpolate(frame, [64, 96], [0, 1], clamp);
+
   const spotlight =
     interpolate(
       frame,
@@ -128,47 +143,92 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           transformOrigin: 'left top',
         }}
       >
-        <div
-          style={{
-            display: 'inline-block',
-            fontSize: 24,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: CT.accent,
-            border: `1.5px solid ${CT.accent}`,
-            borderRadius: 6,
-            padding: '6px 14px',
-          }}
-        >
-          {t.badge}
-        </div>
-        <div
-          style={{
-            fontSize: 74,
-            fontWeight: 800,
-            color: CT.ink,
-            marginTop: 22,
-            lineHeight: 1.05,
-            textWrap: 'balance',
-          }}
-        >
-          {pattern.name}
-        </div>
+        {open !== 1 && (
+          <div
+            style={{
+              display: 'inline-block',
+              fontSize: 24,
+              fontWeight: 700,
+              letterSpacing: 3,
+              color: CT.accent,
+              border: `1.5px solid ${CT.accent}`,
+              borderRadius: 6,
+              padding: '6px 14px',
+              opacity: open === 2 ? badgeIn : 1,
+            }}
+          >
+            {t.badge}
+          </div>
+        )}
         {/* Balanced rather than ragged: Vietnamese pattern names and taglines run
             longer than the English ones and wrap to two lines, and the default
             break leaves a single word stranded on the second. */}
-        <div
-          style={{
-            fontSize: 34,
-            fontWeight: 500,
-            color: CT.inkSoft,
-            marginTop: 12,
-            lineHeight: 1.28,
-            textWrap: 'balance',
-          }}
-        >
-          {pattern.tagline}
-        </div>
+        {open === 1 ? (
+          // Claim first. The label is what every one of these videos leads with,
+          // and a feed scrolls past a label; it does not scroll past a sentence
+          // that disagrees with it. The name arrives a beat later, once the
+          // viewer has a reason to want it.
+          <>
+            <div
+              style={{
+                fontSize: 52,
+                fontWeight: 800,
+                color: CT.ink,
+                lineHeight: 1.14,
+                textWrap: 'balance',
+              }}
+            >
+              {pattern.tagline}
+            </div>
+            <div
+              style={{
+                fontSize: 40,
+                fontWeight: 700,
+                color: CT.accent,
+                marginTop: 16,
+                opacity: nameIn,
+                transform: `translateY(${interpolate(nameIn, [0, 1], [12, 0])}px)`,
+              }}
+            >
+              {pattern.name}
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                // The cold open runs the name larger and alone for a beat, so
+                // the first thing on screen is the subject rather than a chrome
+                // label around it.
+                fontSize: open === 2 ? 92 : 74,
+                fontWeight: 800,
+                color: CT.ink,
+                marginTop: open === 2 ? 8 : 22,
+                lineHeight: 1.05,
+                textWrap: 'balance',
+              }}
+            >
+              {pattern.name}
+            </div>
+            <div
+              style={{
+                fontSize: 34,
+                fontWeight: 500,
+                color: CT.inkSoft,
+                marginTop: 12,
+                lineHeight: 1.28,
+                textWrap: 'balance',
+                opacity: open === 2 ? tagIn : 1,
+                transform:
+                  open === 2
+                    ? `translateY(${interpolate(tagIn, [0, 1], [10, 0])}px)`
+                    : undefined,
+              }}
+            >
+              {pattern.tagline}
+            </div>
+          </>
+        )}
       </div>
 
       <div

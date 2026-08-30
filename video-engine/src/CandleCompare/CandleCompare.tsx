@@ -54,7 +54,14 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
   const verdictIn = kramp(frame, [KB.verdict[0], KB.verdict[0] + 40] as const);
   const whyIn = kramp(frame, [KB.why[0], KB.why[0] + 40] as const);
 
-  const measureLabel = props.metric === 'body' ? t.compare.body : t.compare.bar;
+  const measureLabel =
+    props.metric === 'body'
+      ? t.compare.body
+      : props.metric === 'upper'
+        ? t.compare.upper
+        : props.metric === 'lower'
+          ? t.compare.lower
+          : t.compare.bar;
 
   /**
    * One vertical scale for both panes, in percent of price.

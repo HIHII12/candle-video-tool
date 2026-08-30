@@ -199,6 +199,8 @@ export type PatternStats = {
 };
 
 export type CandleLessonProps = {
+  /** Which of the three openings to use, 0-2; see make_candle_lesson.py. */
+  open?: number;
   kind: 'candleLesson';
   instrument: string;
   /**
@@ -247,7 +249,7 @@ export type CandleCompareProps = {
   locale?: Locale;
   brandMark?: string | null;
   /** Which measurement decides it: the body, or the leg that came before. */
-  metric: 'body' | 'direction';
+  metric: 'body' | 'direction' | 'upper' | 'lower';
   title: string;
   /** What the two have in common — said before the difference. */
   same: string;

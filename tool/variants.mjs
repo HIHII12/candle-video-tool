@@ -122,6 +122,7 @@ export function candlePlan(isoDate, count = 100, locale = 'en') {
 export const COMPARE_PAIRS = [
   'hammer-vs-dragonfly', 'star-vs-gravestone', 'morning-vs-evening',
   'engulfing-pair', 'tweezer-pair', 'doji-vs-marubozu',
+  'doji-vs-gravestone', 'doji-vs-dragonfly',
 ];
 
 /**
@@ -172,7 +173,7 @@ export function mixedPlan(isoDate, count, locale, dataDir) {
   // does not become a comparison channel. Round-robin over six pairs means past
   // about eighteen it starts repeating pairs, which is the point at which more
   // of them stops adding variety.
-  const compare = comparePlan(isoDate, Math.min(18, Math.max(1, Math.round(count / 4))), locale);
+  const compare = comparePlan(isoDate, Math.min(24, Math.max(1, Math.round(count / 4))), locale);
   const guests = [];
   // Interleaved with each other first, so trimming does not eat one whole
   // format off the tail — the mistake planFor already had to fix once.

@@ -65,7 +65,7 @@ export const Pane: React.FC<{
   focusAt: (f: number) => number;
   /** The shared height of that final framing, as a fraction of price. */
   focusSpan: number;
-  metric: 'body' | 'direction';
+  metric: 'body' | 'direction' | 'upper' | 'lower';
   label: string;
 }> = ({side, box, frame, drawAt, measure, zoomAt, relSpan, focusAt, focusSpan, metric, label}) => {
   const total = side.candles.length;
@@ -192,10 +192,17 @@ export const Pane: React.FC<{
         >
           {(() => {
             const x = coords.indexToX(side.indices[side.indices.length - 1]);
-            // The body for the body comparison; the whole bar for the direction
-            // one, where what is being pointed at is the bar itself, not a part.
+            // Whichever part of the bar the argument turns on: the body, one of
+            // the two shadows, or the whole bar when what is being pointed at is
+            // the bar itself rather than a part of it.
             const [lo, hi] =
-              metric === 'body' ? [bodyBottom, bodyTop] : [key.low, key.high];
+              metric === 'body'
+                ? [bodyBottom, bodyTop]
+                : metric === 'upper'
+                  ? [bodyTop, key.high]
+                  : metric === 'lower'
+                    ? [key.low, bodyBottom]
+                    : [key.low, key.high];
             const yLo = coords.priceToY(lo);
             const yHi = coords.priceToY(hi);
             const top = Math.min(yLo, yHi);
