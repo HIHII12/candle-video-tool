@@ -301,9 +301,14 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           left: 40,
           right: 40,
           textAlign: 'center',
-          color: 'rgba(255,255,255,0.34)',
+          // Matched to the other formats' small print. At 0.34 opacity and
+          // weight 700 this line was bright enough to read from the sofa, which
+          // put readable text under the platform's own controls — where it
+          // simply is not seen. Small print is required to be present, not
+          // prominent; see src/safeArea.ts.
+          color: 'rgba(230,237,243,0.30)',
           fontSize: 21,
-          fontWeight: 700,
+          fontWeight: 500,
           zIndex: 60,
         }}
       >

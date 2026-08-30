@@ -85,8 +85,26 @@ node tool/batch.mjs --format candle-lesson --count 100 --workers 2
 cho kế hoạch một ngày: kế hoạch ngày chỉ có 13 video dạy nến, mục lục thì bao
 nhiêu cũng được, mỗi cái một seed riêng.
 
-Chỉ format này chạy được số lượng lớn khi **không có mạng** — ba format kia cần
-dữ liệu giá thật.
+**Nhưng 100 cái cùng một format thì lúc giải nén ra vẫn là một kiểu.** Muốn cả
+năm kiểu trong một lượt:
+
+```bash
+node tool/batch.mjs --mix --count 100 --workers 2 --locale vi
+```
+
+`--mix` trộn hai kiểu **sinh được offline** (mẫu nến · so sánh) với ba kiểu
+replay từ config dữ liệu thật đã có sẵn trong repo. Phần replay + so sánh bị
+chặn ở tối đa 3/5 lượt chạy, nên lượt ngắn cũng đủ cả năm kiểu chứ không bị cắt
+mất đuôi.
+
+Riêng format so sánh:
+
+```bash
+node tool/batch.mjs --format candle-compare --count 12 --locale vi
+```
+
+Hai kiểu này chạy được số lượng lớn khi **không có mạng** — ba kiểu kia cần dữ
+liệu giá thật để *sinh config*, dù render thì không cần.
 
 Trên Windows: nháy đúp `run-100-roi-tat-may.bat` (render → soi sạn → tắt máy).
 
@@ -146,10 +164,20 @@ Bắt: tràn khung · chữ nằm dưới giao diện Shorts · bố cục lệc
 | Âm lượng | -14,1 … -13,8 LUFS · đỉnh max -1,03 dBTP |
 | Format | 77 mẫu nến · 9 setup có tên · 8 đố mua/bán · 6 bản đồ |
 
-**1.460 cảnh báo, tất cả một loại:** vùng chart nằm dưới cột nút / thanh Shorts,
-và đều từ ba format chart (mẫu nến: 0). Đây là chart tràn viền — bình thường;
-phần **chữ** đã được kéo vào trong vùng đọc được. Muốn hết cảnh báo thì phải
-thu hẹp chart, đổi lại mất phần không gian dự phóng bên phải của bản đồ.
+> **Đính chính 30/08 — 1.460 cảnh báo đó em đọc sai nguyên nhân.**
+> Lúc đó em ghi là "vùng chart nằm dưới cột nút". Đo lại thì không phải:
+> `check_layout.py` đếm **mọi** vệt sáng, kể cả dòng miễn trừ trách nhiệm cỡ
+> nhỏ — thứ **cố tình** đặt dưới vạch, vì nó chỉ cần *có mặt*, không cần *nổi
+> bật* (`src/safeArea.ts` ghi rõ điều này từ đầu).
+>
+> Đo cụ thể: dòng miễn trừ sáng tối đa **183**, chữ thân bài từ **600** trở
+> lên — hai nhóm tách hẳn nhau. Nay phép kiểm chỉ tính chữ **đọc được**
+> (ngưỡng 200), và số cảnh báo còn lại là **thật**: format đố mua/bán vẽ dòng
+> miễn trừ của nó ở `rgba(255,255,255,0.34)` đậm 700, sáng hơn ba format kia,
+> nên nó vượt ngưỡng — đã chỉnh về đúng kiểu chung.
+>
+> **Bài học:** một phép kiểm bắn 1.460 phát vào cùng một thứ đã được chấp nhận
+> thì bằng không có phép kiểm nào. Em đã báo con số đó như thể nó là kết quả.
 
 ## Đã chạy thật — 50 video tiếng Việt, 29/08/2026
 

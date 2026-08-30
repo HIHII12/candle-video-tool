@@ -1,6 +1,7 @@
 # Cỗ máy video — nó là gì, và còn thiếu gì
 
 Viết 29/08/2026, sau vòng nâng cấp đầu tiên và 100 video xuất thật.
+**Cập nhật 30/08/2026** — đánh dấu cái nào đã làm xong, cái nào còn nguyên.
 
 ---
 
@@ -21,19 +22,21 @@ lệnh — không mở phần mềm dựng, không kéo thả.
 
 ~7.300 dòng TypeScript + 17 script Python.
 
-### Bốn khuôn nội dung
+### Năm khuôn nội dung
 
 | Khuôn | Nói gì | Cần mạng |
 |---|---|---|
 | **candle-lesson** | Một mẫu nến: giải phẫu → quy tắc → vào lệnh → kết quả | ❌ không |
+| **candle-compare** *(mới 30/08)* | Hai mẫu **dễ nhầm** xếp trên dưới, một phép đo tách chúng ra | ❌ không |
 | **named-setup** | Một setup có tên (double bottom + order block…) trên dữ liệu thật | ✅ có |
 | **buy-or-sell-quiz** | Đố: mua hay bán? Đếm ngược 3 giây, rồi lật bài | ✅ có |
 | **market-map** | Bản đồ vùng thanh khoản, order block, gap trên khung lớn | ✅ có |
 
 Một ngày mặc định: 8 quiz · 8 named-setup · 8 candle-lesson · 6 market-map.
+Lượt `--mix 100`: 59 mẫu nến · 18 so sánh · 9 setup · 8 đố · 6 bản đồ.
 
-**Chỉ candle-lesson chạy được offline.** Đó là lý do 100 video vừa rồi đều là
-khuôn này — mạng ở môi trường render bị chặn.
+**Hai khuôn chạy được offline** (mẫu nến, so sánh) — trước chỉ có một, và đó
+đúng là lý do 100 video đợt trước giải nén ra chỉ thấy một kiểu.
 
 ---
 
@@ -59,13 +62,15 @@ TikTok, đo hai lượt.
 
 ### 🔴 Nhóm 1 — chặn việc kiếm tiền
 
-**1. Toàn bộ tiếng Anh.** Không có một chữ tiếng Việt nào trong video. Nếu khán
-giả là người Việt thì đây là nút chặn lớn nhất, lớn hơn mọi thứ khác cộng lại.
-Cần: bảng chữ song ngữ + chọn ngôn ngữ ở cấp job.
+**1. ✅ XONG — Toàn bộ tiếng Anh.** Đã có luồng `vi`: bảng chữ song ngữ
+(`src/i18n.ts`), tên mẫu nến theo cách dân trade Việt gọi, logo góc phải, chọn
+bằng `--locale vi`.
 
-**2. Không có giọng đọc.** Piper chưa cài trên máy render. Short 35 giây không
-có giọng thì giữ chân kém hơn hẳn — người xem đọc chữ trên màn hình mất công hơn
-nghe. Đây là yếu tố giữ chân số 1 của định dạng này.
+**2. 🟡 ĐÃ DỰNG XONG ĐƯỜNG — chưa chạy thật trên máy anh.** Lời đọc tiếng Việt
+đã viết cho **cả năm khuôn**, và `cai-dat.py --giong` tự tải giọng
+`vi_VN-vais1000-medium` từ **Hugging Face**. Em **chưa nghe được** file nào:
+môi trường render của em bị chặn ra huggingface.co, nên phần tải là code chưa
+chạy qua lần nào. Anh chạy `giong-tieng-viet.bat` một lần rồi báo em.
 
 **3. Không có link đo được cho từng video.** Máy sinh 100 video, nhưng không có
 UTM/link riêng để biết video nào ra người mở tài khoản GTCFX. Không đo được thì
@@ -77,8 +82,9 @@ không biết nên làm thêm cái nào.
 tên mẫu → tagline → chart. Trong feed, đó là dấu hiệu "sản xuất hàng loạt" mà
 cả người xem lẫn thuật toán đều nhận ra. Cần 3–4 kiểu mở khác nhau.
 
-**5. Không có file mô tả + hashtag kèm mỗi video.** Manifest có tiêu đề và hook
-nhưng chưa xuất ra `.txt` để copy-paste lúc upload.
+**5. ✅ XONG — file mô tả + hashtag kèm mỗi video.** Mỗi `.mp4` giờ có một
+`.txt` cùng tên: tiêu đề · mô tả · hashtag · câu miễn trừ. Chữ lấy từ chính
+config của video, hashtag sản phẩm đọc từ `cfg.pair`.
 
 **6. Không có phụ đề `.srt`.** YouTube tự tạo nhưng với tiếng Việt thì tệ.
 
@@ -95,7 +101,7 @@ Bốn khuôn hiện tại đều là **"đây là cái gì"**. Thiếu hẳn cá
 
 | Dạng còn thiếu | Vì sao đáng làm |
 |---|---|
-| **Hai mẫu dễ nhầm** — hammer vs hanging man, các loại doji | Dạy được điều mà một mẫu đơn lẻ không dạy được |
+| ✅ ~~**Hai mẫu dễ nhầm**~~ — **đã làm**, 6 cặp, hai khung chung một thang giá | Dạy được điều mà một mẫu đơn lẻ không dạy được |
 | **Bóc sai lầm** — cùng setup: người mới vào thế nào vs có hệ thống vào thế nào | Dạng giữ chân tốt nhất trên kênh trading |
 | **Nhật ký lệnh thật** — lệnh có thật, số có thật | Thứ duy nhất tạo được niềm tin thật |
 | **Tổng kết tuần / cộng pips** | La bàn đã ghi là cần, và nó nuôi phễu rebate |
@@ -112,8 +118,12 @@ Theo `LA-BAN.md`, ngách GoldFather FX do **Codex + Hermes** dẫn, và nút th�
 một của ngách đó là **chưa có bot tín hiệu** — không phải thiếu video.
 
 Cỗ máy này giờ đã đủ tốt để chạy hàng ngày. Nhồi thêm tính năng cho nó **không
-gỡ được nút thắt đó**. Việc đáng làm tiếp không phải là khuôn video thứ năm, mà
-là: có giọng đọc tiếng Việt, có link đo được, rồi để số thật quyết định làm gì tiếp.
+gỡ được nút thắt đó**.
 
-> Trước khi thêm bất cứ tính năng nào: đăng 20 video trong số 100 cái này, rồi
-> đọc số giữ chân. Không có số đó thì mọi việc nâng cấp tiếp theo đều là đoán.
+**Cập nhật 30/08:** khuôn thứ năm và giọng đọc tiếng Việt đã làm — vì anh yêu
+cầu dứt điểm, và vì "100 video một kiểu" là lỗi thật của em, không phải chuyện
+thêm tính năng cho vui. Nhưng **kết luận dưới đây không đổi**:
+
+> Việc đáng làm tiếp **không phải khuôn thứ sáu**. Đăng 20 video trong số này,
+> đọc số giữ chân, rồi để số thật quyết định. Không có số đó thì mọi nâng cấp
+> tiếp theo đều là đoán — kể cả những cái em vừa làm.

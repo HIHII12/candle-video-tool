@@ -52,9 +52,22 @@ export const Pane: React.FC<{
    * size is drawn twice the size.
    */
   relSpan: number;
+  /**
+   * How far the last beat has closed on the pattern candle itself, 0-1.
+   *
+   * The push-in that runs from the top chart onward is continuous, and by the
+   * final seconds it has slowed to about a third of a pixel a frame — measured,
+   * that reads as a still picture, and the last six seconds of the first build
+   * were flagged as dead. So the closing beat gets a move of its own instead of
+   * the tail of an earlier one: both panes close onto the candle being argued
+   * about, which is also what the words are doing at that moment.
+   */
+  focusAt: (f: number) => number;
+  /** The shared height of that final framing, as a fraction of price. */
+  focusSpan: number;
   metric: 'body' | 'direction';
   label: string;
-}> = ({side, box, frame, drawAt, measure, zoomAt, relSpan, metric, label}) => {
+}> = ({side, box, frame, drawAt, measure, zoomAt, relSpan, focusAt, focusSpan, metric, label}) => {
   const total = side.candles.length;
   const last = side.indices[side.indices.length - 1];
   const first = side.indices[0];
@@ -114,6 +127,9 @@ export const Pane: React.FC<{
   // of a second. Taken raw it stepped every time a tall wick crossed the left
   // edge; the trail rounds that into a glide. Both panes run the same function
   // on the same clock, so they stay at comparable scales throughout.
+  const key = side.candles[last];
+  const keyMid = (key.high + key.low) / 2;
+
   const window = smoothed(
     frame,
     (f) => {
@@ -122,12 +138,18 @@ export const Pane: React.FC<{
       // Generous vertical padding: these panes are 470px tall and the patterns
       // being compared are the long-wick ones, so the tip of a wick is the
       // single most important pixel in the frame and it was landing in the fade.
-      return insetPrice(extentOf(bars.length ? bars : side.candles, [], 0.14), box, {
+      const wide = insetPrice(extentOf(bars.length ? bars : side.candles, [], 0.14), box, {
         top: 12,
         bottom: 12,
         left: 24,
         right: 20,
       });
+      // The closing framing, shared between the panes so they stay comparable
+      // right to the last frame: same height in percent of price, each centred
+      // on its own candle.
+      const need = Math.abs(keyMid) * focusSpan;
+      const tight = {minValue: keyMid - need / 2, maxValue: keyMid + need / 2};
+      return lerpPrice(wide, tight, focusAt(f));
     },
     lerpPrice,
     20,
@@ -151,7 +173,6 @@ export const Pane: React.FC<{
     {from: cam.from, to: cam.to},
   );
 
-  const key = side.candles[side.indices[side.indices.length - 1]];
   const bodyTop = Math.max(key.open, key.close);
   const bodyBottom = Math.min(key.open, key.close);
 

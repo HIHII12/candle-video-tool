@@ -77,6 +77,26 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
     return Math.max(rel(props.left), rel(props.right));
   }, [props.left, props.right]);
 
+  /**
+   * The height the closing push-in settles at — again shared, again the larger.
+   *
+   * Three times the taller candle's own range, so the candle fills roughly a
+   * third of its pane at the end. Tighter than that and the approach bars leave
+   * the frame, which takes the context away exactly when the verdict needs it.
+   */
+  const focusSpan = React.useMemo(() => {
+    const rel = (side: typeof props.left) => {
+      const k = side.candles[side.indices[side.indices.length - 1]];
+      const m = (k.high + k.low) / 2;
+      return m ? (k.high - k.low) / Math.abs(m) : 0;
+    };
+    return Math.max(rel(props.left), rel(props.right)) * 3;
+  }, [props.left, props.right]);
+
+  // Held back until the verdict, then run right to the end.
+  const focus = (f: number) =>
+    kramp(f, [KB.verdict[0], durationInFrames - 30] as const) * 0.85;
+
   const nameTag = (side: typeof props.left, shown: number, top: number) => (
     <div
       style={{
@@ -153,6 +173,8 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
         measure={measure}
         zoomAt={zoom}
         relSpan={relSpan}
+        focusAt={focus}
+        focusSpan={focusSpan}
         metric={props.metric}
         label={measureLabel}
       />
@@ -164,6 +186,8 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
         measure={measure}
         zoomAt={zoom}
         relSpan={relSpan}
+        focusAt={focus}
+        focusSpan={focusSpan}
         metric={props.metric}
         label={measureLabel}
       />
