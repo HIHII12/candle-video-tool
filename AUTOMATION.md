@@ -135,6 +135,22 @@ python3 video-engine/scripts/kiem_video.py "video-engine/out/batch/*/*.mp4" \
 Bắt: tràn khung · chữ nằm dưới giao diện Shorts · bố cục lệch · **đứng hình** ·
 âm lượng lệch chuẩn. Mã thoát 1 nếu có LOI, nên cắm được vào CI.
 
+## Đã chạy thật — 100 video bốn format, tiếng Việt, 30/08/2026
+
+| | |
+|---|---|
+| Render | **100/100, 0 hỏng** |
+| Soi sạn | **0 LỖI** |
+| Đứng hình | max 2,01 s · trung bình 0,09 s |
+| Chuyển động | 15–28% khung hình |
+| Âm lượng | -14,1 … -13,8 LUFS · đỉnh max -1,03 dBTP |
+| Format | 77 mẫu nến · 9 setup có tên · 8 đố mua/bán · 6 bản đồ |
+
+**1.460 cảnh báo, tất cả một loại:** vùng chart nằm dưới cột nút / thanh Shorts,
+và đều từ ba format chart (mẫu nến: 0). Đây là chart tràn viền — bình thường;
+phần **chữ** đã được kéo vào trong vùng đọc được. Muốn hết cảnh báo thì phải
+thu hẹp chart, đổi lại mất phần không gian dự phóng bên phải của bản đồ.
+
 ## Đã chạy thật — 50 video tiếng Việt, 29/08/2026
 
 | | |
