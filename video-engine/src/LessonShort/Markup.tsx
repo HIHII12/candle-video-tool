@@ -43,15 +43,38 @@ export const ZigZag: React.FC<{
           <rect x={0} y={0} width={progress * LESSON_BOX.width} height={LESSON_BOX.height} />
         </clipPath>
       </defs>
+      {/* A soft halo under the stroke, then the stroke.
+          The path used to be a heavy black dashed line laid straight over the
+          candles, and on a white chart that is the most aggressive mark
+          available — it fought the price action it was supposed to be tracing.
+          A rounded stroke on the accent colour, sitting on a pale halo so it
+          stays legible where it crosses a dark candle, traces instead. */}
       <path
         d={d}
         fill="none"
-        stroke={LT.structure}
-        strokeWidth={5}
-        strokeDasharray="16 12"
+        stroke={LT.bg}
+        strokeWidth={13}
         strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.75}
         clipPath={`url(#${clipId})`}
       />
+      <path
+        d={d}
+        fill="none"
+        stroke={LT.ob}
+        strokeWidth={5.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        clipPath={`url(#${clipId})`}
+      />
+      {/* Dots on the swings, so the shape reads as a set of decisions rather
+          than a squiggle. */}
+      {pts.map((p, i) =>
+        p.x <= progress * LESSON_BOX.width ? (
+          <circle key={i} cx={p.x} cy={p.y} r={7} fill={LT.ob} stroke={LT.bg} strokeWidth={3} />
+        ) : null,
+      )}
     </g>
   );
 };
@@ -89,7 +112,10 @@ export const PatternLabels: React.FC<{
 
         return (
           <g key={`${pt.index}-${pt.label}`} opacity={step}>
-            <circle cx={x} cy={y} r={9} fill={LT.ink} />
+            {/* The same dot the zigzag draws, not a second black one beside
+                it: two dot styles on the same kind of point read as two
+                different things being marked. */}
+            <circle cx={x} cy={y} r={7} fill={LT.ob} stroke={LT.bg} strokeWidth={3} />
             <rect
               x={x - width / 2}
               y={y + dy - 30}
