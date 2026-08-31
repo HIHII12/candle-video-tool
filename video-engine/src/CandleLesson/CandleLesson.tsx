@@ -9,6 +9,7 @@ import {BrandMark} from '../BrandMark';
 import {strings} from '../i18n';
 import {ChartEdges} from '../ChartEdges';
 import {Marks, type MarkTheme} from '../Marks';
+import {textWidth} from '../textWidth';
 import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
 import {SAFE} from '../safeArea';
@@ -101,6 +102,29 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   const open = props.open ?? 0;
   /** True for the lessons that teach a structure rather than a candle. */
   const concept = (props.marks?.length ?? 0) > 0;
+  /**
+   * Left edge of the trade-level captions.
+   *
+   * They are right-anchored at the trade box's right end and run leftward, so
+   * "entry · 2x the risk" reaches much further left than the entry bar does —
+   * reserving from the entry bar was not enough and the golden-pocket label
+   * still landed on top of it. Reserve from where the longest caption actually
+   * starts instead.
+   */
+  const tradeLabelLeft =
+    // Same right limit Annotations.tsx uses, and already in chart-box space.
+    CHART.width -
+    SAFE.right -
+    24 -
+    textWidth(
+      strings(props.locale).entry(
+        (
+          Math.abs(props.trade.target - props.trade.entry) /
+          Math.max(1e-6, Math.abs(props.trade.stop - props.trade.entry))
+        ).toFixed(0),
+      ),
+      28,
+    );
   const nameIn = interpolate(frame, [46, 82], [0, 1], clamp);
   const tagIn = interpolate(frame, [40, 76], [0, 1], clamp);
   const badgeIn = interpolate(frame, [64, 96], [0, 1], clamp);
@@ -301,6 +325,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
               // the golden pocket out at the exact moment the video places a
               // buy inside it deletes the argument it just made.
               opacity={Math.max(anatomyOpacity, 0.62)}
+              // The trade box owns the frame from the entry bar rightward once
+              // it is drawn; the mark labels step left of it rather than over it.
+              avoidFromX={tradeProgress > 0.05 ? tradeLabelLeft : undefined}
               theme={MARK_THEME}
               font={CFONT}
             />

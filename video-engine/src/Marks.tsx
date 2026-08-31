@@ -77,9 +77,19 @@ export const Marks: React.FC<{
   box: {width: number; height: number};
   progress: number;
   opacity?: number;
+  /**
+   * x from which another layer owns the frame — the trade levels, in practice.
+   *
+   * Marks and trade levels are drawn by different components that cannot see
+   * each other, and once the entry box appears on the right of the chart the
+   * "GOLDEN POCKET 0.618-0.705" pill was printed straight through "entry · 2x
+   * the risk". Rather than fading one of them out, labels move left of this
+   * line and keep saying what they say.
+   */
+  avoidFromX?: number;
   theme: MarkTheme;
   font: string;
-}> = ({marks, coords, box, progress, opacity = 1, theme, font}) => {
+}> = ({marks, coords, box, progress, opacity = 1, avoidFromX, theme, font}) => {
   if (progress <= 0 || opacity <= 0) return null;
   const count = marks.length;
   const colorOf = (t: Tone = 'gold') => theme[t];
@@ -88,6 +98,11 @@ export const Marks: React.FC<{
   // levels a few pixels apart do not print their names on top of each other —
   // which is exactly what a Fibonacci grid does at the 0.5 and 0.618 lines.
   const used: {y: number; x0: number; x1: number}[] = [];
+  /** Keep a pill clear of the reserved band, then inside the box. */
+  const shove = (x: number, w: number) => {
+    const limit = avoidFromX === undefined ? box.width - 8 : Math.min(avoidFromX - 10, box.width - 8);
+    return Math.max(6, Math.min(x, limit - w));
+  };
   const place = (y: number, x0: number, w: number) => {
     let out = y;
     for (let i = 0; i < 14; i += 1) {
@@ -116,7 +131,7 @@ export const Marks: React.FC<{
           // Right-aligned against the drawn end of the line, then pulled back
           // inside the box. A level near the right of the chart used to print
           // its name past the frame edge.
-          const bx = Math.min(Math.max(x0 + 6, x1 - w - 8), box.width - w - 8);
+          const bx = shove(Math.max(x0 + 6, x1 - w - 8), w);
           const by = place(y - 40, bx, w);
           return (
             <g key={i}>
@@ -157,7 +172,7 @@ export const Marks: React.FC<{
           const end = m.to === undefined ? box.width - 18 : coords.indexToX(m.to);
           const x1 = interpolate(t, [0, 1], [x0, end]);
           const w = pillWidth(m.label, 27, 14);
-          const bx = Math.min(x0 + 8, box.width - w - 8);
+          const bx = shove(x0 + 8, w);
           const by = place(Math.min(yTop, yBottom) - 44, bx, w);
           return (
             <g key={i}>
@@ -227,7 +242,7 @@ export const Marks: React.FC<{
               // Above the swing high, below the swing low: the label never
               // covers the price action it is naming.
               const above = j === 0 || p.y <= pts[Math.max(0, j - 1)].y;
-              const bx = Math.min(Math.max(6, p.x - w / 2), box.width - w - 6);
+              const bx = shove(p.x - w / 2, w);
               const by = place(above ? p.y - 56 : p.y + 22, bx, w);
               return (
                 <g key={j}>
