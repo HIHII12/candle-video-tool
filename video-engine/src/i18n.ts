@@ -44,6 +44,15 @@ type Strings = {
   caveatLoss: string;
   caveatDefault: string;
   cta: string;
+  /**
+   * The same two lines for the concept lessons.
+   *
+   * The candlestick wording — "the pattern is a trigger", "one pattern a day" —
+   * shipped verbatim over a Fibonacci grid and a range, telling the viewer the
+   * video was about something it was not.
+   */
+  conceptCaveat: string;
+  conceptCta: string;
   disclaimer: string;
   target: (price: string) => string;
   stop: (price: string) => string;
@@ -111,6 +120,8 @@ const EN: Strings = {
   caveatLoss: 'Every check passed and it still lost. That is what a trigger is.',
   caveatDefault: 'One trade is not evidence — the pattern is a trigger, not a system.',
   cta: 'Follow for one pattern a day',
+  conceptCaveat: 'One trade is not evidence — structure gives a reason, not a promise.',
+  conceptCta: 'Follow — one concept a day',
   disclaimer: 'Educational only, not financial advice',
   target: (p) => `Target · ${p}`,
   stop: (p) => `Stop · ${p}`,
@@ -189,6 +200,8 @@ const VI: Strings = {
   caveatLoss: 'Đủ cả ba điều kiện mà vẫn thua. Tín hiệu vào lệnh là như vậy.',
   caveatDefault: 'Một lệnh không phải bằng chứng — mẫu nến là tín hiệu, không phải hệ thống.',
   cta: 'Theo dõi — mỗi ngày một mẫu nến',
+  conceptCaveat: 'Một lệnh không phải bằng chứng — cấu trúc cho lý do, không cho lời hứa.',
+  conceptCta: 'Theo dõi — mỗi ngày một kiến thức',
   disclaimer: 'Chỉ mang tính giáo dục, không phải lời khuyên đầu tư',
   target: (p) => `Chốt lời · ${p}`,
   stop: (p) => `Dừng lỗ · ${p}`,

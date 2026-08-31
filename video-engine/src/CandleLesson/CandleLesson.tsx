@@ -99,6 +99,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
    * carries, so there is no second copy to keep true.
    */
   const open = props.open ?? 0;
+  /** True for the lessons that teach a structure rather than a candle. */
+  const concept = (props.marks?.length ?? 0) > 0;
   const nameIn = interpolate(frame, [46, 82], [0, 1], clamp);
   const tagIn = interpolate(frame, [40, 76], [0, 1], clamp);
   const badgeIn = interpolate(frame, [64, 96], [0, 1], clamp);
@@ -293,7 +295,12 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
               coords={coords}
               box={CHART}
               progress={anatomyProgress}
-              opacity={anatomyOpacity}
+              // Dimmed for the trade, not removed. On a candlestick lesson the
+              // anatomy labels have said their piece by then and clutter the
+              // entry; here the drawing IS the reason for the entry, and fading
+              // the golden pocket out at the exact moment the video places a
+              // buy inside it deletes the argument it just made.
+              opacity={Math.max(anatomyOpacity, 0.62)}
               theme={MARK_THEME}
               font={CFONT}
             />
@@ -312,7 +319,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         frame={frame}
         marks={props.voiceMarks ?? undefined}
         locale={props.locale}
-        concept={(props.marks?.length ?? 0) > 0}
+        concept={concept}
       />
 
       {/* Rule + checklist */}
@@ -462,7 +469,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           >
             {props.outcome.result === 'SL'
               ? t.caveatLoss
-              : t.caveatDefault}
+              : concept
+                ? t.conceptCaveat
+                : t.caveatDefault}
           </div>
 
           <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
@@ -513,7 +522,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
                   transform: `scale(${interpolate(cta, [0, 1], [0.8, 1])})`,
                 }}
               >
-                {t.cta}
+                {concept ? t.conceptCta : t.cta}
               </div>
             );
           })()}
