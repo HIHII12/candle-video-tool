@@ -80,7 +80,7 @@ không tốn thời gian render. Chạy offline, không cần mạng.
 
 ## 30 video khác nhau ở đâu
 
-Năm format, mỗi ngày chia đều:
+Sáu format, mỗi ngày chia đều:
 
 - **8 video** dạy mẫu nến — **13 mẫu** (engulfing, hammer, shooting star,
   morning/evening star, 3 loại doji, marubozu, pin bar, tweezer top/bottom).
@@ -95,6 +95,22 @@ Năm format, mỗi ngày chia đều:
   Búa/Doji Chuồn Chuồn · Sao Băng/Doji Bia Mộ · Sao Mai/Sao Hôm ·
   Nhấn Chìm Tăng/Giảm · Đáy Nhíp/Đỉnh Nhíp · Doji/Marubozu.
   **Không cần mạng.**
+
+- **video kiến thức** *(format thứ 6, mới)* — thứ **lớn hơn một cây nến**:
+  **Fibonacci thoái lui · Vùng lệnh (Order Block) · Quét thanh khoản ·
+  Đổi cấu trúc CHoCH · Vai Đầu Vai · Hai Đáy · Đi ngang ngắn hạn**.
+  Cùng mạch kể với bài mẫu nến *(cấu trúc → quy tắc → vào lệnh → sự thật)*,
+  cùng luật 40% video kết thúc bằng lệnh thua. **Không cần mạng.**
+
+> **Vì sao thêm format kiến thức.** Mười ba mẫu nến là một bộ **từ vựng**, chưa
+> phải một bài học. Thứ thật sự quyết định một lệnh thì lớn hơn một cây nến:
+> nhịp lùi kết thúc ở đâu, tiền lớn còn lệnh chưa khớp ở đâu, xu hướng đổi
+> chiều lúc nào, và làm gì khi giá đi ngang — không cái nào nhét vừa vào một
+> cây nến.
+>
+> **Hình vẽ là một lời khẳng định.** Bản dựng đầu cho ra 29/60 trường hợp mà
+> cái "đầu" **không cao hơn hai vai** — video đọc quy tắc của chính nó đè lên
+> một cái chart vi phạm quy tắc đó. Nay có kiểm tự động; 1.400 lần dựng, 0 hỏng.
 
 > **Vì sao thêm format so sánh.** Bốn format cũ đều trả lời cùng một câu —
 > *"cái này là cái gì"*. Không cái nào trả lời câu làm người ta vào lệnh sai:
@@ -148,8 +164,9 @@ node tool\batch.mjs --mix --locale vi --count 100 --workers 2
 
 | Kiểu | Nói gì | Bao nhiêu trong 100 |
 |---|---|---|
-| **Bài học mẫu nến** | Giải phẫu → quy tắc → vào lệnh → kết quả | 59 |
-| **So sánh hai mẫu dễ nhầm** | Giống chỗ nào → đo cái khác nhau → chốt | 18 |
+| **Bài học mẫu nến** | Giải phẫu → quy tắc → vào lệnh → kết quả | 37 |
+| **So sánh hai mẫu dễ nhầm** | Giống chỗ nào → đo cái khác nhau → chốt | 20 |
+| **Kiến thức** *(mới)* | Fibonacci · SMC · Vai Đầu Vai · đi ngang | 20 |
 | **Setup có tên** | Vai Đầu Vai, Hai Đáy… + vùng lệnh | 9 |
 | **Đố mua hay bán** | Đếm ngược 3 giây rồi lật bài | 8 |
 | **Bản đồ thị trường** | Vùng thanh khoản, order block, gap | 6 |
