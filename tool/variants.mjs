@@ -154,6 +154,41 @@ export function comparePlan(isoDate, count = 12, locale = 'en') {
   return jobs;
 }
 
+// The seven concepts this tool teaches beyond the single candle. Kept in step
+// with BUILDERS in make_concept_lesson.py by hand, for the same reason as
+// COMPARE_PAIRS: --dry-run has to print a plan without shelling out to python.
+export const CONCEPTS = [
+  'fibonacci', 'order-block', 'liquidity-sweep', 'bos-choch',
+  'head-shoulders', 'double-bottom', 'sideway',
+];
+
+/**
+ * A run of concept lessons — the knowledge that is bigger than one candle.
+ *
+ * Thirteen candlestick patterns is a vocabulary, not an education. What decides
+ * a trade is where the pullback ends, where the unfilled orders sit, when the
+ * trend actually turned, and what to do when price is going nowhere — and none
+ * of that fits inside a single bar. Same storyboard, same honesty about losses,
+ * same no-network requirement.
+ */
+export function conceptPlan(isoDate, count = 14, locale = 'vi') {
+  const day = dayIndex(isoDate);
+  const jobs = [];
+  for (let n = 0; n < count; n += 1) {
+    const topic = CONCEPTS[n % CONCEPTS.length];
+    const round = Math.floor(n / CONCEPTS.length) + 1;
+    jobs.push({
+      id: `${locale}-concept-${topic}-v${String(round).padStart(2, '0')}`,
+      locale,
+      format: 'concept-lesson',
+      topic,
+      seed: day * 1000 + n * 71 + 13,
+      label: `${topic.replace(/-/g, ' ')} · ${round}`,
+    });
+  }
+  return jobs;
+}
+
 /**
  * A mixed catalogue: every format the machine can build without a network.
  *
@@ -173,7 +208,8 @@ export function mixedPlan(isoDate, count, locale, dataDir) {
   // does not become a comparison channel. Round-robin over six pairs means past
   // about eighteen it starts repeating pairs, which is the point at which more
   // of them stops adding variety.
-  const compare = comparePlan(isoDate, Math.min(24, Math.max(1, Math.round(count / 4))), locale);
+  const compare = comparePlan(isoDate, Math.min(21, Math.max(1, Math.round(count / 5))), locale);
+  const concept = conceptPlan(isoDate, Math.min(21, Math.max(1, Math.round(count / 5))), locale);
   const guests = [];
   // Interleaved with each other first, so trimming does not eat one whole
   // format off the tail — the mistake planFor already had to fix once.
@@ -181,13 +217,14 @@ export function mixedPlan(isoDate, count, locale, dataDir) {
     const before = guests.length;
     if (replay[i]) guests.push(replay[i]);
     if (compare[i]) guests.push(compare[i]);
+    if (concept[i]) guests.push(concept[i]);
     if (guests.length === before) break;
   }
   // Never more than three fifths of the run, so the format that can be freshly
   // generated is always in it. Without the cap a twenty-video mix came out with
   // twenty-eight guests available and zero candle lessons — the trim took the
   // whole tail, which is the same failure planFor was already fixed for.
-  guests.length = Math.min(guests.length, Math.max(1, Math.round(count * 0.6)));
+  guests.length = Math.min(guests.length, Math.max(1, Math.round(count * 0.72)));
   const candles = candlePlan(isoDate, Math.max(0, count - guests.length), locale);
   if (!guests.length) return candles.slice(0, count);
 

@@ -343,6 +343,31 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               ? t.setup.winLine
               : t.setup.lossLine}
           </div>
+          {/* The call to action lives *inside* the verdict block, as its last
+              line, rather than at its own offset from the bottom. It used to be
+              absolutely positioned at SAFE.bottom + 62 with no frame guard at
+              all, which put it permanently in the middle of whatever else was
+              in that band: it drew straight through the step pill for the first
+              thirty seconds and then straight through this verdict. Two blocks
+              measured from the same edge will always eventually meet; one block
+              that flows cannot. */}
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              color: LT.ob,
+              marginTop: 20,
+              opacity: interpolate(frame, [LSB.result[0] + 50, LSB.result[0] + 86], [0, 1], clamp),
+            }}
+          >
+            {t.setup.cta(
+              props.pair.split('/')[0] === 'XAU'
+                ? props.locale === 'vi'
+                  ? 'vàng'
+                  : 'gold'
+                : props.pair.split('/')[0],
+            )}
+          </div>
         </div>
       )}
 
@@ -363,31 +388,6 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         </div>
       )}
 
-      {/* The channel line sits above the step label and the verdict, which now
-          share the band just under it. Two blocks at the same offset would draw
-          straight through each other. */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: SAFE.bottom + 62,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          fontSize: 34,
-          fontWeight: 900,
-          color: LT.ink,
-        }}
-      >
-        {/* Pair-aware: "gold setups" printed over a silver chart, same class of
-            false label as the hardcoded XAU/USD above it. */}
-        {t.setup.cta(
-          props.pair.split('/')[0] === 'XAU'
-            ? props.locale === 'vi'
-              ? 'vàng'
-              : 'gold'
-            : props.pair.split('/')[0],
-        )}
-      </div>
       <div
         style={{
           position: 'absolute',

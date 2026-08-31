@@ -175,9 +175,15 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          top: 456,
+          // Above the chart, not on it. The chart box was grown upward to use
+          // the dead band and this line stayed where it was, so the canvas
+          // painted straight over it — the same z-order trap the rule panel
+          // fell into. Keeping it clear of CHART_BOX.top by construction rather
+          // than by a number that has to be remembered.
+          top: CHART_BOX.top - 84,
           left: 0,
           right: 0,
+          zIndex: 30,
           opacity: frame >= SB.result[0] ? 0 : 1,
           display: 'flex',
           justifyContent: 'center',

@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -179,6 +179,20 @@ async function buildData(job) {
     };
   }
 
+  if (job.format === 'concept-lesson') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_concept_lesson.py',
+      '--topic', job.topic, '--seed', String(job.seed),
+      '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'CandleLesson',
+      configPath: out,
+      cfg,
+      facts: { topic: job.topic, name: cfg.pattern.name },
+    };
+  }
+
   if (job.format === 'candle-compare') {
     const out = `src/data/batch_${job.id}.json`;
     await sh(python, ['scripts/make_candle_compare.py',
@@ -250,7 +264,7 @@ function applyCaption(cfgPath, cfg, caption, format) {
     // written line with a generated template is a downgrade, so it does not
     // happen: with no key configured, the generator's own tagline ships.
     if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
-  } else if (format !== 'market-map' && format !== 'candle-compare') {
+  } else if (format !== 'market-map' && format !== 'candle-compare' && format !== 'concept-lesson') {
     // The market map carries no model-written line: every word on it is either a
     // measured level or a fixed disclaimer, and inventing copy about levels is
     // how a plan starts sounding like a promise.
@@ -276,7 +290,13 @@ async function runJob(job) {
     // The comparison carries no model-written line either. Its copy is the
     // argument — "same wick, measure the body" — and it has to stay true to the
     // two series the generator just built, which a caption model has not seen.
-    job.format === 'market-map' || job.format === 'candle-compare' || job.replay
+    job.format === 'market-map' ||
+      job.format === 'candle-compare' ||
+      // The concept lessons carry written rule text of their own; a caption
+      // model paraphrasing "close above the neckline" is how a rule quietly
+      // becomes a different rule.
+      job.format === 'concept-lesson' ||
+      job.replay
       // A replay keeps the copy the config already carries: it was written for
       // this exact chart, and a fresh line generated now would be about data it
       // has never seen.
@@ -451,9 +471,11 @@ let plan = mix
       ? candlePlan(date, count, locale)
       : format === 'candle-compare'
         ? comparePlan(date, count, locale)
-        : planFor(date, count);
+        : format === 'concept-lesson'
+          ? conceptPlan(date, count, locale)
+          : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && format !== 'candle-lesson' && format !== 'candle-compare') {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
 if (only) plan = plan.filter((j) => j.id.includes(only));

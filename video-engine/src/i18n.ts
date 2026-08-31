@@ -31,6 +31,14 @@ export type PatternStatsLike = {
 type Strings = {
   badge: string;
   rail: [string, string, string, string];
+  /**
+   * Same four beats, for the lessons that are not about a candle.
+   *
+   * The rail read "Pattern" over a Fibonacci grid and a range — naming the
+   * wrong thing on every concept video, in the one place a viewer looks to see
+   * what they are being taught.
+   */
+  conceptRail: [string, string, string, string];
   followThrough: string;
   verdict: {TP: string; SL: string; OPEN: string};
   caveatLoss: string;
@@ -55,6 +63,8 @@ type Strings = {
     banners: string[];
     buy: string;
     sell: string;
+    /** The word between the two buttons. */
+    or: string;
     won: (side: 'BUY' | 'SELL') => string;
     hitTp: string;
     stopped: string;
@@ -95,6 +105,7 @@ type Strings = {
 const EN: Strings = {
   badge: 'CANDLE ANATOMY',
   rail: ['Pattern', 'Rule', 'Trade', 'Reality'],
+  conceptRail: ['Structure', 'Rule', 'Trade', 'Reality'],
   followThrough: 'The follow-through',
   verdict: {TP: 'Target reached', SL: 'Stop hit', OPEN: 'Still open at the end'},
   caveatLoss: 'Every check passed and it still lost. That is what a trigger is.',
@@ -122,6 +133,7 @@ const EN: Strings = {
       'YOUR CALL: BUY OR SELL?',
       'LONG OR SHORT HERE?',
     ],
+    or: 'or',
     buy: 'BUY',
     sell: 'SELL',
     won: (side) => (side === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'),
@@ -171,6 +183,7 @@ const EN: Strings = {
 const VI: Strings = {
   badge: 'GIẢI PHẪU NẾN',
   rail: ['Mẫu nến', 'Quy tắc', 'Vào lệnh', 'Sự thật'],
+  conceptRail: ['Cấu trúc', 'Quy tắc', 'Vào lệnh', 'Sự thật'],
   followThrough: 'Diễn biến sau đó',
   verdict: {TP: 'Chạm chốt lời', SL: 'Dính dừng lỗ', OPEN: 'Hết clip vẫn chưa đóng'},
   caveatLoss: 'Đủ cả ba điều kiện mà vẫn thua. Tín hiệu vào lệnh là như vậy.',
@@ -202,6 +215,7 @@ const VI: Strings = {
     ],
     buy: 'MUA',
     sell: 'BÁN',
+    or: 'hay',
     won: (side) => (side === 'BUY' ? 'PHE MUA THẮNG' : 'PHE BÁN THẮNG'),
     hitTp: 'CHẠM CHỐT LỜI \u2705',
     stopped: 'DÍNH DỪNG LỖ \u274c',

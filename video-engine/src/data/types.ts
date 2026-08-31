@@ -2,6 +2,7 @@
 // The Python script emits a config.json matching this shape; the video reads it.
 
 import type {Locale} from '../i18n';
+import type {Mark} from '../Marks';
 
 export type Candle = {
   // Unix seconds or any monotonic index — only ordering matters for X layout.
@@ -199,6 +200,14 @@ export type PatternStats = {
 };
 
 export type CandleLessonProps = {
+  /**
+   * Extra drawing: levels, zones and swing paths, described as data.
+   *
+   * Absent for the thirteen candlestick lessons, where the candle is the whole
+   * subject. Present for everything this tool teaches that is bigger than one
+   * bar — a Fibonacci grid, an order block, a head and shoulders, a range.
+   */
+  marks?: Mark[];
   /** Which of the three openings to use, 0-2; see make_candle_lesson.py. */
   open?: number;
   kind: 'candleLesson';

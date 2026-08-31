@@ -25,10 +25,17 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
  */
 const BEATS = [CB.patternIn[0], CB.rule[0], CB.zoomOut[0], CB.result[0]] as const;
 
-export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]; locale?: Locale}> = ({
+export const BeatRail: React.FC<{
+  frame: number;
+  marks?: VoiceMark[];
+  locale?: Locale;
+  /** True for the lessons that teach a structure rather than a candle. */
+  concept?: boolean;
+}> = ({
   frame,
   marks,
   locale,
+  concept,
 }) => {
   // Up from just after the title lands, gone before the rule panel needs the band.
   // It also yields to a subtitle: they share the band, and of the two the rail is
@@ -42,7 +49,7 @@ export const BeatRail: React.FC<{frame: number; marks?: VoiceMark[]; locale?: Lo
 
   // Progress runs on the beats themselves, so the rail cannot claim to be
   // somewhere the video is not.
-  const labels = strings(locale).rail;
+  const labels = concept ? strings(locale).conceptRail : strings(locale).rail;
   const span = BEATS[BEATS.length - 1] - BEATS[0];
   const progress = interpolate(frame, [BEATS[0], BEATS[BEATS.length - 1]], [0, 1], clamp);
 

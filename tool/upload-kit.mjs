@@ -21,6 +21,7 @@ const TAGS = {
     base: ['#trading', '#forex', '#priceaction'],
     'candle-lesson': ['#candlestick', '#tradingtips'],
     'candle-compare': ['#candlestick', '#learntotrade'],
+    'concept-lesson': ['#priceaction', '#smartmoney', '#learntotrade'],
     'buy-or-sell-quiz': ['#tradingquiz', '#technicalanalysis'],
     'named-setup': ['#smartmoney', '#technicalanalysis'],
     'market-map': ['#marketanalysis', '#tradingplan'],
@@ -29,6 +30,7 @@ const TAGS = {
     base: ['#trading', '#forex', '#dautu'],
     'candle-lesson': ['#nennhatban', '#hoctrade'],
     'candle-compare': ['#nennhatban', '#hoctrade'],
+    'concept-lesson': ['#phantichkythuat', '#smartmoney', '#hoctrade'],
     'buy-or-sell-quiz': ['#doclenh', '#phantichkythuat'],
     'named-setup': ['#smartmoney', '#phantichkythuat'],
     'market-map': ['#kehoachgiaodich', '#phantichthitruong'],
@@ -103,7 +105,9 @@ const BODY = {
 /** The headline, taken from whatever the format actually put on screen. */
 function titleOf(job, cfg, caption, locale) {
   if (job.format === 'candle-compare') return cfg.title;
-  if (job.format === 'candle-lesson') return cfg.pattern?.tagline || caption?.title || job.label;
+  if (job.format === 'candle-lesson' || job.format === 'concept-lesson') {
+    return cfg.pattern?.tagline || caption?.title || job.label;
+  }
   const written = caption?.title || cfg.title;
   if (written) return written;
   const build = (FALLBACK_TITLE[locale] ?? FALLBACK_TITLE.en)[job.format];
@@ -124,6 +128,12 @@ function bodyOf(job, cfg, locale) {
     out.push(`${cfg.left.name}: ${cfg.left.verdict}`);
     out.push(`${cfg.right.name}: ${cfg.right.verdict}`);
     out.push(cfg.why);
+  } else if (job.format === 'concept-lesson') {
+    // The rule and its three checks, verbatim. This format exists because the
+    // videos held attention without teaching much; the description is the one
+    // place the whole rule fits, so the whole rule goes in.
+    out.push(cfg.pattern?.rule);
+    for (const c of cfg.pattern?.checks ?? []) out.push(`• ${c}`);
   } else if (job.format === 'candle-lesson') {
     out.push(cfg.pattern?.rule);
     if (cfg.stats) {

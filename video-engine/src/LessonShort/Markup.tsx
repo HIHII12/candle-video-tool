@@ -5,6 +5,7 @@ import type {Coords} from '../XauChart/useLightweightChart';
 import {SAFE} from '../safeArea';
 import {strings, type Locale} from '../i18n';
 import {LESSON_BOX, LFONT, LT} from './theme';
+import {pillWidth} from '../textWidth';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 /**
@@ -84,7 +85,7 @@ export const PatternLabels: React.FC<{
         // construction, and a tight label collided with the SL row.
         const dy = bullish ? 92 : -92;
         const label = strings(locale).term(pt.label);
-        const width = label.length * 19 + 26;
+        const width = pillWidth(label, 30, 13);
 
         return (
           <g key={`${pt.index}-${pt.label}`} opacity={step}>
@@ -148,7 +149,7 @@ export const Neckline: React.FC<{
         const label = `${strings(locale).term('NECKLINE')} ${price.toFixed(1)}`;
         return (
           <g opacity={interpolate(progress, [0.6, 1], [0, 1], clamp)}>
-            <rect x={16} y={y - 54} width={label.length * 15 + 32} height={44} rx={8} fill={LT.ink} />
+            <rect x={16} y={y - 54} width={pillWidth(label, 28, 16)} height={44} rx={8} fill={LT.ink} />
             <text x={32} y={y - 22} fill="#fff" fontFamily={LFONT} fontSize={28} fontWeight={900}>
               {label}
             </text>
@@ -255,7 +256,7 @@ export const TradeZone: React.FC<{
           // pill is a fixed width anchored to the zone's left edge, so a setup
           // that resolves near the right of the chart pushed it off frame.
           const text = `${side} · R:R 1:${ratio.toFixed(1)}`;
-          const width = text.length * 17 + 32;
+          const width = pillWidth(text, 31, 16);
           const boxX = Math.min(x0 + 12, RIGHT - width);
           return (
             <>

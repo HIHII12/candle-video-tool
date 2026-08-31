@@ -8,10 +8,29 @@ import {BeatRail} from './BeatRail';
 import {BrandMark} from '../BrandMark';
 import {strings} from '../i18n';
 import {ChartEdges} from '../ChartEdges';
+import {Marks, type MarkTheme} from '../Marks';
 import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
 import {SAFE} from '../safeArea';
 import {candleCues} from '../audio/cues';
+
+/**
+ * Colours for the drawing layer.
+ *
+ * Six tones, and no more: a chart with eight annotation colours on it does not
+ * look thorough, it looks like nobody chose. Gold is the level, violet the
+ * zone, blue the structure, and up/down keep the meaning they already have on
+ * the candles so a green line never means something a green candle does not.
+ */
+const MARK_THEME: MarkTheme = {
+  gold: '#f0b429',
+  violet: '#8b6cff',
+  up: '#2ebd85',
+  down: '#e2465e',
+  ink: '#e6edf3',
+  blue: '#4ea8ff',
+  onFill: '#0b1220',
+};
 import {Narration, duckAt} from '../audio/Narration';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -264,6 +283,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             progress={anatomyProgress}
             opacity={anatomyOpacity}
           />
+          {/* The concept lessons draw here: fib grid, order block, swing
+              skeleton, range rails. Placed before the trade levels so the entry
+              and stop stay the topmost thing on the chart — they are what the
+              viewer has to read at the moment the trade is placed. */}
+          {props.marks?.length ? (
+            <Marks
+              marks={props.marks}
+              coords={coords}
+              box={CHART}
+              progress={anatomyProgress}
+              opacity={anatomyOpacity}
+              theme={MARK_THEME}
+              font={CFONT}
+            />
+          ) : null}
           <TradeLevels
             trade={trade}
             bias={pattern.bias}
@@ -274,7 +308,12 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         </svg>
       )}
 
-      <BeatRail frame={frame} marks={props.voiceMarks ?? undefined} locale={props.locale} />
+      <BeatRail
+        frame={frame}
+        marks={props.voiceMarks ?? undefined}
+        locale={props.locale}
+        concept={(props.marks?.length ?? 0) > 0}
+      />
 
       {/* Rule + checklist */}
       {rulePanel > 0 && (

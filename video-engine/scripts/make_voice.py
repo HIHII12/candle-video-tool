@@ -257,8 +257,34 @@ def vi_compare_lines(cfg: dict) -> list[tuple[int, str]]:
     ]
 
 
+def concept_lines(cfg: dict) -> list[tuple[int, str]]:
+    """A concept lesson: the claim, the rule, where the stop goes, the truth."""
+    p = cfg["pattern"]
+    return [
+        (40, first_sentence(p["tagline"], 12)),
+        (520, f"This is {p['name'].lower()}."),
+        (860, first_sentence(p["rule"])),
+        (1180, first_sentence(p["checks"][0], 12)),
+        (1420, "Entry, stop, target. In that order."),
+        (1860, "A structure is a reason, not a guarantee."),
+    ]
+
+
+def vi_concept_lines(cfg: dict) -> list[tuple[int, str]]:
+    p = cfg["pattern"]
+    return [
+        (40, first_sentence(p["tagline"], 12)),
+        (520, f"Cái này gọi là {p['name'].lower()}."),
+        (860, first_sentence(p["rule"])),
+        (1180, first_sentence(p["checks"][0], 12)),
+        (1420, "Vào lệnh, dừng lỗ, chốt lời. Đúng thứ tự đó."),
+        (1860, "Cấu trúc cho một lý do, không cho một lời hứa."),
+    ]
+
+
 BUILDERS = {
     "candleLesson": candle_lines,
+    "concept": concept_lines,
     "quiz": quiz_lines,
     "lesson": lesson_lines,
     "marketMap": map_lines,
@@ -271,12 +297,18 @@ VI_BUILDERS = {
     "lesson": vi_lesson_lines,
     "marketMap": vi_map_lines,
     "candleCompare": vi_compare_lines,
+    "concept": vi_concept_lines,
 }
 
 
 def kind_of(cfg: dict, override: str) -> str:
     if override:
         return override
+    # A concept lesson shares the candleLesson composition and therefore its
+    # `kind`, but it is not about a candle and must not be narrated as one:
+    # "everyone trades the fibonacci retracement" is not a sentence.
+    if cfg.get("topic") and cfg.get("marks"):
+        return "concept"
     k = cfg.get("kind")
     if k in BUILDERS:
         return k

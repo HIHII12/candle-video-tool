@@ -239,8 +239,25 @@ const insetsAt = (frame: number) => {
 const priceTargetAt = (props: CandleLessonProps, frame: number): PriceWindow => {
   const vis = visibleCandles(props.candles, shownAt(props, frame));
   const track = extentOf(vis, [], 0.09);
-  const patternCandles = props.pattern.indices.map((i) => props.candles[i]);
-  const near = capZoom(extentOf(patternCandles, [], 0.55), track);
+  // The bars the lesson is about, plus every price a mark names — a Fibonacci
+  // grid's outer levels and a range's ceiling are part of the subject, and a
+  // window fitted only to the candles cropped them off the top of the frame.
+  const sub = subjectRange(props);
+  const subjectCandles = props.candles.slice(
+    Math.max(0, Math.floor(sub.from)),
+    Math.min(props.candles.length, Math.ceil(sub.to) + 1),
+  );
+  const markPrices: number[] = [];
+  for (const m of props.marks ?? []) {
+    if (m.kind === 'hline') markPrices.push(m.price);
+    else if (m.kind === 'zone') markPrices.push(m.top, m.bottom);
+    else for (const p of m.points) markPrices.push(p.price);
+  }
+  const wide = (props.marks?.length ?? 0) > 0;
+  const near = capZoom(
+    extentOf(subjectCandles.length ? subjectCandles : props.candles, markPrices, wide ? 0.16 : 0.55),
+    track,
+  );
 
   if (frame < CB.focus[0]) return track;
   if (frame < CB.zoomOut[0]) {
@@ -270,11 +287,47 @@ export const windowAt = (props: CandleLessonProps, frame: number): PriceWindow =
  */
 const MAX_BARS = 30;
 
+/**
+ * The index range the lesson is actually about.
+ *
+ * For a candlestick lesson that is one bar, and the camera closes right in on
+ * it. For a concept lesson it is the whole drawing — a head and shoulders spans
+ * twenty bars, a range fourteen — and closing in on the last bar of it framed
+ * one candle while the formation being explained sat off screen. So the subject
+ * is whatever the marks touch, and the camera frames that.
+ */
+export const subjectRange = (props: CandleLessonProps) => {
+  const idx = props.pattern.indices;
+  let from = idx[0];
+  let to = idx[idx.length - 1];
+  for (const m of props.marks ?? []) {
+    if (m.kind === 'zone') {
+      from = Math.min(from, m.from);
+      to = Math.max(to, m.to ?? to);
+    } else if (m.kind === 'path') {
+      for (const p of m.points) {
+        from = Math.min(from, p.index);
+        to = Math.max(to, p.index);
+      }
+    } else if (m.from !== undefined) {
+      from = Math.min(from, m.from);
+    }
+  }
+  return {from, to};
+};
+
 const logicalTargetAt = (props: CandleLessonProps, frame: number): LogicalWindow => {
   const shown = shownAt(props, frame);
-  const idx = props.pattern.indices;
-  const track = {from: Math.max(-0.7, shown - MAX_BARS), to: shown + 0.7};
-  const near = {from: idx[0] - 3.5, to: idx[idx.length - 1] + 3.5};
+  const sub = subjectRange(props);
+  const wide = (props.marks?.length ?? 0) > 0;
+  const track = {
+    from: Math.max(-0.7, shown - (wide ? MAX_BARS + 14 : MAX_BARS)),
+    to: shown + 0.7,
+  };
+  // A drawing needs room around it to read as a drawing; a single candle needs
+  // to be filled. Same camera, two different subjects.
+  const pad = wide ? 2.2 : 3.5;
+  const near = {from: sub.from - pad, to: sub.to + pad};
 
   if (frame < CB.focus[0]) return track;
   if (frame < CB.zoomOut[0]) {
@@ -291,7 +344,7 @@ export const hWindowAt = (props: CandleLessonProps, frame: number): LogicalWindo
   );
 
 /** Index range the spotlight keeps lit while the pattern is discussed. */
-export const focusRange = (props: CandleLessonProps) => ({
-  from: props.pattern.indices[0] - 1,
-  to: props.pattern.indices[props.pattern.indices.length - 1] + 1,
-});
+export const focusRange = (props: CandleLessonProps) => {
+  const sub = subjectRange(props);
+  return {from: sub.from - 1, to: sub.to + 1};
+};

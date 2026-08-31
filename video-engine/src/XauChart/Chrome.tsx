@@ -113,7 +113,9 @@ export const QuizPills: React.FC<{
     >
       {pill('BUY', TV.up)}
       <span style={{fontFamily: FONT, fontSize: 62, fontWeight: 900, color: '#fff', ...stroke(4)}}>
-        or
+        {/* Was a hardcoded "or" — one English word sitting between two
+            Vietnamese buttons, on every video of the Vietnam track. */}
+        {t.or}
       </span>
       {pill('SELL', TV.down)}
     </div>
