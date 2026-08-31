@@ -22,14 +22,14 @@
     {
       "kind": "hline",
       "price": 1974.56,
-      "label": "cùng một cái sàn, hai lần",
+      "label": "SÀN",
       "tone": "up",
       "order": 0
     },
     {
       "kind": "hline",
       "price": 1991.9,
-      "label": "ĐƯỜNG VIỀN CỔ — phá là có hiệu lực",
+      "label": "ĐƯỜNG VIỀN CỔ",
       "tone": "gold",
       "solid": true,
       "order": 1

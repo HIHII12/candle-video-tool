@@ -60,6 +60,9 @@ export type MarkTheme = {
   onFill: string;
 };
 
+/** How far anything drawn here stays clear of the frame edge. */
+const EDGE = 20;
+
 const stagger = (progress: number, order = 0, count = 1) => {
   // Each mark gets its own slice of the beat, so a five-line Fibonacci grid
   // draws top to bottom instead of appearing all at once as a wall.
@@ -106,7 +109,7 @@ export const Marks: React.FC<{
     // also cover for pillWidth being an estimate: it ran about 8% light on the
     // longest Vietnamese strings, and a pill that is short by 8% puts its last
     // word outside the frame.
-    const M = 20;
+    const M = EDGE;
     const limit = avoidFromX === undefined ? box.width - M : Math.min(avoidFromX - 10, box.width - M);
     return Math.max(M, Math.min(x, limit - w));
   };
@@ -132,8 +135,17 @@ export const Marks: React.FC<{
 
         if (m.kind === 'hline') {
           const y = coords.priceToY(m.price);
-          const x0 = m.from === undefined ? 0 : Math.max(0, coords.indexToX(m.from) - 10);
-          const x1 = interpolate(t, [0, 1], [x0, box.width - 18]);
+          // Both ends held off the frame edge.
+          //
+          // The start used to clamp to 0, and once the camera pulled back far
+          // enough for the anchor bar to sit off screen left, every level line
+          // began exactly on the frame edge — which reads as the chart being
+          // cut off, and is what the frame checker calls "something is running
+          // outside the frame". The same margin as the labels, for the same
+          // reason: a line that stops just short looks deliberate, one that
+          // touches looks broken.
+          const x0 = m.from === undefined ? EDGE : Math.max(EDGE, coords.indexToX(m.from) - 10);
+          const x1 = interpolate(t, [0, 1], [x0, box.width - EDGE]);
           const w = pillWidth(m.label, 27, 14);
           // Right-aligned against the drawn end of the line, then pulled back
           // inside the box. A level near the right of the chart used to print
@@ -175,8 +187,11 @@ export const Marks: React.FC<{
         if (m.kind === 'zone') {
           const yTop = coords.priceToY(m.top);
           const yBottom = coords.priceToY(m.bottom);
-          const x0 = coords.indexToX(m.from);
-          const end = m.to === undefined ? box.width - 18 : coords.indexToX(m.to);
+          const x0 = Math.max(EDGE, coords.indexToX(m.from));
+          const end =
+            m.to === undefined
+              ? box.width - EDGE
+              : Math.min(box.width - EDGE, coords.indexToX(m.to));
           const x1 = interpolate(t, [0, 1], [x0, end]);
           const w = pillWidth(m.label, 27, 14);
           const bx = shove(x0 + 8, w);

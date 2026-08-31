@@ -22,7 +22,7 @@
     {
       "kind": "hline",
       "price": 1976.68,
-      "label": "đáy cũ · thanh khoản nằm dưới đây",
+      "label": "ĐÁY CŨ",
       "tone": "down",
       "order": 0
     },
@@ -32,7 +32,7 @@
       "bottom": 1962.56,
       "from": 12,
       "to": 14,
-      "label": "CÚ QUÉT",
+      "label": "QUÉT",
       "tone": "gold",
       "order": 1
     }

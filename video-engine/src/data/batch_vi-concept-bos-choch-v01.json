@@ -22,7 +22,7 @@
     {
       "kind": "hline",
       "price": 1989.54,
-      "label": "đỉnh thấp hơn — phá là ĐỔI CẤU TRÚC",
+      "label": "ĐỈNH THẤP HƠN",
       "tone": "blue",
       "solid": true,
       "order": 0
@@ -30,7 +30,7 @@
     {
       "kind": "hline",
       "price": 1974.26,
-      "label": "đáy cuối của xu hướng giảm",
+      "label": "ĐÁY CUỐI",
       "tone": "down",
       "order": 1
     }

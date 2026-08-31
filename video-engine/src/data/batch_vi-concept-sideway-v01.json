@@ -7,7 +7,7 @@
     "name": "Đi ngang ngắn hạn",
     "bias": "bullish",
     "tagline": "Thị trường đi ngang phần lớn thời gian — và đó là lúc cháy tài khoản",
-    "rule": "Trong biên độ: mua ở sàn, bán ở trần, và KHÔNG đánh ở giữa. Chỉ đánh theo hướng phá khi giá đóng cửa ngoài biên, không phải khi bóng nến ló ra.",
+    "rule": "Trong biên độ: mua ở SÀN, bán ở TRẦN, và KHÔNG đánh ở giữa. Chỉ đánh theo hướng phá khi giá đóng cửa ngoài biên, không phải khi bóng nến ló ra.",
     "checks": [
       "Phải có ít nhất 2 lần chạm trần và 2 lần chạm sàn",
       "Ở giữa biên là vùng CẤM — tỉ lệ lời/lỗ ở đó luôn xấu",
@@ -22,7 +22,7 @@
     {
       "kind": "hline",
       "price": 2019.56,
-      "label": "TRẦN — bán ở đây, không mua",
+      "label": "TRẦN",
       "tone": "down",
       "from": 4,
       "order": 0
@@ -30,7 +30,7 @@
     {
       "kind": "hline",
       "price": 1997.57,
-      "label": "SÀN — mua ở đây, không bán",
+      "label": "SÀN",
       "tone": "up",
       "from": 4,
       "order": 1
