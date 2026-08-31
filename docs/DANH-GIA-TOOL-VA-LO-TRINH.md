@@ -2,6 +2,7 @@
 
 Viết 29/08/2026, sau vòng nâng cấp đầu tiên và 100 video xuất thật.
 **Cập nhật 30/08/2026** — đánh dấu cái nào đã làm xong, cái nào còn nguyên.
+**Cập nhật 31/08/2026** — sau vòng anh nghiệm thu 100 video và chỉ sạn.
 
 ---
 
@@ -27,7 +28,8 @@ lệnh — không mở phần mềm dựng, không kéo thả.
 | Khuôn | Nói gì | Cần mạng |
 |---|---|---|
 | **candle-lesson** | Một mẫu nến: giải phẫu → quy tắc → vào lệnh → kết quả | ❌ không |
-| **candle-compare** *(mới 30/08)* | Hai mẫu **dễ nhầm** xếp trên dưới, một phép đo tách chúng ra | ❌ không |
+| **candle-compare** *(30/08)* | Hai mẫu **dễ nhầm** xếp trên dưới, một phép đo tách chúng ra | ❌ không |
+| **concept-lesson** *(mới 31/08)* | Fibonacci · Vùng lệnh · Quét thanh khoản · CHoCH · Vai Đầu Vai · Hai Đáy · Đi ngang | ❌ không |
 | **named-setup** | Một setup có tên (double bottom + order block…) trên dữ liệu thật | ✅ có |
 | **buy-or-sell-quiz** | Đố: mua hay bán? Đếm ngược 3 giây, rồi lật bài | ✅ có |
 | **market-map** | Bản đồ vùng thanh khoản, order block, gap trên khung lớn | ✅ có |
@@ -107,8 +109,31 @@ Bốn khuôn hiện tại đều là **"đây là cái gì"**. Thiếu hẳn cá
 | **Tổng kết tuần / cộng pips** | La bàn đã ghi là cần, và nó nuôi phễu rebate |
 | **Quiz nhiều lựa chọn** thay vì mua/bán nhị phân | Comment nhiều hơn = phân phối tốt hơn |
 
-**10. Một mẫu nến quay lại ~8 lần trong 100 video.** Tagline đã khác (38 câu
-khác nhau) nhưng **cấu trúc y hệt**. Đa dạng chữ chưa phải đa dạng nội dung.
+**10. 🟡 ĐỠ HẲN — Một mẫu nến quay lại ~8 lần trong 100 video.** Nay một lượt
+100 là **37 mẫu nến · 20 so sánh · 20 kiến thức · 9 setup · 8 đố · 6 bản đồ**,
+và bài mẫu nến có **ba kiểu mở đầu** chọn theo seed. Vẫn còn lặp, nhưng không
+còn là một khuôn đội sáu cái mũ.
+
+---
+
+## 3b. Vòng 31/08 — anh xem video thật rồi chỉ sạn
+
+Ba lỗi anh chỉ, và **nguyên nhân thật** của từng cái:
+
+| Anh thấy | Em tưởng | Hoá ra |
+|---|---|---|
+| Chữ đè lên nhau ở cuối video setup | lệch vài pixel | dòng CTA **không có điều kiện khung hình nào cả** — vẽ suốt 35 giây ở một vị trí cố định |
+| Nhãn cụt "ĐƯỜNG VIỀN CỔ 430" | chữ quá dài | viên thuốc tính bằng `ký tự × 15`; 53px chữ tràn ra là **trắng trên nền trắng** |
+| Khung nến quiz tràn viền | chart hơi rộng | cây nến **mới nhất** nằm dưới cột nút nền tảng — đúng cái mà câu hỏi đang nói về |
+
+Và hai lỗi **máy soi không bắt được**, chỉ mắt thấy:
+
+- Nét vẽ Fibonacci **biến mất đúng lúc video đặt lệnh** — xoá mất lý do của lệnh.
+- Chữ kết vẫn nói *"mẫu nến là tín hiệu"* trên một video Fibonacci.
+
+> **Bài học:** `kiem_video.py` đo tràn khung · vùng an toàn · bố cục · đứng hình
+> · LUFS. Nó **không đọc được chữ**, nên nó không bao giờ bắt được "chữ nói sai
+> chủ đề" hay "nét vẽ tắt sai lúc". Mắt người vẫn là phép kiểm cuối.
 
 ---
 
