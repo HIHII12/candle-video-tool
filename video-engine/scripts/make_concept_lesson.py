@@ -173,7 +173,7 @@ def build_fibonacci(rng: Rng) -> tuple[list, int, list, dict]:
         {"kind": "hline", "price": lv(0.5), "label": "0.5", "tone": "gold",
          "from": 0, "order": 2},
         {"kind": "zone", "top": lv(0.618), "bottom": lv(0.705), "from": 11,
-         "label": "VÙNG VÀNG 0.618–0.705", "tone": "violet", "order": 3},
+         "label": "VÙNG VÀNG", "tone": "violet", "order": 3},
         {"kind": "hline", "price": swing_low, "label": "0 · đáy", "tone": "ink",
          "from": 0, "order": 4},
     ]
@@ -206,7 +206,7 @@ def build_order_block(rng: Rng) -> tuple[list, int, list, dict]:
     marks = [
         {"kind": "zone", "top": ob["high"], "bottom": ob["low"], "from": 6,
          "label": "VÙNG LỆNH", "tone": "violet", "order": 0},
-        {"kind": "hline", "price": ob["high"], "label": "mép trên vùng", "tone": "gold",
+        {"kind": "hline", "price": ob["high"], "label": "mép vùng", "tone": "gold",
          "from": 6, "order": 1},
     ]
     meta = {
@@ -237,10 +237,10 @@ def build_liquidity_sweep(rng: Rng) -> tuple[list, int, list, dict]:
     stop = sweep["low"] - 0.8
 
     marks = [
-        {"kind": "hline", "price": low1, "label": "đáy cũ · thanh khoản nằm dưới đây",
+        {"kind": "hline", "price": low1, "label": "ĐÁY CŨ",
          "tone": "down", "order": 0},
         {"kind": "zone", "top": low1, "bottom": sweep["low"], "from": 12, "to": 14,
-         "label": "CÚ QUÉT", "tone": "gold", "order": 1},
+         "label": "QUÉT", "tone": "gold", "order": 1},
     ]
     meta = {
         "name": "Quét thanh khoán",
@@ -269,9 +269,9 @@ def build_bos_choch(rng: Rng) -> tuple[list, int, list, dict]:
     stop = low - 1.0
 
     marks = [
-        {"kind": "hline", "price": lower_high, "label": "đỉnh thấp hơn — phá là ĐỔI CẤU TRÚC",
+        {"kind": "hline", "price": lower_high, "label": "ĐỈNH THẤP HƠN",
          "tone": "blue", "solid": True, "order": 0},
-        {"kind": "hline", "price": low, "label": "đáy cuối của xu hướng giảm",
+        {"kind": "hline", "price": low, "label": "ĐÁY CUỐI",
          "tone": "down", "order": 1},
     ]
     meta = {
@@ -363,9 +363,9 @@ def build_double_bottom(rng: Rng) -> tuple[list, int, list, dict]:
     stop = floor_ - 1.4
 
     marks = [
-        {"kind": "hline", "price": floor_, "label": "cùng một cái sàn, hai lần",
+        {"kind": "hline", "price": floor_, "label": "SÀN",
          "tone": "up", "order": 0},
-        {"kind": "hline", "price": peak, "label": "ĐƯỜNG VIỀN CỔ — phá là có hiệu lực",
+        {"kind": "hline", "price": peak, "label": "ĐƯỜNG VIỀN CỔ",
          "tone": "gold", "solid": True, "order": 1},
     ]
     meta = {
@@ -383,7 +383,13 @@ def build_double_bottom(rng: Rng) -> tuple[list, int, list, dict]:
 
 
 def build_sideway(rng: Rng) -> tuple[list, int, list, dict]:
-    """Di ngang — thu thi truong lam NHIEU NHAT, va it ai day."""
+    """Di ngang — thu thi truong lam NHIEU NHAT, va it ai day.
+
+    Nhan tren chart chi con MOT TU. Ban dau chung la ca cau — "TRAN — ban o
+    day, khong mua" — va ba cai nhu the trong mot khung 1080px thi de len nhau,
+    de len ca nen. Cau day hoc thuoc ve khung quy tac, cho no co cho; nhan tren
+    duong chi can noi duong do TEN LA GI.
+    """
     lead = leg(rng, BASE, 4, 10, 0)
     box = flat(rng, lead[-1]["close"], 14, 13.0, 4)
     lo = min(c["low"] for c in box)
@@ -395,9 +401,9 @@ def build_sideway(rng: Rng) -> tuple[list, int, list, dict]:
     stop = hi - (hi - lo) * 0.30
 
     marks = [
-        {"kind": "hline", "price": hi, "label": "TRẦN — bán ở đây, không mua",
+        {"kind": "hline", "price": hi, "label": "TRẦN",
          "tone": "down", "from": 4, "order": 0},
-        {"kind": "hline", "price": lo, "label": "SÀN — mua ở đây, không bán",
+        {"kind": "hline", "price": lo, "label": "SÀN",
          "tone": "up", "from": 4, "order": 1},
         {"kind": "zone", "top": hi, "bottom": lo, "from": 4, "to": 18,
          "label": "ĐI NGANG", "tone": "violet", "order": 2},
@@ -406,7 +412,7 @@ def build_sideway(rng: Rng) -> tuple[list, int, list, dict]:
         "name": "Đi ngang ngắn hạn",
         "bias": "bullish",
         "tagline": "Thị trường đi ngang phần lớn thời gian — và đó là lúc cháy tài khoản",
-        "rule": "Trong biên độ: mua ở sàn, bán ở trần, và KHÔNG đánh ở giữa. Chỉ đánh theo hướng phá khi giá đóng cửa ngoài biên, không phải khi bóng nến ló ra.",
+        "rule": "Trong biên độ: mua ở SÀN, bán ở TRẦN, và KHÔNG đánh ở giữa. Chỉ đánh theo hướng phá khi giá đóng cửa ngoài biên, không phải khi bóng nến ló ra.",
         "checks": [
             "Phải có ít nhất 2 lần chạm trần và 2 lần chạm sàn",
             "Ở giữa biên là vùng CẤM — tỉ lệ lời/lỗ ở đó luôn xấu",
@@ -436,7 +442,7 @@ EN = {
         "checks": ["You need one clean leg to draw from",
                    "A band, 0.618 to 0.705 — not a single number",
                    "Fib gives the ZONE. The candle gives the TIMING"],
-        "marks": ["1.0 · high", "0.382", "0.5", "GOLDEN POCKET 0.618-0.705", "0 · low"],
+        "marks": ["1.0 · high", "0.382", "0.5", "GOLDEN POCKET", "0 · low"],
     },
     "order-block": {
         "name": "Order block",
@@ -445,7 +451,7 @@ EN = {
         "checks": ["The push out must be STRONG, or it is not an order block",
                    "That push has to break the last swing high",
                    "Enter on the retest of the edge, do not chase the push"],
-        "marks": ["ORDER BLOCK", "zone high"],
+        "marks": ["ORDER BLOCK", "zone edge"],
     },
     "liquidity-sweep": {
         "name": "Liquidity sweep",
@@ -454,7 +460,7 @@ EN = {
         "checks": ["The wick takes out the low, the BODY closes above it",
                    "It has to reverse within a bar or two",
                    "Stop goes below the sweep wick — the level just cleared"],
-        "marks": ["old low · liquidity sits under here", "THE SWEEP"],
+        "marks": ["OLD LOW", "SWEEP"],
     },
     "bos-choch": {
         "name": "Change of character",
@@ -463,7 +469,7 @@ EN = {
         "checks": ["It has to CLOSE above, a wick through does not count",
                    "There must be a clear chain of lower highs first",
                    "CHoCH is an early signal, not an entry — wait for the pullback"],
-        "marks": ["lower high — break it and the character changes", "last low of the downtrend"],
+        "marks": ["LOWER HIGH", "LAST LOW"],
     },
     "head-shoulders": {
         "name": "Head and shoulders",
@@ -481,7 +487,7 @@ EN = {
         "checks": ["The two lows within a few percent of each other",
                    "The second low should come on lower volume",
                    "Enter on the break of the middle high, not at the low"],
-        "marks": ["the same floor, twice", "NECKLINE — break it to confirm"],
+        "marks": ["FLOOR", "NECKLINE"],
     },
     "sideway": {
         "name": "The range",
@@ -490,7 +496,7 @@ EN = {
         "checks": ["At least two touches of the ceiling and two of the floor",
                    "The middle is a no-trade zone — the R:R there is always bad",
                    "A break has to CLOSE outside. A wick out is usually a sweep"],
-        "marks": ["CEILING — sell here, do not buy", "FLOOR — buy here, do not sell", "RANGE"],
+        "marks": ["CEILING", "FLOOR", "RANGE"],
     },
 }
 

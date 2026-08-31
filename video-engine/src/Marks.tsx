@@ -100,8 +100,15 @@ export const Marks: React.FC<{
   const used: {y: number; x0: number; x1: number}[] = [];
   /** Keep a pill clear of the reserved band, then inside the box. */
   const shove = (x: number, w: number) => {
-    const limit = avoidFromX === undefined ? box.width - 8 : Math.min(avoidFromX - 10, box.width - 8);
-    return Math.max(6, Math.min(x, limit - w));
+    // 20px of margin, not 8. The frame checker counts ink in the outermost few
+    // columns as touching the edge, and a rounded pill corner six pixels in is
+    // inside that band — the range lesson failed on exactly this. The margin is
+    // also cover for pillWidth being an estimate: it ran about 8% light on the
+    // longest Vietnamese strings, and a pill that is short by 8% puts its last
+    // word outside the frame.
+    const M = 20;
+    const limit = avoidFromX === undefined ? box.width - M : Math.min(avoidFromX - 10, box.width - M);
+    return Math.max(M, Math.min(x, limit - w));
   };
   const place = (y: number, x0: number, w: number) => {
     let out = y;

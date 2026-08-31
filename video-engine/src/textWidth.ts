@@ -39,8 +39,11 @@ export const textWidth = (text: string, fontSize: number, bold = true): number =
     const hit = RATIO.find(([re]) => re.test(ch));
     units += hit ? hit[1] : 0.66;
   }
-  // Heavy weights add roughly 4% over the regular cut.
-  return units * fontSize * (bold ? 1.04 : 1);
+  // Heavy weights add roughly 4% over the regular cut, and the whole estimate
+  // carries 6% of headroom: measured against rendered frames it came out about
+  // 8% light on long mixed-case Vietnamese, and every failure mode of this
+  // function is a clipped word, never a slightly wide pill.
+  return units * fontSize * (bold ? 1.04 : 1) * 1.06;
 };
 
 /**
