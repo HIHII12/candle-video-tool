@@ -132,10 +132,23 @@ const drift = (frame: number) => ramp(frame, CB.focus[1], CB.zoomOut[0]);
  * camera was already tracking, so a flat pattern gets a close-up of its
  * surroundings instead of a wall.
  */
-const MAX_ZOOM = 3.2;
+/**
+ * How much closer than the whole leg the camera may get.
+ *
+ * At 3.2 the pattern candle — the subject of the entire video — occupied about
+ * a quarter of the chart's height while the rest sat empty, which on a phone is
+ * a small shape in a large dark field. At 4.4 it fills about a third and the
+ * approach bars are still in frame, which is the point at which the shape can
+ * actually be read at arm's length.
+ *
+ * The concept lessons keep the old value: their subject is twenty bars wide,
+ * and closing that far in on a head and shoulders crops the head.
+ */
+const MAX_ZOOM = 4.4;
+const MAX_ZOOM_WIDE = 3.0;
 
-const capZoom = (near: PriceWindow, track: PriceWindow): PriceWindow => {
-  const floor = (track.maxValue - track.minValue) / MAX_ZOOM;
+const capZoom = (near: PriceWindow, track: PriceWindow, wide = false): PriceWindow => {
+  const floor = (track.maxValue - track.minValue) / (wide ? MAX_ZOOM_WIDE : MAX_ZOOM);
   const span = near.maxValue - near.minValue;
   if (span >= floor) return near;
   const mid = (near.minValue + near.maxValue) / 2;
@@ -255,8 +268,14 @@ const priceTargetAt = (props: CandleLessonProps, frame: number): PriceWindow => 
   }
   const wide = (props.marks?.length ?? 0) > 0;
   const near = capZoom(
-    extentOf(subjectCandles.length ? subjectCandles : props.candles, markPrices, wide ? 0.16 : 0.55),
+    // 0.30 of padding around the pattern, not 0.55. The cap above was never the
+    // binding constraint — this was: at 0.55 the candle the whole video is
+    // about was given more than half its own frame as empty margin, so it read
+    // as a small shape in a large dark field on a phone. At 0.30 it fills about
+    // a third of the chart and the approach bars are all still in shot.
+    extentOf(subjectCandles.length ? subjectCandles : props.candles, markPrices, wide ? 0.16 : 0.30),
     track,
+    wide,
   );
 
   if (frame < CB.focus[0]) return track;
