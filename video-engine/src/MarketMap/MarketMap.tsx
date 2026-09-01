@@ -108,6 +108,30 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
   const bullish = props.bias === 'bullish';
   const biasColor = bullish ? MT.up : MT.down;
 
+  /**
+   * One label y per zone, stacked so no two overlap.
+   *
+   * Worked out here rather than inside ZoneBand because it is the only place
+   * that can see all the bands at once. Bands are taken top-down; a label that
+   * would land within 46px of the one above it is pushed below it instead.
+   */
+  const labelYs = React.useMemo(() => {
+    if (!coords) return props.zones.map(() => 24);
+    const order = props.zones
+      .map((z, i) => ({i, y: coords.priceToY(Math.max(z.top, z.bottom)) - 26}))
+      .sort((a, b) => a.y - b.y);
+    const out = new Array<number>(props.zones.length).fill(24);
+    let floor = 24;
+    for (const {i, y} of order) {
+      const at = Math.max(y, floor);
+      // 62, not 30: the chart fades its own bottom edge, and a pill that ends
+      // inside that fade looks clipped even though it is inside the box.
+      out[i] = Math.min(at, MAP_BOX.height - 62);
+      floor = at + 46;
+    }
+    return out;
+  }, [coords, props.zones]);
+
   const summaryIn = spring({
     frame: frame - MB.summary[0],
     fps,
@@ -251,6 +275,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               // Clear of the platform's button column: a zone whose name is
               // covered is a zone the viewer cannot use. See src/safeArea.ts.
               labelRight={MAP_BOX.width - SAFE.right - 14}
+              labelY={labelYs[i]}
               reveal={zoneProgress(frame, i, props.zones.length)}
             />
           ))}
@@ -264,6 +289,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             />
           ))}
           <PlanPath
+            height={MAP_BOX.height}
             path={props.path}
             coords={coords}
             width={MAP_BOX.width}
