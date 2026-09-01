@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, conceptPlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -179,6 +179,20 @@ async function buildData(job) {
     };
   }
 
+  if (job.format === 'map-offline') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_map_offline.py',
+      '--seed', String(job.seed), '--pair', job.pair,
+      '--timeframe', job.timeframe, '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'MarketMap',
+      configPath: out,
+      cfg,
+      facts: { bias: cfg.bias, zones: cfg.zones.map((z) => z.label).join(', ') },
+    };
+  }
+
   if (job.format === 'concept-lesson') {
     const out = `src/data/batch_${job.id}.json`;
     await sh(python, ['scripts/make_concept_lesson.py',
@@ -264,7 +278,7 @@ function applyCaption(cfgPath, cfg, caption, format) {
     // written line with a generated template is a downgrade, so it does not
     // happen: with no key configured, the generator's own tagline ships.
     if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
-  } else if (format !== 'market-map' && format !== 'candle-compare' && format !== 'concept-lesson') {
+  } else if (!['market-map', 'map-offline', 'candle-compare', 'concept-lesson'].includes(format)) {
     // The market map carries no model-written line: every word on it is either a
     // measured level or a fixed disclaimer, and inventing copy about levels is
     // how a plan starts sounding like a promise.
@@ -291,6 +305,7 @@ async function runJob(job) {
     // argument — "same wick, measure the body" — and it has to stay true to the
     // two series the generator just built, which a caption model has not seen.
     job.format === 'market-map' ||
+      job.format === 'map-offline' ||
       job.format === 'candle-compare' ||
       // The concept lessons carry written rule text of their own; a caption
       // model paraphrasing "close above the neckline" is how a rule quietly
@@ -473,9 +488,11 @@ let plan = mix
         ? comparePlan(date, count, locale)
         : format === 'concept-lesson'
           ? conceptPlan(date, count, locale)
-          : planFor(date, count);
+          : format === 'map-offline'
+            ? mapPlan(date, count, locale)
+            : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && !['candle-lesson', 'candle-compare', 'concept-lesson'].includes(format)) {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
 if (only) plan = plan.filter((j) => j.id.includes(only));

@@ -94,6 +94,17 @@ type Strings = {
     bias: (bullish: boolean) => string;
     steps: string[];
     provenance: (pair: string) => string;
+    /**
+     * The same line for a map drawn on a constructed series.
+     *
+     * The measured line claims the levels come from real data, and printing
+     * that over a series this tool built itself is the single most damaging
+     * thing it could say — it is the difference between a teaching illustration
+     * and a false claim about the market.
+     */
+    provenanceIllustration: string;
+    /** Heading of the closing panel listing the levels. */
+    levelsToWatch: string;
   };
   /** Side-by-side comparison of two confusable patterns. */
   compare: {badge: string; body: string; bar: string; upper: string; lower: string};
@@ -184,6 +195,9 @@ const EN: Strings = {
     ],
     provenance: (pair) =>
       `Levels are measured from real ${pair} data. The blue path is a plan, not a forecast.`,
+    provenanceIllustration:
+      'Constructed price series - not a live chart. Levels are measured from the series shown. The blue path is a plan, not a forecast.',
+    levelsToWatch: 'LEVELS TO WATCH',
   },
   compare: {badge: 'TELL THEM APART', body: 'the body', bar: 'the bar',
             upper: 'the upper wick', lower: 'the lower wick'},
@@ -266,6 +280,9 @@ const VI: Strings = {
     ],
     provenance: (pair) =>
       `Các vùng giá đo từ dữ liệu ${pair} thật. Đường xanh là kế hoạch, không phải dự báo.`,
+    provenanceIllustration:
+      'Chuỗi giá dựng lại - không phải biểu đồ thật. Các vùng giá đo từ chính chuỗi đang hiển thị. Đường xanh là kế hoạch, không phải dự báo.',
+    levelsToWatch: 'CÁC MỨC CẦN THEO DÕI',
   },
   compare: {badge: 'PHÂN BIỆT', body: 'thân nến', bar: 'cả cây nến',
             upper: 'bóng trên', lower: 'bóng dưới'},

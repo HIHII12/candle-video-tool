@@ -136,6 +136,8 @@ export type MapWaypoint = {
 };
 
 export type MarketMapProps = {
+  /** 'map-offline' when the series was constructed rather than fetched. */
+  note?: string;
   kind: 'marketMap';
   /** Which track this video belongs to; absent means the global one. */
   locale?: Locale;

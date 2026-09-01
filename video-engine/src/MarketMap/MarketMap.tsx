@@ -229,7 +229,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             <TrendLine
               line={props.trendline}
               coords={coords}
-              width={MAP_BOX.width}
+              // The band stops where the platform's button column starts, not
+              // at the frame edge. Running it to 1080 put the last third of
+              // every band under the like/comment stack, and the outermost
+              // pixels touching the frame read as the chart being cut off.
+              width={MAP_BOX.width - SAFE.right + 26}
               height={MAP_BOX.height}
               reveal={mramp(frame, MB.trend)}
             />
@@ -239,7 +243,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               key={`${z.label}-${z.index}`}
               zone={z}
               coords={coords}
-              width={MAP_BOX.width}
+              // The band stops where the platform's button column starts, not
+              // at the frame edge. Running it the full 1080 put the last third
+              // of every band under the like/comment stack, and the outermost
+              // pixels touching the frame read as the chart being cut off.
+              width={MAP_BOX.width - SAFE.right + 30}
               // Clear of the platform's button column: a zone whose name is
               // covered is a zone the viewer cannot use. See src/safeArea.ts.
               labelRight={MAP_BOX.width - SAFE.right - 14}
@@ -249,6 +257,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           {props.choch.map((c, i) => (
             <ChochMark
               key={c.index}
+              height={MAP_BOX.height}
               point={c}
               coords={coords}
               reveal={mramp(frame, [MB.choch[0] + i * 40, MB.choch[1] + i * 40] as const)}
@@ -280,7 +289,17 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             zIndex: 20,
           }}
         >
-          {t.map.steps[MAP_STEPS.indexOf(step)] ?? step.text}
+          <span
+            style={{
+              display: 'inline-block',
+              background: MT.bgTop,
+              borderRadius: 16,
+              padding: '12px 22px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
+            }}
+          >
+            {t.map.steps[MAP_STEPS.indexOf(step)] ?? step.text}
+          </span>
         </div>
       )}
 
@@ -302,7 +321,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             transform: `translateY(${interpolate(summaryIn, [0, 1], [40, 0])}px)`,
           }}
         >
-          <div style={{fontFamily: MFONT, fontSize: 40, color: MT.plan}}>LEVELS TO WATCH</div>
+          <div style={{fontFamily: MFONT, fontSize: 40, color: MT.plan}}>
+            {/* Was hardcoded English, printed on every video of the Vietnam
+                track — the same slip as the "or" between MUA and BÁN. */}
+            {t.map.levelsToWatch}
+          </div>
           <div
             style={{
               display: 'flex',
@@ -332,22 +355,29 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         </div>
       )}
 
-      {/* Our own mark. A reference channel's initials are not ours to reuse. */}
+      {/* Our own mark, inside the chart where every charting package puts one.
+          At bottom 240 it shared a band with the step caption at bottom 232 and
+          printed through it on every frame — the caption is the one line that
+          says what is being drawn, so it is the one line that must be clean. */}
+      {/* Suppressed once the channel's own mark is on the frame: two different
+          watermarks on one video is not branding, it is a mistake. */}
+      {props.brandMark ? null : (
       <div
         style={{
           position: 'absolute',
-          bottom: SAFE.bottom - 40,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
+          top: MAP_BOX.top + 26,
+          left: 34,
           fontFamily: MFONT,
-          fontSize: 34,
-          letterSpacing: 6,
+          fontSize: 30,
+          letterSpacing: 5,
           color: MT.inkFaint,
+          opacity: 0.5,
+          zIndex: 1,
         }}
       >
         {CHANNEL_MARK}
       </div>
+      )}
 
       {/* The plan is a projection. Saying so is not optional. */}
       <div
@@ -363,7 +393,13 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           lineHeight: 1.35,
         }}
       >
-        {t.map.provenance(props.pair)}
+        {/* A constructed series must never carry the "measured from real data"
+            line. The generator stamps note: 'map-offline' and this is where
+            that stamp has to be honoured — the claim is the one thing about
+            this format that cannot be approximate. */}
+        {props.note === 'map-offline'
+          ? t.map.provenanceIllustration
+          : t.map.provenance(props.pair)}
       </div>
       <div
         style={{

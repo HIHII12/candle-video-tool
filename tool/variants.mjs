@@ -189,6 +189,41 @@ export function conceptPlan(isoDate, count = 14, locale = 'vi') {
   return jobs;
 }
 
+// Instruments and timeframes the offline map generator knows. Five by three is
+// fifteen distinct headers before the seed even changes the price series, which
+// is what makes a fifty-map run fifty different maps rather than six repeated.
+export const MAP_PAIRS = ['XAU/USD', 'XAG/USD', 'WTI/USD', 'EUR/USD', 'BTC/USD'];
+export const MAP_TFS = ['H1', 'H4', 'D1'];
+
+/**
+ * A run of market maps, built offline.
+ *
+ * The daily map on real prices is `planFor` + a network; this is the catalogue
+ * version. Everything on it except the price series is still measured — zones,
+ * order blocks, gaps, change of character, the plan — because the generator
+ * hands a constructed series to the same reader the live one uses. The video
+ * says so on screen.
+ */
+export function mapPlan(isoDate, count = 50, locale = 'vi') {
+  const day = dayIndex(isoDate);
+  const jobs = [];
+  for (let n = 0; n < count; n += 1) {
+    const pair = MAP_PAIRS[n % MAP_PAIRS.length];
+    const tf = MAP_TFS[Math.floor(n / MAP_PAIRS.length) % MAP_TFS.length];
+    const round = Math.floor(n / (MAP_PAIRS.length * MAP_TFS.length)) + 1;
+    jobs.push({
+      id: `${locale}-map-${pair.split('/')[0].toLowerCase()}-${tf}-v${String(round).padStart(2, '0')}`,
+      locale,
+      format: 'map-offline',
+      pair,
+      timeframe: tf,
+      seed: day * 1000 + n * 89 + 17,
+      label: `${pair} ${tf} · ${round}`,
+    });
+  }
+  return jobs;
+}
+
 /**
  * A mixed catalogue: every format the machine can build without a network.
  *

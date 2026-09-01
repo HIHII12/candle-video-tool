@@ -2,6 +2,7 @@ import React from 'react';
 import type {ChochPoint, MapWaypoint, MapZone} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
 import {MT, MTEXT, mease, zoneColor} from './theme';
+import {pillWidth} from '../textWidth';
 
 /**
  * A labelled price band.
@@ -29,6 +30,9 @@ export const ZoneBand: React.FC<{
   const y = Math.min(yTop, yBot);
   const x0 = Math.max(0, coords.indexToX(zone.index));
   const grow = mease(reveal);
+  // Sized from the text plus its letter-spacing, not a constant 118. Every
+  // label in this tool that guessed its own width has eventually clipped a word.
+  const labelW = Math.max(96, pillWidth(zone.label, 26, 16) + zone.label.length * 1.4);
 
   return (
     <g opacity={Math.min(1, reveal * 2.2)}>
@@ -60,12 +64,19 @@ export const ZoneBand: React.FC<{
           strokeDasharray={zone.kind === 'gap' ? '10 7' : undefined}
         />
       )}
-      {/* The label rides the right edge of the growing band. */}
+      {/* The label rides the right edge of the growing band, and sits ABOVE it.
+          Centred on the band it shared a line with the plan's waypoint markers,
+          and a numbered blue circle landing on a band printed itself straight
+          through that band's name — "1" and "OB" on the same pixels. Nothing
+          else is drawn above a band, so above is free. */}
       {reveal > 0.45 && (
-        <g transform={`translate(${labelRight}, ${y + h / 2})`} opacity={(reveal - 0.45) / 0.55}>
-          <rect x={-118} y={-21} width={118} height={42} rx={9} fill={color} />
+        <g
+          transform={`translate(${labelRight}, ${Math.max(24, y - 26)})`}
+          opacity={(reveal - 0.45) / 0.55}
+        >
+          <rect x={-labelW} y={-21} width={labelW} height={42} rx={9} fill={color} />
           <text
-            x={-59}
+            x={-labelW / 2}
             y={7}
             textAnchor="middle"
             fontFamily={MTEXT}
@@ -86,14 +97,20 @@ export const ZoneBand: React.FC<{
 export const ChochMark: React.FC<{
   point: ChochPoint;
   coords: Coords;
+  height: number;
   reveal: number;
-}> = ({point, coords, reveal}) => {
+}> = ({point, coords, height, reveal}) => {
   if (reveal <= 0) return null;
   const x = coords.indexToX(point.index);
   const y = coords.priceToY(point.price);
   const up = point.dir === 'bullish';
-  // Bullish CHoCH prints at a high, so its label belongs above the swing.
-  const dy = up ? -46 : 46;
+  // Bullish CHoCH prints at a high, so its label belongs above the swing —
+  // unless there is no room there, in which case it goes to the other side.
+  // A swing near the bottom of the box printed its name half outside the chart,
+  // which reads as the label being cut rather than the swing being low.
+  let dy = up ? -46 : 46;
+  if (y + dy > height - 26) dy = -46;
+  if (y + dy < 26) dy = 46;
 
   return (
     <g opacity={reveal}>
@@ -148,6 +165,11 @@ export const TrendLine: React.FC<{
   // right edge sent the line straight out of the chart, leaving a diagonal that
   // pointed at nothing. So the projection stops where it would leave the frame.
   const slope = (y2 - y1) / (x2 - x1);
+  // A line steeper than this is not a trendline anybody drew — it is two swings
+  // that happened to be close together, projected into a near-vertical stroke
+  // that leaves the frame within a few bars and points at nothing. Better to
+  // draw no line than a line that means nothing.
+  if (Math.abs(slope) > 2.2) return null;
   let xLimit = width;
   if (slope !== 0) {
     const yBound = slope > 0 ? height : 0;
