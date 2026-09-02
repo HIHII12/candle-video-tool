@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -490,9 +490,11 @@ let plan = mix
           ? conceptPlan(date, count, locale)
           : format === 'map-offline'
             ? mapPlan(date, count, locale)
-            : planFor(date, count);
+            : format === 'anatomy'
+              ? anatomyPlan(date, count, locale)
+              : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline'].includes(format)) {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
 if (only) plan = plan.filter((j) => j.id.includes(only));

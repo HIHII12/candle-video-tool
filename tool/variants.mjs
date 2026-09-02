@@ -18,6 +18,12 @@ export const PATTERNS = [
   'bullish-engulfing', 'bearish-engulfing', 'hammer', 'shooting-star',
   'morning-star', 'evening-star', 'doji', 'dragonfly-doji', 'gravestone-doji',
   'marubozu', 'pin-bar', 'tweezer-bottom', 'tweezer-top',
+  'inverted-hammer', 'hanging-man', 'bullish-harami', 'bearish-harami',
+  'piercing-line', 'dark-cloud-cover', 'three-white-soldiers',
+  'three-black-crows', 'spinning-top', 'bullish-belt-hold', 'bearish-belt-hold',
+  'morning-doji-star', 'evening-doji-star', 'rising-three', 'falling-three',
+  'bullish-kicker', 'bearish-kicker', 'bullish-marubozu', 'bearish-marubozu',
+  'long-legged-doji',
 ];
 
 // Yahoo symbols that carry enough intraday history to scan.
@@ -123,6 +129,9 @@ export const COMPARE_PAIRS = [
   'hammer-vs-dragonfly', 'star-vs-gravestone', 'morning-vs-evening',
   'engulfing-pair', 'tweezer-pair', 'doji-vs-marubozu',
   'doji-vs-gravestone', 'doji-vs-dragonfly',
+  'hammer-vs-hanging-man', 'hammer-vs-inverted', 'harami-vs-engulfing',
+  'piercing-vs-engulfing', 'spinning-vs-doji', 'marubozu-pair',
+  'soldiers-vs-crows', 'star-vs-doji-star', 'belt-vs-marubozu',
 ];
 
 /**
@@ -222,6 +231,58 @@ export function mapPlan(isoDate, count = 50, locale = 'vi') {
     });
   }
   return jobs;
+}
+
+/**
+ * The candlestick-anatomy catalogue: every content once, then a second take.
+ *
+ * The plain candlePlan cycles thirteen patterns, so a hundred videos is each
+ * pattern eight times over. What was asked for is different: a hundred videos
+ * built from FIFTY distinct contents, each with two versions to choose between
+ * — two takes of one idea, not two ideas.
+ *
+ * Fifty contents exist now: thirty-three patterns and seventeen comparisons.
+ * Version 1 of everything is laid down first, then version 2, so a run that is
+ * cut short still covers every content once rather than half of them twice.
+ * The two versions of a content differ by seed — different approach leg,
+ * different follow-through, different outcome — and, for the lessons, by
+ * opening style, so they do not read as the same video twice.
+ */
+export function anatomyPlan(isoDate, count = 100, locale = 'vi') {
+  const day = dayIndex(isoDate);
+  const contents = [
+    ...PATTERNS.map((pattern) => ({kind: 'lesson', key: pattern})),
+    ...COMPARE_PAIRS.map((pair) => ({kind: 'compare', key: pair})),
+  ];
+
+  const jobs = [];
+  for (let ver = 1; ver <= 2; ver += 1) {
+    contents.forEach((c, i) => {
+      // Seeds far apart in seed space, so version 2 is a different drawing
+      // rather than a neighbouring one.
+      const seed = day * 1000 + i * 37 + ver * 5501;
+      jobs.push(
+        c.kind === 'lesson'
+          ? {
+              id: `${locale}-nen-${c.key}-v${ver}`,
+              locale,
+              format: 'candle-lesson',
+              pattern: c.key,
+              seed,
+              label: `${c.key.replace(/-/g, ' ')} · ver ${ver}`,
+            }
+          : {
+              id: `${locale}-sosanh-${c.key}-v${ver}`,
+              locale,
+              format: 'candle-compare',
+              pair: c.key,
+              seed,
+              label: `so sánh ${c.key.replace(/-/g, ' ')} · ver ${ver}`,
+            },
+      );
+    });
+  }
+  return jobs.slice(0, count);
 }
 
 /**

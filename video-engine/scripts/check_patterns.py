@@ -104,6 +104,140 @@ def check(name: str, cfg: dict) -> list[str]:
         if not near(a[field], b[field], tol):
             bad.append(f"the two {field}s differ by {abs(a[field]-b[field]):.2f}")
 
+    # --- Hai muoi mau bo sung ------------------------------------------------
+    #
+    # Khong co doan nay thi 20 mau moi di qua ham check ma khong bi kiem gi ca,
+    # va "0 vi pham" chi co nghia la "khong ai hoi", chu khong phai "dung".
+
+    if name == "inverted-hammer":
+        if upper < 2 * body:
+            bad.append(f"upper wick {upper/body:.1f}x body, claim >= 2x")
+        if lower > 0.10 * body:
+            bad.append(f"lower wick {lower/body*100:.0f}% of body, claim < 10%")
+    if name == "hanging-man":
+        if lower < 2 * body:
+            bad.append(f"lower wick {lower/body:.1f}x body, claim >= 2x")
+        # The shape is a hammer's; the up leg before it is what makes the name.
+        lead = candles[max(0, idx[0] - 8):idx[0]]
+        if lead and lead[-1]["close"] <= lead[0]["open"]:
+            bad.append("no up leg before it - that would be a hammer")
+    if name == "inverted-hammer":
+        lead = candles[max(0, idx[0] - 8):idx[0]]
+        if lead and lead[-1]["close"] >= lead[0]["open"]:
+            bad.append("no down leg before it")
+
+    if name in ("bullish-harami", "bearish-harami"):
+        big, small = candles[idx[0]], candles[idx[1]]
+        b_lo, b_hi = min(big["open"], big["close"]), max(big["open"], big["close"])
+        s_lo, s_hi = min(small["open"], small["close"]), max(small["open"], small["close"])
+        if not (s_lo > b_lo and s_hi < b_hi):
+            bad.append("the second body is not inside the first")
+        if abs(small["close"] - small["open"]) > 0.6 * abs(big["close"] - big["open"]):
+            bad.append("the second body is not clearly smaller")
+        up_first = big["close"] > big["open"]
+        if name == "bullish-harami" and up_first:
+            bad.append("first bar should be the down one")
+        if name == "bearish-harami" and not up_first:
+            bad.append("first bar should be the up one")
+
+    if name in ("piercing-line", "dark-cloud-cover"):
+        one, two = candles[idx[0]], candles[idx[1]]
+        mid = (one["open"] + one["close"]) / 2
+        if name == "piercing-line":
+            if two["open"] >= one["low"]:
+                bad.append("the second bar does not open below the first bar's low")
+            if two["close"] <= mid:
+                bad.append("close did not reach past the midpoint")
+            if two["close"] >= max(one["open"], one["close"]):
+                bad.append("closed past the whole body - that is an engulfing")
+        else:
+            if two["open"] <= one["high"]:
+                bad.append("the second bar does not open above the first bar's high")
+            if two["close"] >= mid:
+                bad.append("close did not reach past the midpoint")
+            if two["close"] <= min(one["open"], one["close"]):
+                bad.append("closed past the whole body - that is an engulfing")
+
+    if name in ("three-white-soldiers", "three-black-crows"):
+        bars = [candles[i] for i in idx]
+        up = name.startswith("three-white")
+        for k in range(1, 3):
+            if up and bars[k]["close"] <= bars[k - 1]["close"]:
+                bad.append(f"bar {k+1} does not close higher")
+            if not up and bars[k]["close"] >= bars[k - 1]["close"]:
+                bad.append(f"bar {k+1} does not close lower")
+        for k, b in enumerate(bars):
+            bb = abs(b["close"] - b["open"])
+            w = (b["high"] - max(b["open"], b["close"])) if up else (min(b["open"], b["close"]) - b["low"])
+            if w > 0.35 * bb:
+                bad.append(f"bar {k+1} wick {w/bb*100:.0f}% of body, claim small")
+
+    if name == "spinning-top":
+        if upper < body or lower < body:
+            bad.append("both wicks must be longer than the body")
+        if body > 0.30 * rng:
+            bad.append(f"body {body/rng*100:.0f}% of range, claim small")
+
+    if name in ("bullish-belt-hold", "bearish-belt-hold"):
+        w = lower if name.startswith("bullish") else upper
+        if w > 0.05 * body:
+            bad.append(f"the open-end wick is {w/body*100:.0f}% of body, claim ~none")
+        if name == "bullish-belt-hold" and key["close"] <= key["open"]:
+            bad.append("should be an up bar")
+        if name == "bearish-belt-hold" and key["close"] >= key["open"]:
+            bad.append("should be a down bar")
+
+    if name in ("morning-doji-star", "evening-doji-star"):
+        one, mid, three = (candles[i] for i in idx)
+        mb = abs(mid["close"] - mid["open"])
+        mr = mid["high"] - mid["low"]
+        if mr > 0 and mb > 0.06 * mr:
+            bad.append(f"middle bar body {mb/mr*100:.0f}% of its range, claim a doji")
+        m1 = (one["open"] + one["close"]) / 2
+        if name == "morning-doji-star" and three["close"] <= m1:
+            bad.append("third bar does not close past the midpoint of the first")
+        if name == "evening-doji-star" and three["close"] >= m1:
+            bad.append("third bar does not close past the midpoint of the first")
+
+    if name in ("rising-three", "falling-three"):
+        big = candles[idx[0]]
+        last = candles[idx[1]]
+        inner = candles[idx[0] + 1:idx[1]]
+        for k, c in enumerate(inner):
+            if c["high"] > big["high"] + 1e-9 or c["low"] < big["low"] - 1e-9:
+                bad.append(f"inner bar {k+1} leaves the first bar's range")
+        if name == "rising-three" and last["close"] <= big["high"]:
+            bad.append("last bar does not close above the first bar's high")
+        if name == "falling-three" and last["close"] >= big["low"]:
+            bad.append("last bar does not close below the first bar's low")
+
+    if name in ("bullish-kicker", "bearish-kicker"):
+        one, two = candles[idx[0]], candles[idx[1]]
+        if name == "bullish-kicker":
+            if two["open"] <= one["open"]:
+                bad.append("no gap above the previous open")
+            if two["low"] < one["open"]:
+                bad.append("traded back into the gap")
+        else:
+            if two["open"] >= one["open"]:
+                bad.append("no gap below the previous open")
+            if two["high"] > one["open"]:
+                bad.append("traded back into the gap")
+
+    if name in ("bullish-marubozu", "bearish-marubozu"):
+        if upper > 0.03 * body or lower > 0.03 * body:
+            bad.append(f"wicks {max(upper,lower)/body*100:.1f}% of body, claim < 3%")
+        if name == "bullish-marubozu" and key["close"] <= key["open"]:
+            bad.append("should be an up bar")
+        if name == "bearish-marubozu" and key["close"] >= key["open"]:
+            bad.append("should be a down bar")
+
+    if name == "long-legged-doji":
+        if rng > 0 and body > 0.05 * rng:
+            bad.append(f"body {body/rng*100:.1f}% of range, claim a doji")
+        if upper < 0.30 * rng or lower < 0.30 * rng:
+            bad.append("both wicks must be long - that is what makes it long-legged")
+
     if name in ("morning-star", "evening-star"):
         one, mid, three = (candles[i] for i in idx)
         b1, b_mid = abs(one["close"] - one["open"]), abs(mid["close"] - mid["open"])
