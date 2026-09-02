@@ -71,7 +71,19 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
    * a real move with real pixel change, and it says what the format is for:
    * here is the price, now here is everything around it.
    */
-  const recent = props.candles.slice(-18).flatMap((c) => [c.high, c.low]);
+  /*
+   * The opening window is fitted to the bars that are ON SCREEN, which sounds
+   * obvious and was not what it did.
+   *
+   * It was fitted to the last eighteen bars of the whole series — bars the
+   * reveal has not drawn yet. The candles that WERE drawn sat at prices outside
+   * that window, so the first three or four seconds of every single map video
+   * were a blank chart with a couple of candles in one corner. The freeze check
+   * flagged it as a still image, which it was; the real fault is that a third
+   * of the opening had nothing in it at all.
+   */
+  const visible = props.candles.slice(0, Math.max(2, Math.ceil(shown)));
+  const recent = visible.slice(-18).flatMap((c) => [c.high, c.low]);
   const rLo = Math.min(...recent);
   const rHi = Math.max(...recent);
   const rPad = (rHi - rLo) * 0.18 || 1;
@@ -90,9 +102,33 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
     0.08,
   );
 
-  // Reserve the projection space on the right from the first frame. Growing it
-  // later would slide every band and marker sideways mid-video.
-  const logical = {from: -0.6, to: total - 1 + props.projectBars + 0.6};
+  /**
+   * Horizontal window. Follows the newest bar while the chart fills, then opens
+   * out to the full map — and is fully open before the first band is drawn.
+   *
+   * It used to be fixed from frame one, and the first four seconds were then a
+   * still picture with a candle appearing in it every seventeenth frame: one
+   * bar out of sixty-four changes about one block in a hundred and forty-four,
+   * which is below anything a viewer registers as movement. Six of fifty maps
+   * failed the freeze check on it. Tracking the newest bar makes every bar on
+   * screen move every frame, which is also what a live chart does.
+   *
+   * The reason it was pinned still holds — a window that moved while the bands
+   * were on screen would slide them sideways — so the pan is finished by frame
+   * 560 and the first band lands at 770.
+   */
+  // Linear, and starting at frame 20 rather than 70.
+  //
+  // The first attempt used mease() — smoothstep — and it is flat at both ends
+  // by construction, so the pan covered a fifth of its travel in the first two
+  // and a half seconds: a quarter of a pixel per frame, which measured as a
+  // freeze again. camera.ts already carries this warning for the candle lesson;
+  // it applies here for the same reason.
+  const open = mramp(frame, [20, MB.candles[1]] as const);
+  const logical = {
+    from: (shown - 30) + (-0.6 - (shown - 30)) * open,
+    to: (shown + 6) + (total - 1 + props.projectBars + 0.6 - (shown + 6)) * open,
+  };
 
   const {containerRef, coords} = useLightweightChart(
     props,
@@ -131,6 +167,16 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
     }
     return out;
   }, [coords, props.zones]);
+
+  /** Per-chip reveal across the summary beat, staggered and overlapping. */
+  const chipIn = (i: number) => {
+    const n = Math.max(1, props.zones.length);
+    const start = MB.summary[0] + 34 + (i * 150) / n;
+    return interpolate(frame, [start, start + 26], [0, 1], {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    });
+  };
 
   const summaryIn = spring({
     frame: frame - MB.summary[0],
@@ -361,10 +407,21 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               marginTop: 12,
             }}
           >
-            {props.zones.map((z) => (
+            {props.zones.map((z, zi) => (
               <span
                 key={`${z.label}-${z.index}`}
                 style={{
+                  // One chip at a time, across the closing beat.
+                  //
+                  // They used to arrive together with the panel, and the last
+                  // two and a half seconds of the video were then perfectly
+                  // still — measured on six of fifty maps as a freeze, and a
+                  // viewer reads a still frame as the video having ended. Landing
+                  // them in sequence also gives the eye somewhere to go: five
+                  // price levels dropped at once is five things to read and none
+                  // of them get read.
+                  opacity: chipIn(zi),
+                  transform: `translateY(${interpolate(chipIn(zi), [0, 1], [16, 0])}px)`,
                   fontSize: 27,
                   fontWeight: 800,
                   color: '#fff',
