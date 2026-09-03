@@ -155,7 +155,10 @@ export const QuizLayer: React.FC<{
         <div
           style={{
             position: 'absolute',
-            bottom: SAFE.bottom + 40,
+            // Measured off a rendered frame, not guessed: at +40 this headline
+            // landed 10px under the beat-rail labels, which for 57px of cap
+            // height reads as one crowded block rather than two elements.
+            bottom: SAFE.bottom + 4,
             left: 40,
             right: 40,
             textAlign: 'center',

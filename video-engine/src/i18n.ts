@@ -173,7 +173,12 @@ const EN: Strings = {
     or: 'or',
     buy: 'BUY',
     sell: 'SELL',
-    whichIs: (name) => `WHICH ONE IS THE ${name.toUpperCase()}?`,
+    // "Spot the", not "Which one is the": a third of these names are plural —
+    // "Three Black Crows", "Three White Soldiers" — and "which one is the three
+    // black crows" is broken English on a channel whose whole pitch is that it
+    // knows what it is talking about. "Spot the" is correct for every name in
+    // the catalogue, singular or plural.
+    whichIs: (name) => `SPOT THE ${name.toUpperCase()}`,
     top: 'TOP',
     bottom: 'BOTTOM',
     thatOne: 'THAT ONE',

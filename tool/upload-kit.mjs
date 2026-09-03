@@ -114,7 +114,9 @@ function quizTitleOf(job, cfg, locale) {
   const vi = locale === 'vi';
   if (job.format === 'candle-compare') {
     const ask = (job.quizAsk === 'right' ? cfg.right : cfg.left)?.name ?? '';
-    return vi ? `Cái nào là ${ask}?` : `Which one is the ${ask}?`;
+    // Matches the wording on screen, and stays correct for the plural names
+    // ("Three Black Crows") that "which one is the ..." breaks on.
+    return vi ? `Cái nào là ${ask}?` : `Spot the ${ask}`;
   }
   return vi ? 'Chart này: mua hay bán?' : 'Buy or sell this chart?';
 }
