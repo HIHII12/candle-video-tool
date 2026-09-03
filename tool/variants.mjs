@@ -422,3 +422,60 @@ export function planFor(isoDate, count = 30) {
   const seen = new Set();
   return jobs.filter((j) => !seen.has(j.id) && seen.add(j.id)).slice(0, count);
 }
+
+/**
+ * The quiz track: the same anatomy content, asked as a question first.
+ *
+ * The arithmetic is the whole design. 33 patterns and 17 confusable pairs is 50
+ * distinct contents, and two versions of each is exactly 100 — so the set fills
+ * without a single content appearing three times, which is the rule this
+ * channel is being posted under.
+ *
+ * The two formats ask different questions on purpose. A lesson asks BUY or
+ * SELL, which tests whether the viewer can read a pattern's meaning; a
+ * comparison asks TOP or BOTTOM, which tests whether they can tell two shapes
+ * apart at all. Fifty of each question would be a quiz with one idea in it.
+ */
+export function quizPlan(isoDate, count = 100, locale = 'en') {
+  const day = dayIndex(isoDate);
+  const contents = [
+    ...PATTERNS.map((pattern) => ({kind: 'lesson', key: pattern})),
+    ...COMPARE_PAIRS.map((pair) => ({kind: 'compare', key: pair})),
+  ];
+
+  const jobs = [];
+  for (let ver = 1; ver <= 2; ver += 1) {
+    contents.forEach((c, i) => {
+      const seed = day * 1000 + i * 37 + ver * 5501;
+      if (c.kind === 'lesson') {
+        jobs.push({
+          id: `${locale}-quiz-${c.key}-v${ver}`,
+          locale,
+          format: 'candle-lesson',
+          pattern: c.key,
+          seed,
+          quiz: true,
+          // Rotates the banner wording, so two versions of one pattern do not
+          // open with the same sentence over a different drawing.
+          quizVariant: (i + ver) % 4,
+          label: `quiz · ${c.key.replace(/-/g, ' ')} · ver ${ver}`,
+        });
+      } else {
+        jobs.push({
+          id: `${locale}-quiz-vs-${c.key}-v${ver}`,
+          locale,
+          format: 'candle-compare',
+          pair: c.key,
+          seed,
+          quiz: true,
+          // Version 2 asks about the other pattern, so the answer moves from the
+          // top pane to the bottom one. Without this, every second version of
+          // every pair would have the same correct answer as the first.
+          quizAsk: ver === 1 ? 'left' : 'right',
+          label: `quiz · ${c.key.replace(/-/g, ' ')} · ver ${ver}`,
+        });
+      }
+    });
+  }
+  return jobs.slice(0, count);
+}

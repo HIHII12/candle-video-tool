@@ -4,6 +4,7 @@ import type {CandleCompareProps} from '../data/types';
 import {Pane} from './Pane';
 import {KB, KLAYER, KLAYOUT, KT, kramp} from './theme';
 import {BrandMark} from '../BrandMark';
+import {CompareQuiz} from './CompareQuiz';
 import {Soundtrack} from '../audio/Soundtrack';
 import {SAFE} from '../safeArea';
 import {strings} from '../i18n';
@@ -198,6 +199,18 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
         metric={props.metric}
         label={measureLabel}
       />
+
+      {/* Ask before naming. The format already hid both names until the
+          verdict, so the question costs it nothing it was using. */}
+      {props.quiz ? (
+        <CompareQuiz
+          frame={frame}
+          fps={fps}
+          askName={(props.quizAsk === 'right' ? props.right : props.left).name}
+          answer={props.quizAsk === 'right' ? 'BOTTOM' : 'TOP'}
+          locale={props.locale}
+        />
+      ) : null}
 
       {nameTag(props.left, verdictIn, KLAYOUT.a.top - 44)}
       {nameTag(props.right, verdictIn, KLAYOUT.b.top - 44)}

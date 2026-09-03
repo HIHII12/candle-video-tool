@@ -40,6 +40,11 @@ tool-app/data/previews/
 video-engine/src/data/batch_candle-*-v*.json
 video-engine/src/data/batch_*-candle-*-v*.json
 video-engine/src/data/batch_*-compare-*-v*.json
+# The quiz plan writes one of these per video; they are generator output, not
+# source, and 100 of them per run is not a diff anybody should have to read.
+video-engine/src/data/batch_*-quiz-*.json
+video-engine/src/data/batch_*-nen-*-v*.json
+video-engine/src/data/batch_*-sosanh-*-v*.json
 video-engine/src/data/_compare.json
 video-engine/src/data/_probe.json
 video-engine/out/qa/

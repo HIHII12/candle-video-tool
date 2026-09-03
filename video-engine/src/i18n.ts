@@ -77,6 +77,12 @@ type Strings = {
     won: (side: 'BUY' | 'SELL') => string;
     hitTp: string;
     stopped: string;
+    /** Comparison quiz: which of the two panes is the named pattern. */
+    whichIs: (name: string) => string;
+    top: string;
+    bottom: string;
+    /** Shown with the winning pane once the answer lands. */
+    thatOne: string;
   };
   /** Named setup walkthrough. */
   setup: {
@@ -158,6 +164,10 @@ const EN: Strings = {
     or: 'or',
     buy: 'BUY',
     sell: 'SELL',
+    whichIs: (name) => `WHICH ONE IS THE ${name.toUpperCase()}?`,
+    top: 'TOP',
+    bottom: 'BOTTOM',
+    thatOne: 'THAT ONE',
     won: (side) => (side === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'),
     hitTp: 'HIT TP \u2705',
     stopped: 'STOPPED OUT \u274c',
@@ -240,6 +250,10 @@ const VI: Strings = {
       'ĐẾN LƯỢT BẠN',
       'LONG HAY SHORT?',
     ],
+    whichIs: (name) => `CÁI NÀO LÀ ${name.toUpperCase()}?`,
+    top: 'TRÊN',
+    bottom: 'DƯỚI',
+    thatOne: 'CHÍNH NÓ',
     buy: 'MUA',
     sell: 'BÁN',
     or: 'hay',

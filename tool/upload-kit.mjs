@@ -102,8 +102,26 @@ const BODY = {
   },
 };
 
+/**
+ * The question a quiz video asks, as its title.
+ *
+ * Deliberately does NOT name the pattern. The title is the first thing a viewer
+ * reads and the pattern name is the answer, so a title like "Hammer — buy or
+ * sell?" answers its own question in the feed. The name is in the description
+ * and the hashtags, where it can still be searched for without being spoiled.
+ */
+function quizTitleOf(job, cfg, locale) {
+  const vi = locale === 'vi';
+  if (job.format === 'candle-compare') {
+    const ask = (job.quizAsk === 'right' ? cfg.right : cfg.left)?.name ?? '';
+    return vi ? `Cái nào là ${ask}?` : `Which one is the ${ask}?`;
+  }
+  return vi ? 'Chart này: mua hay bán?' : 'Buy or sell this chart?';
+}
+
 /** The headline, taken from whatever the format actually put on screen. */
 function titleOf(job, cfg, caption, locale) {
+  if (job.quiz) return quizTitleOf(job, cfg, locale);
   if (job.format === 'candle-compare') return cfg.title;
   if (job.format === 'candle-lesson' || job.format === 'concept-lesson') {
     return cfg.pattern?.tagline || caption?.title || job.label;

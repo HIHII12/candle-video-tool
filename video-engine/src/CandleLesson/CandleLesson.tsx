@@ -9,6 +9,7 @@ import {BrandMark} from '../BrandMark';
 import {strings} from '../i18n';
 import {ChartEdges} from '../ChartEdges';
 import {Marks, type MarkTheme} from '../Marks';
+import {HEADER_BACK_AFTER, QuizLayer} from './QuizLayer';
 import {textWidth} from '../textWidth';
 import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
@@ -88,6 +89,18 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   const titleIn = 1;
   // Title shrinks out of the way once the chart becomes the subject.
   const titleOut = interpolate(frame, [CB.focus[0], CB.focus[1]], [1, 0.62], clamp);
+
+  // Nothing to hold back on a plain lesson; on a quiz, hold the header until
+  // the question band has finished clearing, then bring it in as the
+  // explanation opens. HEADER_BACK_AFTER lives with the band that clears.
+  const headerHold = props.quiz
+    ? interpolate(
+        frame,
+        [CB.anatomy[0] + HEADER_BACK_AFTER, CB.anatomy[0] + HEADER_BACK_AFTER + 34],
+        [0, 1],
+        clamp,
+      )
+    : 1;
 
   /**
    * Which of the three openings this video uses; see make_candle_lesson.py.
@@ -181,7 +194,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           // Give the corner mark its own column when there is one, so a long
           // pattern name wraps rather than running under the badge.
           right: props.brandMark ? SAFE.right + 130 : SAFE.right,
-          opacity: titleIn * (0.45 + 0.55 * titleOut),
+          // On a quiz the header IS the answer, so it stands down until the
+          // question has been answered and its band has cleared.
+          opacity: titleIn * (0.45 + 0.55 * titleOut) * headerHold,
           transform: `translateY(${interpolate(settle, [0, 1], [-14, 0])}px) scale(${
             (0.985 + 0.015 * settle) * (0.94 + 0.06 * titleOut)
           })`,
@@ -341,6 +356,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           />
         </svg>
       )}
+
+      {/* Ask before explaining. Gated on the config so the plain lessons are
+          untouched: the quiz is a different product, not a new default. */}
+      {props.quiz ? (
+        <QuizLayer
+          frame={frame}
+          fps={fps}
+          bias={pattern.bias}
+          // The answer lands exactly as the anatomy beat opens, so the
+          // explanation reads as the mark scheme for the question just asked.
+          answerAt={CB.anatomy[0]}
+          variant={props.quizVariant ?? 0}
+          locale={props.locale}
+        />
+      ) : null}
 
       <BeatRail
         frame={frame}

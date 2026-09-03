@@ -202,6 +202,10 @@ export type PatternStats = {
 };
 
 export type CandleLessonProps = {
+  /** Open with a BUY-or-SELL question before explaining the pattern. */
+  quiz?: boolean;
+  /** Rotates wording that would otherwise repeat across a batch. */
+  quizVariant?: number;
   /**
    * Extra drawing: levels, zones and swing paths, described as data.
    *
@@ -257,6 +261,10 @@ export type CompareSide = {
  */
 export type CandleCompareProps = {
   kind: 'candleCompare';
+  /** Ask which pane is which before naming them. */
+  quiz?: boolean;
+  /** Which of the two the question names. Defaults to the top pane. */
+  quizAsk?: 'left' | 'right';
   locale?: Locale;
   brandMark?: string | null;
   /** Which measurement decides it: the body, or the leg that came before. */

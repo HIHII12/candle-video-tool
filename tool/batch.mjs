@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -261,9 +261,16 @@ async function buildData(job) {
 }
 
 /** Stamp the track's own settings onto a config before it is rendered. */
-function applyTrack(cfg) {
+function applyTrack(cfg, job) {
   cfg.locale = locale;
   cfg.brandMark = brand === 'none' ? null : brand;
+  // The quiz flags live on the plan, not in the generator: the same generated
+  // setup is a lesson or a quiz depending only on whether it is asked first.
+  if (job?.quiz) {
+    cfg.quiz = true;
+    if (job.quizVariant !== undefined) cfg.quizVariant = job.quizVariant;
+    if (job.quizAsk !== undefined) cfg.quizAsk = job.quizAsk;
+  }
   return cfg;
 }
 
@@ -317,7 +324,7 @@ async function runJob(job) {
       // has never seen.
       ? { title: cfg.title ?? job.label, hook: cfg.hook ?? null, source: 'none' }
       : await writeCaption(job, facts);
-  applyCaption(configPath, applyTrack(cfg), caption, job.format);
+  applyCaption(configPath, applyTrack(cfg, job), caption, job.format);
 
   // Narration is opt-in and best-effort. The engine is installed per machine by
   // scripts/setup_voice.py; without it the video renders exactly as before, so a
@@ -492,12 +499,19 @@ let plan = mix
             ? mapPlan(date, count, locale)
             : format === 'anatomy'
               ? anatomyPlan(date, count, locale)
+              : format === 'quiz'
+                ? quizPlan(date, count, locale)
               : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy'].includes(format)) {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
-if (only) plan = plan.filter((j) => j.id.includes(only));
+// Comma-separated, so a smoke test can name one job per format rather than
+// running the whole plan to reach the second one.
+if (only) {
+  const wanted = only.split(',').map((x) => x.trim()).filter(Boolean);
+  plan = plan.filter((j) => wanted.some((w) => j.id.includes(w)));
+}
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }
 console.log(`Plan for ${date}: ${plan.length} videos, ${workers} at a time\n`);
 
