@@ -74,6 +74,15 @@ type Strings = {
     sell: string;
     /** The word between the two buttons. */
     or: string;
+    /**
+     * The line shown when the answer lands.
+     *
+     * States the ANSWER, never an outcome. "BUYERS WON" was the first cut, and
+     * on a video that goes on to get stopped out it reads as the video
+     * contradicting itself sixteen seconds later — the candle's buyers winning
+     * and the trade winning are two different claims, and only one of them is
+     * being made here.
+     */
     won: (side: 'BUY' | 'SELL') => string;
     hitTp: string;
     stopped: string;
@@ -168,7 +177,7 @@ const EN: Strings = {
     top: 'TOP',
     bottom: 'BOTTOM',
     thatOne: 'THAT ONE',
-    won: (side) => (side === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'),
+    won: (side) => `ANSWER · ${side}`,
     hitTp: 'HIT TP \u2705',
     stopped: 'STOPPED OUT \u274c',
   },
@@ -257,7 +266,7 @@ const VI: Strings = {
     buy: 'MUA',
     sell: 'BÁN',
     or: 'hay',
-    won: (side) => (side === 'BUY' ? 'PHE MUA THẮNG' : 'PHE BÁN THẮNG'),
+    won: (side) => `ĐÁP ÁN · ${side === 'BUY' ? 'MUA' : 'BÁN'}`,
     hitTp: 'CHẠM CHỐT LỜI \u2705',
     stopped: 'DÍNH DỪNG LỖ \u274c',
   },
