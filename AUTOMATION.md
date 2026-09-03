@@ -233,3 +233,32 @@ node tool/batch.mjs --mix --count 100 --locale vi --date 2026-08-31 --workers 2
 **Khác lượt 30/08 ở chỗ nào.** Lượt trước 100 video ra **một khuôn** — giải nén
 thấy đúng một kiểu. Lượt này năm khuôn, trong đó khuôn so sánh (24 video) và ba
 kiểu mở đầu là thứ trực tiếp chữa lỗi đó.
+
+## Da chay that — 100 video GIAI PHAU NEN, tieng Viet, 06/09/2026
+
+| | |
+|---|---|
+| Render | **100/100, 0 hong** (131 phut) |
+| Soi san | **100/100, 0 LOI** |
+| Dung hinh | max **1,0 s** · trung binh **0,36 s** (nguong loi 2,4 s) |
+| Chuyen dong | 11,3 – 21,9% khung hinh |
+| Am luong | -14,1 … -13,8 LUFS |
+| Noi dung | **50 content x 2 ver** = 33 mau nen + 17 cap so sanh |
+
+```bash
+node tool/batch.mjs --format anatomy --count 100 --locale vi --workers 3
+```
+
+**Vi sao `anatomy` chu khong phai `candle-lesson`.** candlePlan xoay vong mau
+nen, nen 100 video la moi mau quay lai tam lan. Anh can moi content toi da HAI
+ver — tuc la 50 content khac nhau. anatomyPlan xep ver 1 cua ca 50 content
+truoc, roi moi toi ver 2, nen mot luot bi cat ngang van phu du 50 content.
+
+**Hai ver co that su khac nhau khong.** Do tren ca 33 mau: 33/33 khac kieu mo
+dau, 33/33 khac tagline, 13/33 khac ca ket qua thang/thua. Khong cap nao giong
+het. Nen 100 video nay dang duoc 100 bai, khong phai 50 bai x 2 ban nhap.
+
+**Bai hoc ve may kiem.** check_patterns.py bao "33 mau, 0 vi pham" khi no moi
+chi biet luat cua 13 mau cu — 20 mau moi di qua ma khong bi hoi gi. "0 vi pham"
+luc do chi co nghia la "khong ai kiem". Viet luat cho ca 20 mau roi thi no bat
+ngay hai loi that o Sao Mai Doji / Sao Hom Doji.
