@@ -1,6 +1,7 @@
 import React from 'react';
 import {interpolate, spring} from 'remotion';
 import {TV, FONT, stroke} from './chartTheme';
+import {strings, type Locale} from '../i18n';
 import {CHANNEL_MARK} from '../brand';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -47,12 +48,15 @@ export const QuizPills: React.FC<{
   fps: number;
   answerAt: number;
   answer: 'BUY' | 'SELL';
-}> = ({frame, fps, answerAt, answer}) => {
+  locale?: Locale;
+}> = ({frame, fps, answerAt, answer, locale}) => {
+  const t = strings(locale).quiz;
   const entry = spring({frame: frame - 10, fps, config: {damping: 13}, durationInFrames: 30});
   const revealed = frame >= answerAt;
 
   const pill = (label: 'BUY' | 'SELL', color: string) => {
     const isAnswer = label === answer;
+    const text = label === 'BUY' ? t.buy : t.sell;
     const settle = revealed
       ? spring({
           frame: frame - answerAt,
@@ -86,7 +90,7 @@ export const QuizPills: React.FC<{
             ...stroke(5),
           }}
         >
-          {label}
+          {text}
         </span>
       </div>
     );
@@ -109,7 +113,9 @@ export const QuizPills: React.FC<{
     >
       {pill('BUY', TV.up)}
       <span style={{fontFamily: FONT, fontSize: 62, fontWeight: 900, color: '#fff', ...stroke(4)}}>
-        or
+        {/* Was a hardcoded "or" — one English word sitting between two
+            Vietnamese buttons, on every video of the Vietnam track. */}
+        {t.or}
       </span>
       {pill('SELL', TV.down)}
     </div>
@@ -183,7 +189,8 @@ export const AnswerBadge: React.FC<{
   fps: number;
   at: number;
   answer: 'BUY' | 'SELL';
-}> = ({frame, fps, at, answer}) => {
+  locale?: Locale;
+}> = ({frame, fps, at, answer, locale}) => {
   if (frame < at) return null;
   const pop = spring({frame: frame - at, fps, config: {damping: 10, mass: 0.6}, durationInFrames: 26});
   const color = answer === 'BUY' ? TV.up : TV.down;
@@ -197,7 +204,10 @@ export const AnswerBadge: React.FC<{
         right: 0,
         textAlign: 'center',
         fontFamily: FONT,
-        fontSize: 104,
+        // Sized from the text, not fixed. The English verdict is eleven
+        // characters and fits at 104; the Vietnamese one is thirteen and ran
+        // into both edges of the frame at the same size.
+        fontSize: Math.min(104, Math.round(1180 / Math.max(9, strings(locale).quiz.won(answer).length))),
         fontWeight: 900,
         color,
         transform: `scale(${interpolate(pop, [0, 1], [0.5, 1])})`,
@@ -207,7 +217,7 @@ export const AnswerBadge: React.FC<{
     >
       {/* "SELLER!" read as a label for a person rather than a verdict on the
           move. Naming the winner is what the viewer is waiting to hear. */}
-      {answer === 'BUY' ? 'BUYERS WON' : 'SELLERS WON'}
+      {strings(locale).quiz.won(answer)}
     </div>
   );
 };

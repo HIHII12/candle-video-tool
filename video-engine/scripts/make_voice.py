@@ -42,15 +42,41 @@ def first_sentence(text: str, max_words: int = 14) -> str:
     words = head.split()
     if len(words) > max_words:
         head = " ".join(words[:max_words])
-    return head + "."
+    # A question keeps its question mark. Appending a full stop to one gave
+    # piper "Nen Bua hay Doji Chuon Chuon?." to read, which it renders as a
+    # statement with a stumble at the end instead of a question.
+    return head if head.endswith(("?", "!")) else head + "."
 
 
-def engine() -> tuple[Path, Path]:
+# Which voice model belongs to which track. Both can be installed side by side;
+# setup_voice.py downloads them from Hugging Face by name.
+VOICE_FOR = {"vi": "vi_", "en": "en_"}
+
+
+def engine(locale: str = "en") -> tuple[Path, Path]:
+    """The binary, and the voice model that matches the track being built.
+
+    Model choice used to be "first .onnx in the folder, alphabetically", which
+    was fine while exactly one was installed and silently wrong the moment a
+    second was: `en_US-norman` sorts before `vi_VN-vais1000`, so a machine with
+    both would have read the Vietnamese track in English. The track picks the
+    voice now, and a missing one says which command installs it rather than
+    quietly falling back to the wrong language.
+    """
     exe = next((p for p in (VENDOR / "piper.exe", VENDOR / "piper") if p.exists()), None)
-    model = next(iter(sorted(VENDOR.glob("*.onnx"))), None)
-    if not exe or not model:
+    models = sorted(VENDOR.glob("*.onnx"))
+    prefix = VOICE_FOR.get(locale, "en_")
+    model = next((m for m in models if m.name.startswith(prefix)), None)
+    if not exe or not models:
         raise SystemExit(
             "Speech engine not installed. Run:  python3 scripts/setup_voice.py"
+        )
+    if not model:
+        want = "vi_VN-vais1000-medium" if locale == "vi" else "en_US-norman-medium"
+        raise SystemExit(
+            f"No {locale} voice installed (found: "
+            f"{', '.join(m.stem for m in models) or 'none'}).\n"
+            f"Run:  python3 scripts/setup_voice.py --voice {want}"
         )
     return exe, model
 
@@ -133,17 +159,156 @@ def map_lines(cfg: dict) -> list[tuple[int, str]]:
     ]
 
 
+def compare_lines(cfg: dict) -> list[tuple[int, str]]:
+    """The comparison, spoken as the argument it is.
+
+    Nothing is named before the measurement, exactly as on screen. Reading the
+    two names out at the start would hand over the answer before the viewer has
+    been given the chance to look, which is the whole point of the format.
+    """
+    left = cfg["left"]["name"]
+    right = cfg["right"]["name"]
+    return [
+        (30, first_sentence(cfg["title"], 10)),
+        (560, "Same shape. Same story, apparently."),
+        (950, first_sentence(cfg["same"])),
+        (1230, first_sentence(cfg["diff"])),
+        (1620, f"On top, {left}. Below, {right}."),
+        (1910, first_sentence(cfg["why"])),
+    ]
+
+
+# --- the Vietnam track -----------------------------------------------------
+# Not a translation of the lines above. Vietnamese traders say "nen bua", not
+# "the hammer candle", and a sentence built by translating English word order
+# reads as a machine speaking — which is the one thing this track cannot sound
+# like. Beats are the same because the storyboards are the same.
+
+def vi_candle_lines(cfg: dict) -> list[tuple[int, str]]:
+    p = cfg["pattern"]
+    name = p["name"]
+    st = cfg.get("stats")
+    lines = [
+        (40, f"Ai cũng vào lệnh theo {name}."),
+        (520, first_sentence(p["tagline"])),
+        (860, first_sentence(p["rule"])),
+        (1390, "Vào lệnh ở giá đóng cửa. Dừng lỗ ngoài bóng nến."),
+    ]
+    if st:
+        lines.append((1660, "Nhưng đúng một lần thì chưa là bằng chứng."))
+        lines.append((1820, f"{st['settled']} lần thử. Chỉ {st['wins']} lần thắng."))
+    else:
+        lines.append((1560, "Xem tiếp cái gì xảy ra."))
+        lines.append((1860, "Mẫu nến là cái cò súng, không phải cả hệ thống."))
+    return lines
+
+
+def vi_quiz_lines(cfg: dict) -> list[tuple[int, str]]:
+    won = "Bên mua" if cfg.get("answer") == "BUY" else "Bên bán"
+    return [
+        (40, "Mua, hay bán?"),
+        (560, "Kháng cự và hỗ trợ trước đã."),
+        (760, "Một khoảng nhảy giá chưa lấp, và vùng lệnh ngay cạnh nó."),
+        (960, "Vùng vàng trùng với cả hai."),
+        (1215, "Ba giây. Chọn một bên."),
+        (1415, f"{won} thắng."),
+        (1900, "Setup đúng vẫn thua được. Đó là nghề."),
+    ]
+
+
+def vi_lesson_lines(cfg: dict) -> list[tuple[int, str]]:
+    pat = (cfg.get("pattern") or {}).get("name", "cấu trúc này")
+    return [
+        (40, "Phần lớn lệnh vào quá sớm."),
+        (620, "Vẽ cấu trúc ra trước."),
+        (840, f"Đó là {pat}."),
+        (1000, "Đường viền cổ là cái cò súng."),
+        (1140, "Vùng lệnh là điểm vào."),
+        (1300, "Dừng lỗ ngoài vai. Chốt lời theo chiều cao mô hình."),
+        (1890, "Mô hình cho mức giá. Hợp lưu cho thời điểm."),
+    ]
+
+
+def vi_map_lines(cfg: dict) -> list[tuple[int, str]]:
+    zones = ", ".join(z["label"] for z in cfg.get("zones", [])[:3])
+    bias = {"bullish": "nghiêng mua", "bearish": "nghiêng bán"}.get(
+        cfg.get("bias", ""), "chưa rõ hướng"
+    )
+    return [
+        (40, f"Bản đồ hôm nay. Thiên hướng: {bias}."),
+        (620, "Đây là đường mà giá tôn trọng."),
+        (800, f"Thanh khoản nằm ở đây. {zones}."),
+        (1300, "Cấu trúc đổi tính chất ở chỗ này."),
+        (1470, "Nên kế hoạch chạy thế này. Kế hoạch, không phải lời tiên tri."),
+        (1880, "Đây là các mức cho phiên tới."),
+    ]
+
+
+def vi_compare_lines(cfg: dict) -> list[tuple[int, str]]:
+    left = cfg["left"]["name"]
+    right = cfg["right"]["name"]
+    return [
+        (30, first_sentence(cfg["title"], 10)),
+        (560, "Nhìn thì y hệt nhau."),
+        (950, first_sentence(cfg["same"])),
+        (1230, first_sentence(cfg["diff"])),
+        (1620, f"Ở trên là {left}. Ở dưới là {right}."),
+        (1910, first_sentence(cfg["why"])),
+    ]
+
+
+def concept_lines(cfg: dict) -> list[tuple[int, str]]:
+    """A concept lesson: the claim, the rule, where the stop goes, the truth."""
+    p = cfg["pattern"]
+    return [
+        (40, first_sentence(p["tagline"], 12)),
+        (520, f"This is {p['name'].lower()}."),
+        (860, first_sentence(p["rule"])),
+        (1180, first_sentence(p["checks"][0], 12)),
+        (1420, "Entry, stop, target. In that order."),
+        (1860, "A structure is a reason, not a guarantee."),
+    ]
+
+
+def vi_concept_lines(cfg: dict) -> list[tuple[int, str]]:
+    p = cfg["pattern"]
+    return [
+        (40, first_sentence(p["tagline"], 12)),
+        (520, f"Cái này gọi là {p['name'].lower()}."),
+        (860, first_sentence(p["rule"])),
+        (1180, first_sentence(p["checks"][0], 12)),
+        (1420, "Vào lệnh, dừng lỗ, chốt lời. Đúng thứ tự đó."),
+        (1860, "Cấu trúc cho một lý do, không cho một lời hứa."),
+    ]
+
+
 BUILDERS = {
     "candleLesson": candle_lines,
+    "concept": concept_lines,
     "quiz": quiz_lines,
     "lesson": lesson_lines,
     "marketMap": map_lines,
+    "candleCompare": compare_lines,
+}
+
+VI_BUILDERS = {
+    "candleLesson": vi_candle_lines,
+    "quiz": vi_quiz_lines,
+    "lesson": vi_lesson_lines,
+    "marketMap": vi_map_lines,
+    "candleCompare": vi_compare_lines,
+    "concept": vi_concept_lines,
 }
 
 
 def kind_of(cfg: dict, override: str) -> str:
     if override:
         return override
+    # A concept lesson shares the candleLesson composition and therefore its
+    # `kind`, but it is not about a candle and must not be narrated as one:
+    # "everyone trades the fibonacci retracement" is not a sentence.
+    if cfg.get("topic") and cfg.get("marks"):
+        return "concept"
     k = cfg.get("kind")
     if k in BUILDERS:
         return k
@@ -169,14 +334,19 @@ def main() -> None:
     ap.add_argument("--config", required=True)
     ap.add_argument("--kind", default="", choices=["", *BUILDERS])
     ap.add_argument("--id", default="", help="output name under public/voice")
+    ap.add_argument("--locale", default="", choices=["", "en", "vi"],
+                    help="track to narrate; defaults to the config's own locale")
     ap.add_argument("--max-frames", type=int, default=2100,
                     help="length of the video the narration has to fit inside")
     args = ap.parse_args()
 
-    exe, model = engine()
     cfg = json.loads(Path(args.config).read_text())
+    # The config carries the track, so narration follows the video rather than
+    # needing to be told twice.
+    locale = args.locale or cfg.get("locale") or "en"
+    exe, model = engine(locale)
     kind = kind_of(cfg, args.kind)
-    lines = BUILDERS[kind](cfg)
+    lines = (VI_BUILDERS if locale == "vi" else BUILDERS)[kind](cfg)
 
     name = args.id or Path(args.config).stem
     tmp = Path("/tmp/_line.wav")
@@ -227,7 +397,7 @@ def main() -> None:
     Path(args.config).write_text(json.dumps(cfg, indent=2))
 
     total = len(track) / RATE
-    print(f"{name}: {len(lines)} lines, {total:.1f}s of speech")
+    print(f"{name}: {locale} · {len(lines)} lines, {total:.1f}s of speech")
     for m in marks:
         print(f"  f{m['startFrame']:>5}-{m['endFrame']:<5} {m['text'][:64]}")
     for text in dropped:

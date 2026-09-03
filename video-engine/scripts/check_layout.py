@@ -51,7 +51,7 @@ def frame_at(video: Path, seconds: float) -> np.ndarray:
     return np.asarray(Image.open(out).convert("RGB")).astype(np.int16)
 
 
-def ink_mask(img: np.ndarray) -> np.ndarray:
+def ink_mask(img: np.ndarray, threshold: int = 42) -> np.ndarray:
     """Pixels that differ from the frame's own background.
 
     The background is estimated *per row*, from the leftmost and rightmost
@@ -63,7 +63,18 @@ def ink_mask(img: np.ndarray) -> np.ndarray:
     """
     strip = np.concatenate([img[:, :12], img[:, -12:]], axis=1)
     bg = np.median(strip, axis=1, keepdims=True)  # (h, 1, 3)
-    return np.abs(img - bg).sum(axis=2) > 42
+    return np.abs(img - bg).sum(axis=2) > threshold
+
+
+# Small print is drawn deliberately low-contrast; anything the viewer is meant
+# to read is drawn bright. Measured across the formats, the gap is wide and
+# clean: the disclaimer line peaks around 180 on this scale and the dimmest body
+# text sits above 600. See src/safeArea.ts — a disclaimer is required to be
+# present, not to be prominent, so it is allowed below the line and everything
+# else is not. Without this split the safe-area check fired on every frame of
+# every format because of that one legal line, and 1400 warnings that are all
+# the same accepted thing is the same as no check at all.
+READABLE = 200
 
 
 def check_frame(img: np.ndarray, t: float) -> list[str]:
@@ -87,16 +98,19 @@ def check_frame(img: np.ndarray, t: float) -> list[str]:
         if px > span * 0.06:
             out.append(f"{t:5.1f}s  content touches the {name} edge ({px}px)")
 
-    # safe area: ink under where the platform draws its own UI
+    # safe area: readable ink under where the platform draws its own UI
+    read = ink_mask(img, READABLE)
+    read_total = max(1, int(read.sum()))
     b = int(h * (1 - SAFE["bottom"]))
     r = int(w * (1 - SAFE["right"]))
-    bottom_ink = int(ink[b:, :].sum())
+    bottom_ink = int(read[b:, :].sum())
+    total = read_total
     if bottom_ink > total * 0.04:
         out.append(
             f"{t:5.1f}s  {100*bottom_ink/total:.0f}% of content sits in the bottom "
             f"{SAFE['bottom']:.0%} — under the platform's caption and controls"
         )
-    right_ink = int(ink[: b, r:].sum())
+    right_ink = int(read[:b, r:].sum())
     if right_ink > total * 0.06:
         out.append(
             f"{t:5.1f}s  {100*right_ink/total:.0f}% of content sits in the right "

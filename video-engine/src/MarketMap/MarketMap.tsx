@@ -2,6 +2,10 @@ import React from 'react';
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {MarketMapProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
+import {ChartEdges} from '../ChartEdges';
+import {slowPush} from '../camera';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {ChochMark, PlanPath, TrendLine, ZoneBand} from './Marks';
 import {
   MAP_BOX,
@@ -11,6 +15,7 @@ import {
   MT,
   MTEXT,
   mapShownAt,
+  mease,
   mramp,
   zoneColor,
   zoneProgress,
@@ -52,22 +57,126 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
   const hi = Math.max(...prices);
   const padY = (hi - lo) * 0.06 || 1;
 
-  // Reserve the projection space on the right from the first frame. Growing it
-  // later would slide every band and marker sideways mid-video.
-  const logical = {from: -0.6, to: total - 1 + props.projectBars + 0.6};
+  /**
+   * The opening move: start on where price actually is, pull back to the map.
+   *
+   * A slow push was tried first and measured: it moved the frame by about a
+   * tenth of a pixel between sampled frames, and both the frame check and the
+   * eye read the first ten seconds as a still image — the candles finish
+   * arriving at nine seconds and nothing else lands until the trend line at ten.
+   * On a light chart a gentle zoom simply does not change enough pixels.
+   *
+   * So the camera starts tight on the most recent bars, which is where a trader
+   * looks first anyway, and widens to the full map as the bars fill in. That is
+   * a real move with real pixel change, and it says what the format is for:
+   * here is the price, now here is everything around it.
+   */
+  /*
+   * The opening window is fitted to the bars that are ON SCREEN, which sounds
+   * obvious and was not what it did.
+   *
+   * It was fitted to the last eighteen bars of the whole series — bars the
+   * reveal has not drawn yet. The candles that WERE drawn sat at prices outside
+   * that window, so the first three or four seconds of every single map video
+   * were a blank chart with a couple of candles in one corner. The freeze check
+   * flagged it as a still image, which it was; the real fault is that a third
+   * of the opening had nothing in it at all.
+   */
+  const visible = props.candles.slice(0, Math.max(2, Math.ceil(shown)));
+  const recent = visible.slice(-18).flatMap((c) => [c.high, c.low]);
+  const rLo = Math.min(...recent);
+  const rHi = Math.max(...recent);
+  const rPad = (rHi - rLo) * 0.18 || 1;
+  const full = {minValue: lo - padY, maxValue: hi + padY};
+  const near = {minValue: rLo - rPad, maxValue: rHi + rPad};
+  const openT = mease(mramp(frame, MB.candles));
+  const openWindow = slowPush(
+    {
+      minValue: near.minValue + (full.minValue - near.minValue) * openT,
+      maxValue: near.maxValue + (full.maxValue - near.maxValue) * openT,
+    },
+    // The push carries on underneath once the pull-back has finished, so the
+    // twenty-five seconds of annotation that follow are never perfectly still.
+    frame / durationInFrames,
+    0.2,
+    0.08,
+  );
+
+  /**
+   * Horizontal window. Follows the newest bar while the chart fills, then opens
+   * out to the full map — and is fully open before the first band is drawn.
+   *
+   * It used to be fixed from frame one, and the first four seconds were then a
+   * still picture with a candle appearing in it every seventeenth frame: one
+   * bar out of sixty-four changes about one block in a hundred and forty-four,
+   * which is below anything a viewer registers as movement. Six of fifty maps
+   * failed the freeze check on it. Tracking the newest bar makes every bar on
+   * screen move every frame, which is also what a live chart does.
+   *
+   * The reason it was pinned still holds — a window that moved while the bands
+   * were on screen would slide them sideways — so the pan is finished by frame
+   * 560 and the first band lands at 770.
+   */
+  // Linear, and starting at frame 20 rather than 70.
+  //
+  // The first attempt used mease() — smoothstep — and it is flat at both ends
+  // by construction, so the pan covered a fifth of its travel in the first two
+  // and a half seconds: a quarter of a pixel per frame, which measured as a
+  // freeze again. camera.ts already carries this warning for the candle lesson;
+  // it applies here for the same reason.
+  const open = mramp(frame, [20, MB.candles[1]] as const);
+  const logical = {
+    from: (shown - 30) + (-0.6 - (shown - 30)) * open,
+    to: (shown + 6) + (total - 1 + props.projectBars + 0.6 - (shown + 6)) * open,
+  };
 
   const {containerRef, coords} = useLightweightChart(
     props,
     shown,
-    {minValue: lo - padY, maxValue: hi + padY},
+    openWindow,
     {bg: MT.bg, up: MT.up, down: MT.down, box: MAP_BOX},
     logical,
   );
 
   const titleIn = spring({frame: frame - 6, fps, config: {damping: 200}, durationInFrames: 26});
+  const t = strings(props.locale);
   const step = [...MAP_STEPS].reverse().find((s) => frame >= s.from);
   const bullish = props.bias === 'bullish';
   const biasColor = bullish ? MT.up : MT.down;
+
+  /**
+   * One label y per zone, stacked so no two overlap.
+   *
+   * Worked out here rather than inside ZoneBand because it is the only place
+   * that can see all the bands at once. Bands are taken top-down; a label that
+   * would land within 46px of the one above it is pushed below it instead.
+   */
+  const labelYs = React.useMemo(() => {
+    if (!coords) return props.zones.map(() => 24);
+    const order = props.zones
+      .map((z, i) => ({i, y: coords.priceToY(Math.max(z.top, z.bottom)) - 26}))
+      .sort((a, b) => a.y - b.y);
+    const out = new Array<number>(props.zones.length).fill(24);
+    let floor = 24;
+    for (const {i, y} of order) {
+      const at = Math.max(y, floor);
+      // 62, not 30: the chart fades its own bottom edge, and a pill that ends
+      // inside that fade looks clipped even though it is inside the box.
+      out[i] = Math.min(at, MAP_BOX.height - 62);
+      floor = at + 46;
+    }
+    return out;
+  }, [coords, props.zones]);
+
+  /** Per-chip reveal across the summary beat, staggered and overlapping. */
+  const chipIn = (i: number) => {
+    const n = Math.max(1, props.zones.length);
+    const start = MB.summary[0] + 34 + (i * 150) / n;
+    return interpolate(frame, [start, start + 26], [0, 1], {
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    });
+  };
 
   const summaryIn = spring({
     frame: frame - MB.summary[0],
@@ -134,7 +243,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               letterSpacing: 1.2,
             }}
           >
-            {bullish ? 'BULLISH BIAS' : 'BEARISH BIAS'}
+            {t.map.bias(bullish)}
           </span>
           <span
             style={{
@@ -161,6 +270,18 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         }}
       />
 
+      {/* Above the marks, not below them. This format's zone bands are drawn
+          the full width of the chart on purpose, so they reached both frame
+          edges and painted straight over a fade that was sitting underneath
+          them. */}
+      <ChartEdges box={MAP_BOX} bg={MT.bg} zIndex={15} />
+
+      {/* The map's own header already owns the top-right with its timeframe
+          badge, so the mark drops below the header rule instead. */}
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} top={196} size={80} opacity={0.85} />
+      ) : null}
+
       {/* Marks overlay. zIndex matters: the chart canvas paints over siblings. */}
       {coords && (
         <svg
@@ -178,7 +299,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             <TrendLine
               line={props.trendline}
               coords={coords}
-              width={MAP_BOX.width}
+              // The band stops where the platform's button column starts, not
+              // at the frame edge. Running it to 1080 put the last third of
+              // every band under the like/comment stack, and the outermost
+              // pixels touching the frame read as the chart being cut off.
+              width={MAP_BOX.width - SAFE.right + 26}
               height={MAP_BOX.height}
               reveal={mramp(frame, MB.trend)}
             />
@@ -188,20 +313,29 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               key={`${z.label}-${z.index}`}
               zone={z}
               coords={coords}
-              width={MAP_BOX.width}
-              labelRight={MAP_BOX.width - 16}
+              // The band stops where the platform's button column starts, not
+              // at the frame edge. Running it the full 1080 put the last third
+              // of every band under the like/comment stack, and the outermost
+              // pixels touching the frame read as the chart being cut off.
+              width={MAP_BOX.width - SAFE.right + 30}
+              // Clear of the platform's button column: a zone whose name is
+              // covered is a zone the viewer cannot use. See src/safeArea.ts.
+              labelRight={MAP_BOX.width - SAFE.right - 14}
+              labelY={labelYs[i]}
               reveal={zoneProgress(frame, i, props.zones.length)}
             />
           ))}
           {props.choch.map((c, i) => (
             <ChochMark
               key={c.index}
+              height={MAP_BOX.height}
               point={c}
               coords={coords}
               reveal={mramp(frame, [MB.choch[0] + i * 40, MB.choch[1] + i * 40] as const)}
             />
           ))}
           <PlanPath
+            height={MAP_BOX.height}
             path={props.path}
             coords={coords}
             width={MAP_BOX.width}
@@ -227,7 +361,17 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             zIndex: 20,
           }}
         >
-          {step.text}
+          <span
+            style={{
+              display: 'inline-block',
+              background: MT.bgTop,
+              borderRadius: 16,
+              padding: '12px 22px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
+            }}
+          >
+            {t.map.steps[MAP_STEPS.indexOf(step)] ?? step.text}
+          </span>
         </div>
       )}
 
@@ -249,7 +393,11 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
             transform: `translateY(${interpolate(summaryIn, [0, 1], [40, 0])}px)`,
           }}
         >
-          <div style={{fontFamily: MFONT, fontSize: 40, color: MT.plan}}>LEVELS TO WATCH</div>
+          <div style={{fontFamily: MFONT, fontSize: 40, color: MT.plan}}>
+            {/* Was hardcoded English, printed on every video of the Vietnam
+                track — the same slip as the "or" between MUA and BÁN. */}
+            {t.map.levelsToWatch}
+          </div>
           <div
             style={{
               display: 'flex',
@@ -259,10 +407,21 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               marginTop: 12,
             }}
           >
-            {props.zones.map((z) => (
+            {props.zones.map((z, zi) => (
               <span
                 key={`${z.label}-${z.index}`}
                 style={{
+                  // One chip at a time, across the closing beat.
+                  //
+                  // They used to arrive together with the panel, and the last
+                  // two and a half seconds of the video were then perfectly
+                  // still — measured on six of fifty maps as a freeze, and a
+                  // viewer reads a still frame as the video having ended. Landing
+                  // them in sequence also gives the eye somewhere to go: five
+                  // price levels dropped at once is five things to read and none
+                  // of them get read.
+                  opacity: chipIn(zi),
+                  transform: `translateY(${interpolate(chipIn(zi), [0, 1], [16, 0])}px)`,
                   fontSize: 27,
                   fontWeight: 800,
                   color: '#fff',
@@ -279,22 +438,29 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         </div>
       )}
 
-      {/* Our own mark. A reference channel's initials are not ours to reuse. */}
+      {/* Our own mark, inside the chart where every charting package puts one.
+          At bottom 240 it shared a band with the step caption at bottom 232 and
+          printed through it on every frame — the caption is the one line that
+          says what is being drawn, so it is the one line that must be clean. */}
+      {/* Suppressed once the channel's own mark is on the frame: two different
+          watermarks on one video is not branding, it is a mistake. */}
+      {props.brandMark ? null : (
       <div
         style={{
           position: 'absolute',
-          bottom: SAFE.bottom - 40,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
+          top: MAP_BOX.top + 26,
+          left: 34,
           fontFamily: MFONT,
-          fontSize: 34,
-          letterSpacing: 6,
+          fontSize: 30,
+          letterSpacing: 5,
           color: MT.inkFaint,
+          opacity: 0.5,
+          zIndex: 1,
         }}
       >
         {CHANNEL_MARK}
       </div>
+      )}
 
       {/* The plan is a projection. Saying so is not optional. */}
       <div
@@ -310,8 +476,13 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           lineHeight: 1.35,
         }}
       >
-        Levels are measured from real {props.pair} data. The blue path is a plan,
-        not a forecast.
+        {/* A constructed series must never carry the "measured from real data"
+            line. The generator stamps note: 'map-offline' and this is where
+            that stamp has to be honoured — the claim is the one thing about
+            this format that cannot be approximate. */}
+        {props.note === 'map-offline'
+          ? t.map.provenanceIllustration
+          : t.map.provenance(props.pair)}
       </div>
       <div
         style={{
@@ -325,7 +496,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
           color: MT.inkFaint,
         }}
       >
-        Educational only, not financial advice
+        {t.disclaimer}
       </div>
       <Soundtrack bed="light" cues={mapCues()} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

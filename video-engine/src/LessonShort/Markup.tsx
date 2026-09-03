@@ -2,10 +2,21 @@ import React from 'react';
 import {interpolate} from 'remotion';
 import type {OrderBlock, Pattern, RiskReward, SwingPoint} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
+import {SAFE} from '../safeArea';
+import {strings, type Locale} from '../i18n';
 import {LESSON_BOX, LFONT, LT} from './theme';
+import {pillWidth} from '../textWidth';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-const RIGHT = LESSON_BOX.width - 26;
+/**
+ * Right-hand limit for markup, in chart coordinates.
+ *
+ * Not the chart's own width. The platform draws its like / comment / share
+ * column down the right of the frame (src/safeArea.ts), and a price label under
+ * it is not clipped by us — it is covered, on every phone, which looks the same
+ * as being cut off.
+ */
+const RIGHT = LESSON_BOX.width - SAFE.right - 14;
 
 /**
  * The zigzag structure path, drawn on with a dash offset so it looks like a
@@ -32,25 +43,49 @@ export const ZigZag: React.FC<{
           <rect x={0} y={0} width={progress * LESSON_BOX.width} height={LESSON_BOX.height} />
         </clipPath>
       </defs>
+      {/* A soft halo under the stroke, then the stroke.
+          The path used to be a heavy black dashed line laid straight over the
+          candles, and on a white chart that is the most aggressive mark
+          available — it fought the price action it was supposed to be tracing.
+          A rounded stroke on the accent colour, sitting on a pale halo so it
+          stays legible where it crosses a dark candle, traces instead. */}
       <path
         d={d}
         fill="none"
-        stroke={LT.structure}
-        strokeWidth={5}
-        strokeDasharray="16 12"
+        stroke={LT.bg}
+        strokeWidth={13}
         strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.75}
         clipPath={`url(#${clipId})`}
       />
+      <path
+        d={d}
+        fill="none"
+        stroke={LT.ob}
+        strokeWidth={5.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        clipPath={`url(#${clipId})`}
+      />
+      {/* Dots on the swings, so the shape reads as a set of decisions rather
+          than a squiggle. */}
+      {pts.map((p, i) =>
+        p.x <= progress * LESSON_BOX.width ? (
+          <circle key={i} cx={p.x} cy={p.y} r={7} fill={LT.ob} stroke={LT.bg} strokeWidth={3} />
+        ) : null,
+      )}
     </g>
   );
 };
 
 /** Shoulder / Head / Bottom callouts on the formation's defining points. */
 export const PatternLabels: React.FC<{
+  locale?: Locale;
   pattern: Pattern;
   coords: Coords;
   progress: number;
-}> = ({pattern, coords, progress}) => {
+}> = ({pattern, coords, progress, locale}) => {
   if (progress <= 0) return null;
   const bullish = pattern.bias === 'bullish';
 
@@ -72,11 +107,15 @@ export const PatternLabels: React.FC<{
         // offset is generous because the stop sits on the right shoulder by
         // construction, and a tight label collided with the SL row.
         const dy = bullish ? 92 : -92;
-        const width = pt.label.length * 19 + 26;
+        const label = strings(locale).term(pt.label);
+        const width = pillWidth(label, 30, 13);
 
         return (
           <g key={`${pt.index}-${pt.label}`} opacity={step}>
-            <circle cx={x} cy={y} r={9} fill={LT.ink} />
+            {/* The same dot the zigzag draws, not a second black one beside
+                it: two dot styles on the same kind of point read as two
+                different things being marked. */}
+            <circle cx={x} cy={y} r={7} fill={LT.ob} stroke={LT.bg} strokeWidth={3} />
             <rect
               x={x - width / 2}
               y={y + dy - 30}
@@ -94,7 +133,7 @@ export const PatternLabels: React.FC<{
               fontWeight={900}
               textAnchor="middle"
             >
-              {pt.label}
+              {label}
             </text>
           </g>
         );
@@ -104,10 +143,16 @@ export const PatternLabels: React.FC<{
 };
 
 /** The trigger line the formation breaks to confirm. */
-export const Neckline: React.FC<{price: number; coords: Coords; progress: number}> = ({
+export const Neckline: React.FC<{
+  price: number;
+  coords: Coords;
+  progress: number;
+  locale?: Locale;
+}> = ({
   price,
   coords,
   progress,
+  locale,
 }) => {
   if (progress <= 0) return null;
   const y = coords.priceToY(price);
@@ -123,21 +168,35 @@ export const Neckline: React.FC<{price: number; coords: Coords; progress: number
         strokeWidth={5}
         strokeDasharray="18 12"
       />
-      <g opacity={interpolate(progress, [0.6, 1], [0, 1], clamp)}>
-        <rect x={16} y={y - 54} width={252} height={44} rx={8} fill={LT.ink} />
-        <text x={32} y={y - 22} fill="#fff" fontFamily={LFONT} fontSize={28} fontWeight={900}>
-          NECKLINE {price.toFixed(1)}
-        </text>
-      </g>
+      {(() => {
+        // Width from the text, not a constant. At a fixed 252px the Vietnamese
+        // term ran past the pill and came out as "ĐƯỜNG VIỀN C" — the kind of
+        // clipping that only appears once the words change length.
+        const label = `${strings(locale).term('NECKLINE')} ${price.toFixed(1)}`;
+        return (
+          <g opacity={interpolate(progress, [0.6, 1], [0, 1], clamp)}>
+            <rect x={16} y={y - 54} width={pillWidth(label, 28, 16)} height={44} rx={8} fill={LT.ink} />
+            <text x={32} y={y - 22} fill="#fff" fontFamily={LFONT} fontSize={28} fontWeight={900}>
+              {label}
+            </text>
+          </g>
+        );
+      })()}
     </g>
   );
 };
 
 /** Entry zone drawn on the order block candle. */
-export const EntryZone: React.FC<{ob: OrderBlock; coords: Coords; progress: number}> = ({
+export const EntryZone: React.FC<{
+  ob: OrderBlock;
+  coords: Coords;
+  progress: number;
+  locale?: Locale;
+}> = ({
   ob,
   coords,
   progress,
+  locale,
 }) => {
   if (progress <= 0) return null;
   const x0 = coords.indexToX(ob.index);
@@ -166,7 +225,7 @@ export const EntryZone: React.FC<{ob: OrderBlock; coords: Coords; progress: numb
           fontSize={27}
           fontWeight={900}
         >
-          ORDER BLOCK
+          {strings(locale).term('ORDER BLOCK')}
         </text>
       </g>
     </g>
@@ -218,10 +277,22 @@ export const TradeZone: React.FC<{
         <text x={x1 - 14} y={yStop + 36} fill={LT.down} fontSize={32} textAnchor="end">
           SL {trade.stop.toFixed(1)}
         </text>
-        <rect x={x0 + 12} y={yEntry + 12} width={296} height={50} rx={9} fill={LT.ink} />
-        <text x={x0 + 28} y={yEntry + 47} fill="#fff" fontSize={31}>
-          {side} · R:R 1:{ratio.toFixed(1)}
-        </text>
+        {(() => {
+          // Pulled back inside the readable area when the zone starts late: the
+          // pill is a fixed width anchored to the zone's left edge, so a setup
+          // that resolves near the right of the chart pushed it off frame.
+          const text = `${side} · R:R 1:${ratio.toFixed(1)}`;
+          const width = pillWidth(text, 31, 16);
+          const boxX = Math.min(x0 + 12, RIGHT - width);
+          return (
+            <>
+              <rect x={boxX} y={yEntry + 12} width={width} height={50} rx={9} fill={LT.ink} />
+              <text x={boxX + 16} y={yEntry + 47} fill="#fff" fontSize={31}>
+                {text}
+              </text>
+            </>
+          );
+        })()}
       </g>
     </g>
   );

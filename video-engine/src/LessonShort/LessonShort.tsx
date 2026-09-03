@@ -2,9 +2,13 @@ import React from 'react';
 import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {ForexChartProps, RiskReward} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
+import {ChartEdges} from '../ChartEdges';
+import {slowPush} from '../camera';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {logicalWindowAt} from '../XauChart/logicalWindow';
 import {EntryZone, Neckline, PatternLabels, TradeZone, ZigZag} from './Markup';
-import {LESSON_BOX, LFONT, LSB, LT, STEPS, lramp} from './theme';
+import {LESSON_BOX, LESSON_DURATION, LFONT, LSB, LT, STEPS, lramp} from './theme';
 import {CHANNEL_MARK} from '../brand';
 import {SAFE} from '../safeArea';
 import {Soundtrack} from '../audio/Soundtrack';
@@ -18,13 +22,8 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
  * data, so a keyless run still varies across a day's videos instead of stamping
  * one line onto every upload.
  */
-const FALLBACK_HEADLINES = [
-  'THE SNIPER ENTRY FORMULA',
-  'WHERE SMART MONEY ENTERS',
-  'THE CONFLUENCE PLAYBOOK',
-  'READ THE STRUCTURE FIRST',
-  'THE ENTRY MOST TRADERS MISS',
-];
+// The lines themselves live in src/i18n.ts: the Vietnam track opens with its own
+// five, not with a translation of these.
 
 /** Last candle this format ever draws — where the formation's trade resolved. */
 const lastShownIndex = (props: ForexChartProps) =>
@@ -67,11 +66,36 @@ const priceWindow = (props: ForexChartProps, frame: number) => {
 
   const tight = pad([...setupPrices, ...nearAnchors]);
   const wide = pad([...allPrices, ...anchors]);
-  const t = lramp(frame, LSB.reveal);
-  return {
-    minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
-    maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
+
+  /**
+   * Opening pull-back, then the reveal's own widen.
+   *
+   * The tight -> wide move only ever happened during the reveal, so the twenty
+   * seconds of markup before it held one fixed window and the chart sat
+   * perfectly still underneath it — nine seconds of it by the frame check, and
+   * a slow zoom was measured and was not enough to register. So the camera
+   * starts close on the most recent bars, where a trader looks first, and backs
+   * off to the whole structure as the markup is drawn onto it.
+   */
+  const recent = props.candles
+    .slice(Math.max(0, props.setupCount - 16), props.setupCount)
+    .flatMap((c) => [c.high, c.low]);
+  const near = pad(recent.length ? recent : setupPrices);
+  const open = lramp(frame, [LSB.title[0], LSB.ob[0]] as const);
+  const base = {
+    minValue: near.minValue + (tight.minValue - near.minValue) * open,
+    maxValue: near.maxValue + (tight.maxValue - near.maxValue) * open,
   };
+
+  const t = lramp(frame, LSB.reveal);
+  return slowPush(
+    {
+      minValue: base.minValue + (wide.minValue - base.minValue) * t,
+      maxValue: base.maxValue + (wide.maxValue - base.maxValue) * t,
+    },
+    frame / LESSON_DURATION,
+    0.14,
+  );
 };
 
 const shownAt = (props: ForexChartProps, frame: number) => {
@@ -87,9 +111,10 @@ const shownAt = (props: ForexChartProps, frame: number) => {
     // Opens part-drawn: see the note in XauChart's storyboard. An empty first
     // frame is the cheapest way to lose a short-form viewer.
     const OPEN_AT = 0.55;
-    return Math.max(1, Math.round((OPEN_AT + (1 - OPEN_AT) * lramp(frame, LSB.replay)) * setup));
+    return Math.max(1, (OPEN_AT + (1 - OPEN_AT) * lramp(frame, LSB.replay)) * setup);
   }
-  return Math.min(total, setup + Math.round(lramp(frame, LSB.reveal) * span));
+  // Fractional: the newest bar forms rather than appearing whole. See camera.ts.
+  return Math.min(total, setup + lramp(frame, LSB.reveal) * span);
 };
 
 export const LessonShort: React.FC<ForexChartProps> = (props) => {
@@ -109,6 +134,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
   const pattern = props.pattern;
   const trade: RiskReward | null = props.patternTrade;
   const side = props.patternSide ?? 'LONG';
+  const t = strings(props.locale);
   const win = props.patternOutcome.result === 'TP';
 
   const titleIn = spring({frame: frame - 8, fps, config: {damping: 200}, durationInFrames: 26});
@@ -152,9 +178,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
             lineHeight: 1.08,
           }}
         >
-          {(props.title || '').trim().toUpperCase() || FALLBACK_HEADLINES[
-            (props.candles.length + props.setupCount) % FALLBACK_HEADLINES.length
-          ]}
+          {(props.title || '').trim().toUpperCase() ||
+            t.setup.hooks[(props.candles.length + props.setupCount) % t.setup.hooks.length]}
         </div>
         <div style={{marginTop: 14}}>
           <span
@@ -168,7 +193,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               lineHeight: 1.5,
             }}
           >
-            {pattern ? pattern.name : 'Structure'} + Order Block
+            {t.setup.subtitle(t.term(pattern ? pattern.name : 'Structure'))}
           </span>
         </div>
         <div style={{marginTop: 20, fontSize: 32, fontWeight: 900, color: LT.inkSoft}}>
@@ -190,7 +215,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           letterSpacing: 6,
         }}
       >
-        {CHANNEL_MARK}
+        {props.brandMark ? '' : CHANNEL_MARK}
       </div>
 
       <div
@@ -203,6 +228,14 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           height: LESSON_BOX.height,
         }}
       />
+
+      <ChartEdges box={LESSON_BOX} bg={LT.bg} zIndex={5} />
+
+      {/* Below the headline block, which runs full width on this format and is
+          the one thing that must not be crowded. */}
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} top={352} size={78} opacity={0.85} />
+      ) : null}
 
       {/* zIndex: the chart canvas paints over siblings without it. */}
       {coords && (
@@ -227,10 +260,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               price={pattern.neckline}
               coords={coords}
               progress={lramp(frame, LSB.neckline)}
-            />
+            locale={props.locale}
+          />
           )}
           {props.orderBlock && (
-            <EntryZone ob={props.orderBlock} coords={coords} progress={lramp(frame, LSB.ob)} />
+            <EntryZone ob={props.orderBlock} coords={coords} progress={lramp(frame, LSB.ob)}
+            locale={props.locale}
+          />
           )}
           {trade && (
             <TradeZone
@@ -247,7 +283,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               pattern={pattern}
               coords={coords}
               progress={lramp(frame, LSB.labels)}
-            />
+            locale={props.locale}
+          />
           )}
         </svg>
       )}
@@ -257,9 +294,13 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 210,
+            // Above the Shorts title bar, not under it. At bottom 210 this step
+            // label — the one line that says which part of the setup is being
+            // drawn — sat inside the platform's own band on every phone, and the
+            // frame check measured a fifth of the video's ink down there.
+            bottom: SAFE.bottom,
             left: 46,
-            right: 46,
+            right: SAFE.right,
             textAlign: 'center',
             fontSize: 40,
             fontWeight: 900,
@@ -269,7 +310,9 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
             padding: '16px 20px',
           }}
         >
-          {step.text}
+          {/* Numbered by position in the list, so a translated step keeps the
+              step number the English one had. */}
+          {t.setup.steps[STEPS.indexOf(step)] ?? step.text}
         </div>
       )}
 
@@ -278,9 +321,9 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 180,
+            bottom: SAFE.bottom,
             left: 46,
-            right: 46,
+            right: SAFE.right,
             textAlign: 'center',
             opacity: resultIn,
             transform: `translateY(${interpolate(resultIn, [0, 1], [60, 0])}px)`,
@@ -293,12 +336,37 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
               color: win ? LT.up : LT.down,
             }}
           >
-            {win ? 'TARGET HIT ✅' : 'STOPPED OUT ❌'}
+            {win ? t.setup.targetHit : t.setup.stopped}
           </div>
           <div style={{fontSize: 34, fontWeight: 900, color: LT.inkSoft, marginTop: 8}}>
             {win
-              ? 'The measured move played out'
-              : 'Not every valid formation works — that is why you use a stop'}
+              ? t.setup.winLine
+              : t.setup.lossLine}
+          </div>
+          {/* The call to action lives *inside* the verdict block, as its last
+              line, rather than at its own offset from the bottom. It used to be
+              absolutely positioned at SAFE.bottom + 62 with no frame guard at
+              all, which put it permanently in the middle of whatever else was
+              in that band: it drew straight through the step pill for the first
+              thirty seconds and then straight through this verdict. Two blocks
+              measured from the same edge will always eventually meet; one block
+              that flows cannot. */}
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              color: LT.ob,
+              marginTop: 20,
+              opacity: interpolate(frame, [LSB.result[0] + 50, LSB.result[0] + 86], [0, 1], clamp),
+            }}
+          >
+            {t.setup.cta(
+              props.pair.split('/')[0] === 'XAU'
+                ? props.locale === 'vi'
+                  ? 'vàng'
+                  : 'gold'
+                : props.pair.split('/')[0],
+            )}
           </div>
         </div>
       )}
@@ -307,7 +375,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 300,
+            bottom: SAFE.bottom + 96,
             left: 0,
             right: 0,
             textAlign: 'center',
@@ -323,22 +391,6 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          bottom: SAFE.bottom,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          fontSize: 34,
-          fontWeight: 900,
-          color: LT.ink,
-        }}
-      >
-        {/* Pair-aware: "gold setups" printed over a silver chart, same class of
-            false label as the hardcoded XAU/USD above it. */}
-        Follow for daily {props.pair.split('/')[0] === 'XAU' ? 'gold' : props.pair.split('/')[0]} setups
-      </div>
-      <div
-        style={{
-          position: 'absolute',
           bottom: 34,
           left: 40,
           right: 40,
@@ -348,7 +400,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
           color: LT.inkSoft,
         }}
       >
-        Real {props.pair} data · Educational only, not financial advice
+        {t.realData(props.pair)}
       </div>
       <Soundtrack bed="light" cues={lessonCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

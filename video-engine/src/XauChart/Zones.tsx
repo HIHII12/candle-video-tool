@@ -2,10 +2,19 @@ import React from 'react';
 import {interpolate} from 'remotion';
 import type {Fibonacci, Fvg, OrderBlock} from '../data/types';
 import type {Coords} from './useLightweightChart';
+import {SAFE} from '../safeArea';
 import {CHART_BOX, TV, FONT} from './chartTheme';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-const RIGHT_EDGE = CHART_BOX.width - 30;
+/**
+ * Right-hand limit for markup, in chart coordinates.
+ *
+ * Not the chart's own width. The platform draws its like / comment / share
+ * column down the right of the frame (src/safeArea.ts), and a price label under
+ * it is not clipped by us — it is covered, on every phone, which looks the same
+ * as being cut off.
+ */
+const RIGHT_EDGE = CHART_BOX.width - SAFE.right - 14;
 
 // Smart-money annotations. Each zone grows rightward from the candle that
 // created it, the same way a trader would drag the box out on a live chart.

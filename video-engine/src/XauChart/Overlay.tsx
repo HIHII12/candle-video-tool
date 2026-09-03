@@ -1,8 +1,10 @@
 import React from 'react';
+import {strings, type Locale} from '../i18n';
 import {interpolate} from 'remotion';
 import type {ForexChartProps} from '../data/types';
 import type {Coords} from './useLightweightChart';
 import {CHART_BOX, TV, FONT} from './chartTheme';
+import {pillWidth} from '../textWidth';
 
 // Chart annotations drawn on top of the lightweight-charts canvas. The chart
 // engine owns the candles; these are the "trader marking up the screen" bits.
@@ -10,10 +12,11 @@ import {CHART_BOX, TV, FONT} from './chartTheme';
 export const LevelLine: React.FC<{
   price: number;
   label: string;
+  locale?: Locale;
   kind: 'support' | 'resistance';
   coords: Coords;
   progress: number;
-}> = ({price, label, kind, coords, progress}) => {
+}> = ({price, label, kind, coords, progress, locale}) => {
   if (progress <= 0) return null;
   const y = coords.priceToY(price);
   const color = kind === 'support' ? TV.support : TV.resistance;
@@ -34,19 +37,29 @@ export const LevelLine: React.FC<{
         strokeWidth={6}
         strokeDasharray="22 14"
       />
-      <g opacity={labelOpacity}>
-        <rect x={16} y={y - 56} width={310} height={46} rx={9} fill={color} />
-        <text
-          x={34}
-          y={y - 21}
-          fill="#06110d"
-          fontFamily={FONT}
-          fontSize={32}
-          fontWeight={900}
-        >
-          {label} {price.toFixed(1)}
-        </text>
-      </g>
+      {(() => {
+        // Sized from the text, not from a constant. At a fixed 310 the
+        // Vietnamese "Kháng cự 4151.5" ran past the end of its own pill, and
+        // since the text is dark and the pill is the only thing behind it, the
+        // overflowing characters landed on the chart background and vanished.
+        const text = `${strings(locale).term(label)} ${price.toFixed(1)}`;
+        const w = pillWidth(text, 32, 18);
+        return (
+          <g opacity={labelOpacity}>
+            <rect x={16} y={y - 58} width={w} height={48} rx={9} fill={color} />
+            <text
+              x={34}
+              y={y - 22}
+              fill="#06110d"
+              fontFamily={FONT}
+              fontSize={32}
+              fontWeight={900}
+            >
+              {text}
+            </text>
+          </g>
+        );
+      })()}
     </g>
   );
 };

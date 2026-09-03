@@ -4,10 +4,35 @@ import type {CandleLessonProps} from '../data/types';
 import {useLightweightChart} from '../XauChart/useLightweightChart';
 import {AnatomyLabels, Spotlight, TradeLevels} from './Annotations';
 import {RealityCheck} from './RealityCheck';
-import {CB, CFONT, CHART, CT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
+import {BeatRail} from './BeatRail';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
+import {ChartEdges} from '../ChartEdges';
+import {Marks, type MarkTheme} from '../Marks';
+import {HEADER_BACK_AFTER, QuizLayer} from './QuizLayer';
+import {textWidth} from '../textWidth';
+import {CB, CFONT, CHART, CT, LAYER, LAYOUT, cramp, ease, focusRange, hWindowAt, shownAt, windowAt} from './theme';
 import {Soundtrack} from '../audio/Soundtrack';
 import {SAFE} from '../safeArea';
 import {candleCues} from '../audio/cues';
+
+/**
+ * Colours for the drawing layer.
+ *
+ * Six tones, and no more: a chart with eight annotation colours on it does not
+ * look thorough, it looks like nobody chose. Gold is the level, violet the
+ * zone, blue the structure, and up/down keep the meaning they already have on
+ * the candles so a green line never means something a green candle does not.
+ */
+const MARK_THEME: MarkTheme = {
+  gold: '#f0b429',
+  violet: '#8b6cff',
+  up: '#2ebd85',
+  down: '#e2465e',
+  ink: '#e6edf3',
+  blue: '#4ea8ff',
+  onFill: '#0b1220',
+};
 import {Narration, duckAt} from '../audio/Narration';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -32,12 +57,90 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
   );
 
   const {pattern, trade} = props;
+  const t = strings(props.locale);
   const bullish = pattern.bias === 'bullish';
   const win = props.outcome.result === 'TP';
+  /**
+   * What the series actually printed, said plainly.
+   *
+   * "Target not reached" covered two very different endings — the stop being
+   * taken out, and the clip simply running out with the trade still live — and
+   * blurred the more useful of the two. A stop-out on a textbook-perfect pattern
+   * is the most instructive frame this format produces; it should not be phrased
+   * as an absence.
+   */
+  const verdict =
+    props.outcome.result === 'TP'
+      ? t.verdict.TP
+      : props.outcome.result === 'SL'
+        ? t.verdict.SL
+        : t.verdict.OPEN;
 
-  const titleIn = spring({frame: frame - 6, fps, config: {damping: 200}, durationInFrames: 28});
+  /**
+   * The header is legible on frame zero and only *settles* after it.
+   *
+   * It used to fade in from nothing over the first half-second, which meant the
+   * cover frame — the still a feed shows before anyone presses play, and the one
+   * frame that decides whether they do — was a bare chart with no title on it.
+   * Motion on the opening frame is worth having; an unlabelled opening frame is
+   * not what it costs.
+   */
+  const settle = spring({frame, fps, config: {damping: 200}, durationInFrames: 26});
+  const titleIn = 1;
   // Title shrinks out of the way once the chart becomes the subject.
   const titleOut = interpolate(frame, [CB.focus[0], CB.focus[1]], [1, 0.62], clamp);
+
+  // Nothing to hold back on a plain lesson; on a quiz, hold the header until
+  // the question band has finished clearing, then bring it in as the
+  // explanation opens. HEADER_BACK_AFTER lives with the band that clears.
+  const headerHold = props.quiz
+    ? interpolate(
+        frame,
+        [CB.anatomy[0] + HEADER_BACK_AFTER, CB.anatomy[0] + HEADER_BACK_AFTER + 34],
+        [0, 1],
+        clamp,
+      )
+    : 1;
+
+  /**
+   * Which of the three openings this video uses; see make_candle_lesson.py.
+   *
+   * 0 — badge, name, tagline together (the original).
+   * 1 — the claim alone, the name a beat later.
+   * 2 — cold open: the name large and alone, badge and tagline arriving after.
+   *
+   * All three are built from the same three pieces of text the config already
+   * carries, so there is no second copy to keep true.
+   */
+  const open = props.open ?? 0;
+  /** True for the lessons that teach a structure rather than a candle. */
+  const concept = (props.marks?.length ?? 0) > 0;
+  /**
+   * Left edge of the trade-level captions.
+   *
+   * They are right-anchored at the trade box's right end and run leftward, so
+   * "entry · 2x the risk" reaches much further left than the entry bar does —
+   * reserving from the entry bar was not enough and the golden-pocket label
+   * still landed on top of it. Reserve from where the longest caption actually
+   * starts instead.
+   */
+  const tradeLabelLeft =
+    // Same right limit Annotations.tsx uses, and already in chart-box space.
+    CHART.width -
+    SAFE.right -
+    24 -
+    textWidth(
+      strings(props.locale).entry(
+        (
+          Math.abs(props.trade.target - props.trade.entry) /
+          Math.max(1e-6, Math.abs(props.trade.stop - props.trade.entry))
+        ).toFixed(0),
+      ),
+      28,
+    );
+  const nameIn = interpolate(frame, [46, 82], [0, 1], clamp);
+  const tagIn = interpolate(frame, [40, 76], [0, 1], clamp);
+  const badgeIn = interpolate(frame, [64, 96], [0, 1], clamp);
 
   const spotlight =
     interpolate(
@@ -56,7 +159,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
     clamp,
   );
   const ruleProgress = cramp(frame, CB.rule);
-  const tradeProgress = cramp(frame, [CB.zoomOut[0] + 40, CB.zoomOut[1] + 90] as const);
+  const tradeProgress = cramp(frame, [CB.zoomOut[1], CB.zoomOut[1] + 130] as const);
 
   const range = focusRange(props);
 
@@ -85,36 +188,107 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          top: 96,
+          zIndex: LAYER.overlay,
+          top: LAYOUT.headerTop,
           left: 60,
-          right: 60,
-          opacity: titleIn * (0.45 + 0.55 * titleOut),
-          transform: `translateY(${interpolate(titleIn, [0, 1], [-22, 0])}px) scale(${
-            0.94 + 0.06 * titleOut
+          // Give the corner mark its own column when there is one, so a long
+          // pattern name wraps rather than running under the badge.
+          right: props.brandMark ? SAFE.right + 130 : SAFE.right,
+          // On a quiz the header IS the answer, so it stands down until the
+          // question has been answered and its band has cleared.
+          opacity: titleIn * (0.45 + 0.55 * titleOut) * headerHold,
+          transform: `translateY(${interpolate(settle, [0, 1], [-14, 0])}px) scale(${
+            (0.985 + 0.015 * settle) * (0.94 + 0.06 * titleOut)
           })`,
           transformOrigin: 'left top',
         }}
       >
-        <div
-          style={{
-            display: 'inline-block',
-            fontSize: 24,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: CT.accent,
-            border: `1.5px solid ${CT.accent}`,
-            borderRadius: 6,
-            padding: '6px 14px',
-          }}
-        >
-          CANDLE ANATOMY
-        </div>
-        <div style={{fontSize: 74, fontWeight: 800, color: CT.ink, marginTop: 22, lineHeight: 1.05}}>
-          {pattern.name}
-        </div>
-        <div style={{fontSize: 34, fontWeight: 500, color: CT.inkSoft, marginTop: 12}}>
-          {pattern.tagline}
-        </div>
+        {open !== 1 && (
+          <div
+            style={{
+              display: 'inline-block',
+              fontSize: 24,
+              fontWeight: 700,
+              letterSpacing: 3,
+              color: CT.accent,
+              border: `1.5px solid ${CT.accent}`,
+              borderRadius: 6,
+              padding: '6px 14px',
+              opacity: open === 2 ? badgeIn : 1,
+            }}
+          >
+            {t.badge}
+          </div>
+        )}
+        {/* Balanced rather than ragged: Vietnamese pattern names and taglines run
+            longer than the English ones and wrap to two lines, and the default
+            break leaves a single word stranded on the second. */}
+        {open === 1 ? (
+          // Claim first. The label is what every one of these videos leads with,
+          // and a feed scrolls past a label; it does not scroll past a sentence
+          // that disagrees with it. The name arrives a beat later, once the
+          // viewer has a reason to want it.
+          <>
+            <div
+              style={{
+                fontSize: 52,
+                fontWeight: 800,
+                color: CT.ink,
+                lineHeight: 1.14,
+                textWrap: 'balance',
+              }}
+            >
+              {pattern.tagline}
+            </div>
+            <div
+              style={{
+                fontSize: 40,
+                fontWeight: 700,
+                color: CT.accent,
+                marginTop: 16,
+                opacity: nameIn,
+                transform: `translateY(${interpolate(nameIn, [0, 1], [12, 0])}px)`,
+              }}
+            >
+              {pattern.name}
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                // The cold open runs the name larger and alone for a beat, so
+                // the first thing on screen is the subject rather than a chrome
+                // label around it.
+                fontSize: open === 2 ? 92 : 74,
+                fontWeight: 800,
+                color: CT.ink,
+                marginTop: open === 2 ? 8 : 22,
+                lineHeight: 1.05,
+                textWrap: 'balance',
+              }}
+            >
+              {pattern.name}
+            </div>
+            <div
+              style={{
+                fontSize: 34,
+                fontWeight: 500,
+                color: CT.inkSoft,
+                marginTop: 12,
+                lineHeight: 1.28,
+                textWrap: 'balance',
+                opacity: open === 2 ? tagIn : 1,
+                transform:
+                  open === 2
+                    ? `translateY(${interpolate(tagIn, [0, 1], [10, 0])}px)`
+                    : undefined,
+              }}
+            >
+              {pattern.tagline}
+            </div>
+          </>
+        )}
       </div>
 
       <div
@@ -128,6 +302,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         }}
       />
 
+      <ChartEdges box={CHART} bg={CT.bg} zIndex={LAYER.chart + 5} />
+
       {/* zIndex: the chart canvas paints over siblings without it. */}
       {coords && (
         <svg
@@ -138,7 +314,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             left: CHART.left,
             top: CHART.top,
             pointerEvents: 'none',
-            zIndex: 10,
+            zIndex: LAYER.marks,
           }}
         >
           <Spotlight coords={coords} from={range.from} to={range.to} opacity={spotlight * 0.92} />
@@ -148,23 +324,74 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             progress={anatomyProgress}
             opacity={anatomyOpacity}
           />
+          {/* The concept lessons draw here: fib grid, order block, swing
+              skeleton, range rails. Placed before the trade levels so the entry
+              and stop stay the topmost thing on the chart — they are what the
+              viewer has to read at the moment the trade is placed. */}
+          {props.marks?.length ? (
+            <Marks
+              marks={props.marks}
+              coords={coords}
+              box={CHART}
+              progress={anatomyProgress}
+              // Dimmed for the trade, not removed. On a candlestick lesson the
+              // anatomy labels have said their piece by then and clutter the
+              // entry; here the drawing IS the reason for the entry, and fading
+              // the golden pocket out at the exact moment the video places a
+              // buy inside it deletes the argument it just made.
+              opacity={Math.max(anatomyOpacity, 0.62)}
+              // The trade box owns the frame from the entry bar rightward once
+              // it is drawn; the mark labels step left of it rather than over it.
+              avoidFromX={tradeProgress > 0.05 ? tradeLabelLeft : undefined}
+              theme={MARK_THEME}
+              font={CFONT}
+            />
+          ) : null}
           <TradeLevels
             trade={trade}
             bias={pattern.bias}
             coords={coords}
             progress={tradeProgress}
+            locale={props.locale}
           />
         </svg>
       )}
+
+      {/* Ask before explaining. Gated on the config so the plain lessons are
+          untouched: the quiz is a different product, not a new default. */}
+      {props.quiz ? (
+        <QuizLayer
+          frame={frame}
+          fps={fps}
+          bias={pattern.bias}
+          // The answer lands exactly as the anatomy beat opens, so the
+          // explanation reads as the mark scheme for the question just asked.
+          answerAt={CB.anatomy[0]}
+          variant={props.quizVariant ?? 0}
+          locale={props.locale}
+        />
+      ) : null}
+
+      <BeatRail
+        frame={frame}
+        marks={props.voiceMarks ?? undefined}
+        locale={props.locale}
+        concept={concept}
+      />
 
       {/* Rule + checklist */}
       {rulePanel > 0 && (
         <div
           style={{
             position: 'absolute',
-            bottom: 150,
+            // Without this the panel is *behind* the chart canvas, and since the
+            // panel grows upward from its bottom edge it is the top of it that
+            // disappears — which is the rule itself, the one sentence the beat
+            // exists to deliver. It rendered, it was simply painted over.
+            zIndex: LAYER.overlay,
+            bottom: SAFE.bottom,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             background: CT.panel,
             border: `1.5px solid ${CT.panelLine}`,
             borderRadius: 20,
@@ -216,14 +443,18 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         </div>
       )}
 
-      {/* Follow-through caption */}
-      {frame >= CB.reveal[0] && frame < CB.result[0] && (
+      {/* Follow-through caption.
+          Only when there is no narration: with a voice track the same band holds
+          the subtitle, and a line naming a direction is the kind of copy that
+          fills a slot without telling anyone anything. */}
+      {!props.voiceMarks?.length && frame >= CB.reveal[0] && frame < CB.result[0] && (
         <div
           style={{
             position: 'absolute',
-            bottom: SAFE.bottom + 40,
+            zIndex: LAYER.overlay,
+            top: LAYOUT.captionTop,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             textAlign: 'center',
             fontSize: 34,
             fontWeight: 600,
@@ -231,7 +462,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             opacity: interpolate(frame, [CB.reveal[0], CB.reveal[0] + 24], [0, 1], clamp),
           }}
         >
-          {bullish ? 'Buyers follow through…' : 'Sellers follow through…'}
+          {/* Neutral on purpose: the follow-through is where the trade is
+              decided, and about four in ten of them decide against it. */}
+          {t.followThrough}
         </div>
       )}
 
@@ -243,7 +476,9 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           nothing was edited. Staggering the lines means something arrives every
           few frames right to the end, and a recap is worth watching: it is the
           rule restated at the moment the viewer has just seen it pay off. */}
-      {props.stats && <RealityCheck stats={props.stats} frame={frame} fps={fps} />}
+      {props.stats && (
+        <RealityCheck stats={props.stats} frame={frame} fps={fps} locale={props.locale} />
+      )}
 
       {/* The recap is the fallback for when no statistic could be measured — no
           network, or too few settled trades to quote honestly. */}
@@ -251,9 +486,10 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
         <div
           style={{
             position: 'absolute',
+            zIndex: LAYER.overlay,
             bottom: SAFE.bottom,
             left: 56,
-            right: 56,
+            right: SAFE.right,
             textAlign: 'center',
           }}
         >
@@ -261,12 +497,38 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
             style={{
               fontSize: 52,
               fontWeight: 800,
-              color: win ? CT.up : CT.down,
+              color:
+                props.outcome.result === 'TP'
+                  ? CT.up
+                  : props.outcome.result === 'SL'
+                    ? CT.down
+                    : CT.inkSoft,
               opacity: resultIn,
               transform: `translateY(${interpolate(resultIn, [0, 1], [44, 0])}px)`,
             }}
           >
-            {win ? 'Target reached' : 'Target not reached'}
+            {verdict}
+          </div>
+
+          {/* The honesty beat, for the videos that could not measure one.
+              With statistics the panel says what the pattern really does across
+              every occurrence; without them the least this can do is refuse to
+              let one worked example stand in for evidence. Ending on "it worked"
+              is how a teaching channel turns into a highlight reel. */}
+          <div
+            style={{
+              marginTop: 14,
+              fontSize: 30,
+              fontWeight: 600,
+              color: CT.inkSoft,
+              opacity: interpolate(resultIn, [0.4, 1], [0, 1], clamp),
+            }}
+          >
+            {props.outcome.result === 'SL'
+              ? t.caveatLoss
+              : concept
+                ? t.conceptCaveat
+                : t.caveatDefault}
           </div>
 
           <div style={{marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12}}>
@@ -317,7 +579,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
                   transform: `scale(${interpolate(cta, [0, 1], [0.8, 1])})`,
                 }}
               >
-                Follow for one pattern a day
+                {concept ? t.conceptCta : t.cta}
               </div>
             );
           })()}
@@ -328,7 +590,8 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          bottom: 42,
+          zIndex: LAYER.overlay,
+          top: LAYOUT.disclaimerY,
           left: 56,
           right: 56,
           textAlign: 'center',
@@ -337,7 +600,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           color: CT.inkFaint,
         }}
       >
-        {props.note} · Educational only, not financial advice
+        {props.note} · {t.disclaimer}
       </div>
       {/* Narration is optional: no voice files means no track, no subtitle, and
           an unducked bed. The video is complete without it. */}
@@ -349,8 +612,21 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
           tone="dark"
           // Clear of the statistics panel, which owns the bottom of the frame
           // from the result beat onward.
-          bottom={660}
+          // The caption band under the chart. At 660 the subtitle floated in the
+          // middle of the chart and lay across the trade box during the one beat
+          // where the levels are the subject.
+          bottom={SAFE.bottom}
+          // The final lines are the statistics headline, word for word. Printing
+          // them again as a subtitle put two copies of one sentence on screen,
+          // the higher one sitting across the panel that earns it.
+          hideCaptionFrom={CB.result[0]}
+          // The rule beat prints the same sentence in the panel below, at length.
+          hideCaptionBetween={CB.rule}
         />
+      ) : null}
+
+      {props.brandMark ? (
+        <BrandMark file={props.brandMark} />
       ) : null}
 
       <Soundtrack

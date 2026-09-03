@@ -7,7 +7,11 @@ import {Cursor, LevelLine, PositionBox} from './Overlay';
 import {FiboLevels, FvgBox, OrderBlockBox} from './Zones';
 import {Flash, ResultStrip} from './Beats';
 import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark} from './Chrome';
-import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt} from './storyboard';
+import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt, shownFloatAt} from './storyboard';
+import {visibleCandles} from '../camera';
+import {ChartEdges} from '../ChartEdges';
+import {BrandMark} from '../BrandMark';
+import {strings} from '../i18n';
 import {logicalWindowAt} from './logicalWindow';
 import {CHART_BOX, TV, FONT} from './chartTheme';
 import {interpolate} from 'remotion';
@@ -16,12 +20,8 @@ import {quizCues} from '../audio/cues';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
-const BANNERS = [
-  'WOULD YOU BUY OR SELL?',
-  'BUY OR SELL THIS CHART?',
-  'YOUR CALL: BUY OR SELL?',
-  'LONG OR SHORT HERE?',
-];
+// The four phrasings live in src/i18n.ts, because the Vietnam track asks the
+// same question in its own words rather than in a translation of these.
 
 /**
  * The banner still has to pose the question the pills answer, so an arbitrary
@@ -32,18 +32,20 @@ const quizBanner = (props: ForexChartProps) => {
   const hook = (props.hook ?? '').trim().toUpperCase();
   // At 70px, anything much over 24 characters wraps and breaks the strip.
   if (hook && hook.length <= 24 && hook.includes('?')) return hook;
-  return BANNERS[(props.candles.length + props.setupCount) % BANNERS.length];
+  const banners = strings(props.locale).quiz.banners;
+  return banners[(props.candles.length + props.setupCount) % banners.length];
 };
 
 export const XauChart: React.FC<ForexChartProps> = (props) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
 
+  const shownFloat = shownFloatAt(props, frame);
   const shown = shownAt(props, frame);
   const priceWindow = priceWindowAt(props, frame);
   const {containerRef, coords} = useLightweightChart(
     props,
-    shown,
+    shownFloat,
     priceWindow,
     undefined,
     logicalWindowAt(props.setupCount, lastRevealIndex(props), ramp(frame, SB.reveal)),
@@ -73,7 +75,10 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
   const win = props.outcome.result === 'TP';
   const revealing = frame >= SB.reveal[0] && frame < SB.reveal[1];
 
-  const lastShown = props.candles[shown - 1];
+  // The bar as it is drawn right now, not as it will close. Reading the closed
+  // candle here put a price on screen that the chart had not printed yet.
+  const visible = visibleCandles(props.candles, shownFloat);
+  const lastShown = visible[visible.length - 1] ?? props.candles[0];
 
   // A slight jitter while the outcome plays reads as tension on a static chart.
   const shake = revealing ? Math.sin(frame * 1.9) * 1.8 : 0;
@@ -162,17 +167,23 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           line at this size; otherwise a rotation, indexed off the data so a
           keyless run still varies between videos. */}
       <TopBanner text={quizBanner(props)} frame={frame} />
-      <QuizPills frame={frame} fps={fps} answerAt={SB.answer} answer={props.answer} />
-      <Watermark visible={frame < SB.result[0]} />
+      <QuizPills frame={frame} fps={fps} answerAt={SB.answer} answer={props.answer} locale={props.locale} />
+      <Watermark visible={frame < SB.result[0] && !props.brandMark} />
 
       {/* Instrument + live price, small so the candles stay dominant.
           Hidden once the result strip claims this slot. */}
       <div
         style={{
           position: 'absolute',
-          top: 456,
+          // Above the chart, not on it. The chart box was grown upward to use
+          // the dead band and this line stayed where it was, so the canvas
+          // painted straight over it — the same z-order trap the rule panel
+          // fell into. Keeping it clear of CHART_BOX.top by construction rather
+          // than by a number that has to be remembered.
+          top: CHART_BOX.top - 84,
           left: 0,
           right: 0,
+          zIndex: 30,
           opacity: frame >= SB.result[0] ? 0 : 1,
           display: 'flex',
           justifyContent: 'center',
@@ -208,6 +219,13 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
         }}
       />
 
+      <ChartEdges box={CHART_BOX} bg={TV.bg} zIndex={5} transform={`translateX(${shake}px)`} />
+
+      {/* Below both the banner and the BUY/SELL pills. The banner owns the top
+          116px and the pills sit at 176; anything between the two lands on one
+          of them, so the mark waits until under both. */}
+      {props.brandMark ? <BrandMark file={props.brandMark} top={300} size={76} opacity={0.85} /> : null}
+
       {/* Annotation overlay, aligned to the chart canvas.
           zIndex matters: the chart canvas paints over siblings without it. */}
       {coords && (
@@ -230,6 +248,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
               kind="resistance"
               coords={coords}
               progress={levelProgress}
+              locale={props.locale}
             />
           )}
           {support && (
@@ -239,6 +258,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
               kind="support"
               coords={coords}
               progress={secondLevelProgress}
+              locale={props.locale}
             />
           )}
           {props.fibonacci && (
@@ -275,7 +295,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
 
       <Countdown frame={frame} fps={fps} range={SB.countdown} />
       {frame < SB.result[0] && (
-        <AnswerBadge frame={frame} fps={fps} at={SB.answer} answer={props.answer} />
+        <AnswerBadge frame={frame} fps={fps} at={SB.answer} answer={props.answer} locale={props.locale} />
       )}
       <Flash frame={frame} at={RESOLUTION_FRAME} win={win} />
       <ResultStrip props={props} frame={frame} fps={fps} at={SB.result[0]} />
@@ -287,13 +307,18 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           left: 40,
           right: 40,
           textAlign: 'center',
-          color: 'rgba(255,255,255,0.34)',
+          // Matched to the other formats' small print. At 0.34 opacity and
+          // weight 700 this line was bright enough to read from the sofa, which
+          // put readable text under the platform's own controls — where it
+          // simply is not seen. Small print is required to be present, not
+          // prominent; see src/safeArea.ts.
+          color: 'rgba(230,237,243,0.30)',
           fontSize: 21,
-          fontWeight: 700,
+          fontWeight: 500,
           zIndex: 60,
         }}
       >
-        Real {props.pair} data · Educational only, not financial advice
+        {strings(props.locale).realData(props.pair)}
       </div>
       <Soundtrack bed="dark" cues={quizCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

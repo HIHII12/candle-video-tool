@@ -22,8 +22,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
+import { writeUploadNote } from './upload-kit.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ENGINE = join(ROOT, 'video-engine');
@@ -38,6 +39,53 @@ const workers = Math.max(1, Number(flag('workers', '1')));
 const dryRun = has('dry-run');
 // Operational escape hatch: re-run one job after a fix without the whole day.
 const only = flag('only', '');
+// One format only. `candle-lesson` also switches to the catalogue plan, which is
+// the only way to ask for more videos than a single day contains.
+const format = flag('format', '');
+// The finished file gets its absolute level set once; see
+// video-engine/scripts/chuan_am_luong.py for why that is not done in the engine.
+const skipLoudness = has('no-loudness');
+/**
+ * Video quality, as h264's constant-rate factor. Lower is bigger.
+ *
+ * Remotion defaults to 18, which is a mastering setting: visually lossless and
+ * about 5.3 MB for one of these. At 23 the same video is 2.7 MB and, compared
+ * frame against frame, indistinguishable — these are flat-coloured charts on a
+ * dark ground, which is exactly what h264 compresses well. That matters twice
+ * over: a day of thirty is 80 MB instead of 160, and every one of them is going
+ * to be re-encoded by YouTube or TikTok on upload anyway, so the extra bitrate
+ * was never going to reach a viewer.
+ *
+ * Pass --crf 18 to get the old masters back.
+ */
+const crf = flag('crf', '23');
+/**
+ * Which track to build: `en` for global, `vi` for Vietnam.
+ *
+ * Not a translation switch. The Vietnam track uses the pattern names Vietnamese
+ * traders actually say, its own written rules, and the channel's mark in the
+ * corner; the global track stays exactly what it was. See video-engine/src/i18n.ts.
+ */
+const locale = flag('locale', 'en');
+/** Corner mark, a file under video-engine/public/brand. `none` turns it off. */
+const brand = flag('brand', locale === 'vi' ? 'van-thang-trading.png' : 'none');
+/**
+ * Render the three market-data formats from the configs already in the repo,
+ * instead of fetching fresh ones.
+ *
+ * This is what makes a mixed batch possible without a network. The prices are
+ * as old as the checked-in config, which is fine for teaching a setup and wrong
+ * for anything presented as today's chart.
+ */
+const replay = has('replay');
+/**
+ * Every format the machine can build offline, in one run.
+ *
+ * `--format candle-lesson --count 100` is a hundred of one thing; `--mix
+ * --count 100` is the same hundred with all four formats in it, as many of the
+ * other three as the repo holds data for.
+ */
+const mix = has('mix');
 
 const OUT = join(ENGINE, 'out', 'batch', date);
 const MANIFEST = join(OUT, 'manifest.json');
@@ -89,19 +137,87 @@ const sh = (cmd, cmdArgs, onLine) =>
 
 /** Produce the config for a job and report the facts a caption can use. */
 async function buildData(job) {
+  if (job.replay) {
+    // Nothing to generate: the data is already on disk, so this only reads it
+    // and lets applyTrack stamp the locale and the mark onto it.
+    const cfg = JSON.parse(readFileSync(join(ENGINE, job.replay), 'utf8'));
+    // Into a run folder, never back over the source. The replay configs are
+    // checked in, and stamping a locale onto them turned a render into an edit
+    // of the repo — which git noticed and a reader would not have.
+    const out = `src/data/_run/${job.id}.json`;
+    mkdirSync(join(ENGINE, 'src', 'data', '_run'), {recursive: true});
+    if (job.locale && job.locale !== 'en') {
+      // The title and hook in the file were written for the English track. Left
+      // in place they win over the localised fallback, so a Vietnamese video
+      // opens with an English headline. Clearing them hands the slot back.
+      cfg.title = '';
+      cfg.hook = '';
+    }
+    writeFileSync(join(ENGINE, out), JSON.stringify(cfg, null, 2));
+    return {
+      composition: job.composition,
+      configPath: out,
+      cfg,
+      facts: {pair: cfg.pair, timeframe: cfg.timeframe},
+    };
+  }
+
   if (job.format === 'candle-lesson') {
     const out = `src/data/batch_${job.id}.json`;
     // --stats measures how the pattern actually performed across real history.
     // It needs network; the generator degrades to no stats rather than failing,
     // which keeps this the one format that still works offline.
     await sh(python, ['scripts/make_candle_lesson.py',
-      '--pattern', job.pattern, '--seed', String(job.seed), '--out', out, '--stats']);
+      '--pattern', job.pattern, '--seed', String(job.seed), '--out', out,
+      '--locale', job.locale ?? locale, '--stats']);
     const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
     return {
       composition: 'CandleLesson',
       configPath: out,
       cfg,
       facts: { patternName: cfg.pattern.name },
+    };
+  }
+
+  if (job.format === 'map-offline') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_map_offline.py',
+      '--seed', String(job.seed), '--pair', job.pair,
+      '--timeframe', job.timeframe, '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'MarketMap',
+      configPath: out,
+      cfg,
+      facts: { bias: cfg.bias, zones: cfg.zones.map((z) => z.label).join(', ') },
+    };
+  }
+
+  if (job.format === 'concept-lesson') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_concept_lesson.py',
+      '--topic', job.topic, '--seed', String(job.seed),
+      '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'CandleLesson',
+      configPath: out,
+      cfg,
+      facts: { topic: job.topic, name: cfg.pattern.name },
+    };
+  }
+
+  if (job.format === 'candle-compare') {
+    const out = `src/data/batch_${job.id}.json`;
+    await sh(python, ['scripts/make_candle_compare.py',
+      '--pair', job.pair, '--seed', String(job.seed),
+      '--locale', job.locale ?? locale, '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'CandleCompare',
+      configPath: out,
+      cfg,
+      facts: { left: cfg.left.name, right: cfg.right.name, metric: cfg.metric },
     };
   }
 
@@ -144,19 +260,41 @@ async function buildData(job) {
   };
 }
 
+/** Stamp the track's own settings onto a config before it is rendered. */
+function applyTrack(cfg, job) {
+  cfg.locale = locale;
+  cfg.brandMark = brand === 'none' ? null : brand;
+  // The quiz flags live on the plan, not in the generator: the same generated
+  // setup is a lesson or a quiz depending only on whether it is asked first.
+  if (job?.quiz) {
+    cfg.quiz = true;
+    if (job.quizVariant !== undefined) cfg.quizVariant = job.quizVariant;
+    if (job.quizAsk !== undefined) cfg.quizAsk = job.quizAsk;
+  }
+  return cfg;
+}
+
 /** Write the model's copy back into the config the renderer reads. */
 function applyCaption(cfgPath, cfg, caption, format) {
-  // The market map has no model-written line on screen: every word on it is
-  // either a measured level or a fixed disclaimer, and inventing copy about
-  // levels is how a plan starts sounding like a promise.
-  if (format === 'market-map') return;
-
   if (format === 'candle-lesson') {
-    cfg.pattern.tagline = caption.hook;
-  } else {
+    // Only a model's line replaces the generator's.
+    //
+    // The fallback for this format is `What a <pattern> actually tells you` —
+    // one template, filled in a hundred times, which is exactly the sameness the
+    // seeded taglines in make_candle_lesson.py exist to break. Overwriting a
+    // written line with a generated template is a downgrade, so it does not
+    // happen: with no key configured, the generator's own tagline ships.
+    if (caption.source !== 'fallback') cfg.pattern.tagline = caption.hook;
+  } else if (!['market-map', 'map-offline', 'candle-compare', 'concept-lesson'].includes(format)) {
+    // The market map carries no model-written line: every word on it is either a
+    // measured level or a fixed disclaimer, and inventing copy about levels is
+    // how a plan starts sounding like a promise.
     cfg.title = caption.title;
     cfg.hook = caption.hook;
   }
+  // Written for every format, including the map. Returning early for the map is
+  // what left it without its locale, so the Vietnam track rendered maps in
+  // English while everything else around them was Vietnamese.
   writeFileSync(join(ENGINE, cfgPath), JSON.stringify(cfg, null, 2));
 }
 
@@ -170,10 +308,23 @@ async function runJob(job) {
   const { composition, configPath, cfg, facts } = await buildData(job);
   // The market map carries no model-written line, so it skips the LLM entirely.
   const caption =
-    job.format === 'market-map'
-      ? { title: `${job.pair} ${job.timeframe} market map`, hook: null, source: 'none' }
+    // The comparison carries no model-written line either. Its copy is the
+    // argument — "same wick, measure the body" — and it has to stay true to the
+    // two series the generator just built, which a caption model has not seen.
+    job.format === 'market-map' ||
+      job.format === 'map-offline' ||
+      job.format === 'candle-compare' ||
+      // The concept lessons carry written rule text of their own; a caption
+      // model paraphrasing "close above the neckline" is how a rule quietly
+      // becomes a different rule.
+      job.format === 'concept-lesson' ||
+      job.replay
+      // A replay keeps the copy the config already carries: it was written for
+      // this exact chart, and a fresh line generated now would be about data it
+      // has never seen.
+      ? { title: cfg.title ?? job.label, hook: cfg.hook ?? null, source: 'none' }
       : await writeCaption(job, facts);
-  applyCaption(configPath, cfg, caption, job.format);
+  applyCaption(configPath, applyTrack(cfg, job), caption, job.format);
 
   // Narration is opt-in and best-effort. The engine is installed per machine by
   // scripts/setup_voice.py; without it the video renders exactly as before, so a
@@ -191,6 +342,7 @@ async function runJob(job) {
     'npx',
     ['remotion', 'render', composition, target,
       `--props=./${configPath}`,
+      `--crf=${crf}`,
       ...(browser ? [`--browser-executable=${browser}`] : [])],
     (line) => {
       const m = line.match(/Rendered (\d+)\/(\d+)/);
@@ -203,10 +355,37 @@ async function runJob(job) {
     },
   );
 
+  // Level is the last thing done, on the finished file, because integrated
+  // loudness is only measurable once every track is in the mix. Skipping it is
+  // not fatal: the video is watchable, just quieter than the platform expects.
+  let loudness = 'skipped';
+  if (!skipLoudness) {
+    try {
+      await sh(python, ['scripts/chuan_am_luong.py', target], (line) => {
+        const m = line.match(/(-?\d+\.\d+)\s*->\s*(-?\d+\.\d+)\s*LUFS/);
+        if (m) loudness = `${m[1]} -> ${m[2]} LUFS`;
+      });
+    } catch (err) {
+      loudness = `failed: ${String(err.message ?? err).split('\n')[0]}`;
+    }
+  }
+
+  // The caption that has to be typed into the upload box, written beside the
+  // video. Best-effort: a video that renders and has no .txt beside it is still
+  // a video, so this must never fail the job.
+  let note = null;
+  try {
+    note = writeUploadNote(ENGINE, target, job, cfg, caption);
+  } catch (err) {
+    console.log(`       upload note skipped: ${String(err.message ?? err).split('\n')[0]}`);
+  }
+
   return {
     ...job,
     status: 'rendered',
     file: target,
+    uploadNote: note ? note.replace(`${ENGINE}/`, '') : null,
+    loudness,
     composition,
     caption: { title: caption.title, hook: caption.hook, source: caption.source },
     renderSeconds: Math.round((Date.now() - started) / 1000),
@@ -295,8 +474,44 @@ function preflight() {
 
 if (!dryRun) preflight();
 
-let plan = planFor(date, count);
-if (only) plan = plan.filter((j) => j.id.includes(only));
+// All four formats have a Vietnamese edition now. What is still worth saying is
+// where the *data* comes from, because the three market formats can only be
+// replayed from the configs in the repo when there is no network — and those
+// carry the prices they were fetched with, not today's.
+if (mix || replay) {
+  console.log(
+    'Note: the quiz, named-setup and market-map videos replay configs already ' +
+      'in the repo. Their prices are as old as those files.\n',
+  );
+}
+
+let plan = mix
+  ? mixedPlan(date, count, locale, join(ENGINE, 'src', 'data'))
+  : replay
+    ? replayPlan(join(ENGINE, 'src', 'data'), locale)
+    : format === 'candle-lesson'
+      ? candlePlan(date, count, locale)
+      : format === 'candle-compare'
+        ? comparePlan(date, count, locale)
+        : format === 'concept-lesson'
+          ? conceptPlan(date, count, locale)
+          : format === 'map-offline'
+            ? mapPlan(date, count, locale)
+            : format === 'anatomy'
+              ? anatomyPlan(date, count, locale)
+              : format === 'quiz'
+                ? quizPlan(date, count, locale)
+              : planFor(date, count);
+if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz'].includes(format)) {
+  plan = plan.filter((j) => j.format === format);
+}
+// Comma-separated, so a smoke test can name one job per format rather than
+// running the whole plan to reach the second one.
+if (only) {
+  const wanted = only.split(',').map((x) => x.trim()).filter(Boolean);
+  plan = plan.filter((j) => wanted.some((w) => j.id.includes(w)));
+}
 if (!plan.length) { console.error(`No jobs match --only "${only}".`); process.exit(1); }
 console.log(`Plan for ${date}: ${plan.length} videos, ${workers} at a time\n`);
 
@@ -313,7 +528,7 @@ let done = 0;
 const results = await pool(plan, workers, runJob, (r) => {
   done += 1;
   const mark = r.status === 'rendered' ? 'ok' : r.status === 'skipped' ? '--' : 'FAIL';
-  const extra = r.status === 'rendered' ? `${r.renderSeconds}s render · ${r.videoDurationSeconds}s video · caption: ${r.caption.source}`
+  const extra = r.status === 'rendered' ? `${r.renderSeconds}s render · ${r.videoDurationSeconds}s video · caption: ${r.caption.source} · ${r.loudness}`
     : r.status === 'failed' ? r.error.split('\n')[0] : r.reason;
   console.log(`[${String(done).padStart(2)}/${plan.length}] ${mark.padEnd(4)} ${r.id.padEnd(30)} ${extra}`);
 });

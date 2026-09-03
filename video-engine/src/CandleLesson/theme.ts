@@ -1,5 +1,20 @@
 import type {CandleLessonProps} from '../data/types';
 import {TEXT_FONT} from '../fonts';
+import {SAFE} from '../safeArea';
+import {
+  clamp01,
+  ease,
+  extentOf,
+  insetLogical,
+  insetPrice,
+  lerpLogical,
+  lerpPrice,
+  ramp,
+  smoothed,
+  visibleCandles,
+  type LogicalWindow,
+  type PriceWindow,
+} from '../camera';
 
 /**
  * Restrained palette. The quiz format shouts because it competes in a feed;
@@ -24,117 +39,147 @@ export const CT = {
 // weights rather than a fallback the browser has to fake.
 export const CFONT = TEXT_FONT;
 
-export const CHART = {
-  left: 0,
-  top: 520,
-  width: 1080,
-  height: 900,
+/**
+ * Vertical bands, declared once.
+ *
+ * The old layout put the chart at y 520–1420 in a 1920-tall frame: a 500px
+ * header for three lines of text, and 500px below the chart holding one line of
+ * small print. A quarter of a phone screen doing nothing is the single loudest
+ * "nobody laid this out" signal a short can send, and it was on every frame.
+ *
+ * These bands are exhaustive and non-overlapping by construction, and the chart
+ * gets the share that matches what the viewer came for.
+ */
+export const LAYOUT = {
+  headerTop: 78,
+  /** Where the chart element sits. Candles may be inset further, never wider. */
+  chart: {left: 0, top: 322, width: 1080, height: 1136},
+  /** Captions and the verdict live here; the chart is inset out of the way. */
+  captionTop: 1470,
+  /** Nothing the viewer must read may sit below this line. */
+  readableBottom: 1920 - SAFE.bottom,
+  /** Small print is allowed below it — required to be present, not prominent. */
+  disclaimerY: 1858,
+} as const;
+
+// Kept for the components that still import CHART by name.
+export const CHART = LAYOUT.chart;
+
+/**
+ * Paint order.
+ *
+ * lightweight-charts draws into a canvas that paints over any sibling with no
+ * stacking context of its own, so "later in the JSX" is not enough. Every
+ * element that has to sit above the chart says so with one of these, because
+ * the failure mode is silent: the element renders, is painted over, and only
+ * the part of it that happens to fall outside the chart box is ever seen.
+ */
+export const LAYER = {
+  chart: 0,
+  /** Annotations drawn in chart coordinates. */
+  marks: 10,
+  /** Text and panels drawn in frame coordinates. */
+  overlay: 20,
+  /** Subtitles sit above everything; an unreadable subtitle is worse than none. */
+  subtitle: 40,
 } as const;
 
 export const CANDLE_DURATION = 2100;
 
 export const CB = {
-  title: [0, 170] as const,
-  context: [70, 470] as const, // approach leg streams in
-  patternIn: [500, 620] as const, // the pattern lands, one bar at a time
-  focus: [660, 780] as const, // spotlight + zoom toward the pattern
-  anatomy: [810, 1030] as const, // name the parts
-  rule: [1060, 1320] as const, // the rule, with its checklist
-  zoomOut: [1360, 1470] as const, // pull back and place the trade
-  // The reveal used to finish at 1830, which left the last 4.5 seconds — and in
-  // practice closer to 9, since the follow-through candles arrive early — with a
-  // completely frozen chart. A third of a short-form video holding still is the
-  // clearest "nobody edited this" signal there is, so the candles now keep
-  // arriving until just before the end and the verdict lands over them.
-  reveal: [1500, 1870] as const,
+  title: [0, 150] as const,
+  context: [30, 470] as const, // approach leg streams in
+  patternIn: [470, 650] as const, // the pattern lands, one bar at a time
+  focus: [670, 800] as const, // spotlight + zoom toward the pattern
+  anatomy: [820, 1040] as const, // name the parts
+  rule: [1060, 1340] as const, // the rule, with its checklist
+  zoomOut: [1380, 1500] as const, // pull back and place the trade
+  // Runs to within forty frames of the end. The follow-through used to finish
+  // at 1870 and the last four seconds were a frozen chart under a frozen panel —
+  // a third of the video holding perfectly still, which is the clearest "nobody
+  // edited this" signal a short can give. Spread across the whole reveal each
+  // bar takes about a second to form, so something is always moving.
+  reveal: [1500, 2060] as const,
   // Overlaps the reveal deliberately: the recap starts building while the last
   // candles are still landing, so there is no frame where both are idle.
   result: [1840, 2100] as const,
 };
 
-export const cramp = (frame: number, range: readonly [number, number]) => {
-  const [a, b] = range;
-  if (frame <= a) return 0;
-  if (frame >= b) return 1;
-  return (frame - a) / (b - a);
-};
+export const cramp = (frame: number, range: readonly [number, number]) =>
+  ramp(frame, range[0], range[1]);
 
-// Smoothstep. Linear ramps on a zoom read as mechanical; easing both ends is
-// what makes the camera move feel deliberate.
-export const ease = (t: number) => t * t * (3 - 2 * t);
+export {ease};
 
 const patternStart = (props: CandleLessonProps) => props.pattern.indices[0];
 
-/** Candles on screen at a given frame. */
-export const shownAt = (props: CandleLessonProps, frame: number) => {
-  const start = patternStart(props);
-  const patternLen = props.pattern.indices.length;
-  const total = props.candles.length;
-
-  if (frame < CB.patternIn[0]) {
-    // Opens with most of the approach leg already on screen. Streaming in from a
-    // single candle meant frame 0 — the one frame that decides whether anyone
-    // watches — was an empty chart, and the first second was spent drawing what
-    // is only context anyway.
-    const OPEN_AT = 0.55;
-    return Math.max(1, Math.round((OPEN_AT + (1 - OPEN_AT) * cramp(frame, CB.context)) * start));
-  }
-  if (frame < CB.reveal[0]) {
-    return start + Math.max(1, Math.round(cramp(frame, CB.patternIn) * patternLen));
-  }
-  const last = Math.min(props.outcome.index ?? total - 1, total - 1);
-  const span = Math.max(0, last - (props.setupCount - 1));
-  return Math.min(total, props.setupCount + Math.round(cramp(frame, CB.reveal) * span));
-};
-
-const pad = (prices: number[], factor: number) => {
-  const lo = Math.min(...prices);
-  const hi = Math.max(...prices);
-  const p = (hi - lo) * factor || 1;
-  return {minValue: lo - p, maxValue: hi + p};
-};
-
-const lerpWindow = (
-  a: {minValue: number; maxValue: number},
-  b: {minValue: number; maxValue: number},
-  t: number,
-) => ({
-  minValue: a.minValue + (b.minValue - a.minValue) * t,
-  maxValue: a.maxValue + (b.maxValue - a.maxValue) * t,
-});
+/**
+ * How far into the slow push-in a frame is.
+ *
+ * Runs from the moment the camera arrives on the pattern to the moment it leaves,
+ * so the move is continuous across the anatomy and rule beats rather than
+ * restarting at each one.
+ */
+const drift = (frame: number) => ramp(frame, CB.focus[1], CB.zoomOut[0]);
 
 /**
- * Vertical window, animated as a camera: wide on the approach, tight on the
- * pattern while it is being explained, wide again for the follow-through.
- * Zooming the price scale rather than scaling the canvas keeps candles crisp.
+ * How far in the close-up is allowed to go.
+ *
+ * The close-up frames the pattern's own price range, which is fine until the
+ * pattern barely has one. A doji's body is a few cents, so padding *its* range
+ * produced a window a few cents tall — the neighbouring bars became hundreds of
+ * pixels of solid colour running straight off both edges, and the frame check
+ * called it exactly that. The magnification is capped against the window the
+ * camera was already tracking, so a flat pattern gets a close-up of its
+ * surroundings instead of a wall.
  */
-export const windowAt = (props: CandleLessonProps, frame: number) => {
-  const start = patternStart(props);
-  const setup = props.candles.slice(0, props.setupCount);
-  const patternCandles = props.pattern.indices.map((i) => props.candles[i]);
+/**
+ * How much closer than the whole leg the camera may get.
+ *
+ * At 3.2 the pattern candle — the subject of the entire video — occupied about
+ * a quarter of the chart's height while the rest sat empty, which on a phone is
+ * a small shape in a large dark field. At 4.4 it fills about a third and the
+ * approach bars are still in frame, which is the point at which the shape can
+ * actually be read at arm's length.
+ *
+ * The concept lessons keep the old value: their subject is twenty bars wide,
+ * and closing that far in on a head and shoulders crops the head.
+ */
+const MAX_ZOOM = 4.4;
+const MAX_ZOOM_WIDE = 3.0;
 
-  const wide = pad(
-    [...setup.flatMap((c) => [c.high, c.low]), props.trade.stop],
-    0.1,
-  );
-  const near = pad(patternCandles.flatMap((c) => [c.high, c.low]), 0.5);
-  // Only as far as the video actually plays. Padding for candles past the
-  // outcome squashes everything the viewer does see into a narrower band.
-  const shownEnd = Math.min(props.outcome.index ?? props.candles.length - 1, props.candles.length - 1);
-  const full = pad(
-    [
-      ...props.candles.slice(0, shownEnd + 1).flatMap((c) => [c.high, c.low]),
-      props.trade.stop,
-      props.trade.target,
-    ],
-    0.08,
-  );
+const capZoom = (near: PriceWindow, track: PriceWindow, wide = false): PriceWindow => {
+  const floor = (track.maxValue - track.minValue) / (wide ? MAX_ZOOM_WIDE : MAX_ZOOM);
+  const span = near.maxValue - near.minValue;
+  if (span >= floor) return near;
+  const mid = (near.minValue + near.maxValue) / 2;
+  return {minValue: mid - floor / 2, maxValue: mid + floor / 2};
+};
 
-  if (frame < CB.focus[0]) return wide;
-  if (frame < CB.zoomOut[0]) {
-    return lerpWindow(wide, near, ease(cramp(frame, CB.focus)));
-  }
-  return lerpWindow(near, full, ease(cramp(frame, CB.zoomOut)));
+/**
+ * Squeeze a window toward its centre, with a touch of pan.
+ *
+ * The size of the move is set by what it has to beat, not by taste: at 7% over
+ * eight seconds the shift is under a pixel between sampled frames and the
+ * automated check still called it a frozen chart — correctly, because a viewer
+ * cannot see it either. 16% with a slight downward pan is a slow push that reads
+ * as a camera move, and it is still gentle enough not to compete with the labels
+ * being drawn over it.
+ */
+const PUSH = 0.16;
+const PAN = 0.03;
+
+const tighten = (w: PriceWindow, t: number): PriceWindow => {
+  const span = w.maxValue - w.minValue;
+  const mid = (w.minValue + w.maxValue) / 2 - span * PAN * t;
+  const k = 1 - PUSH * t;
+  return {minValue: mid - (span / 2) * k, maxValue: mid + (span / 2) * k};
+};
+
+const tightenLogical = (w: LogicalWindow, t: number): LogicalWindow => {
+  const span = w.to - w.from;
+  const mid = (w.from + w.to) / 2 + span * PAN * t;
+  const k = 1 - PUSH * t;
+  return {from: mid - (span / 2) * k, to: mid + (span / 2) * k};
 };
 
 /** Last candle the video ever shows — slots past it are dead width. */
@@ -142,38 +187,183 @@ const lastShown = (props: CandleLessonProps) =>
   Math.min(props.outcome.index ?? props.candles.length - 1, props.candles.length - 1);
 
 /**
- * Horizontal window, animated as the other half of the same camera.
- *
- * Reserving a slot for every candle up front meant the setup filled barely half
- * the frame and the pattern being explained was a sliver in a lot of empty
- * space. Moving both axes together is the difference between a chart that looks
- * framed and one that looks like a screenshot of the wrong region: the setup
- * fills the width, the camera pushes in on the pattern to explain it, then pulls
- * back to show the follow-through.
+ * Candles on screen at a given frame — fractional, so the newest one is caught
+ * mid-formation rather than appearing whole between two frames.
  */
-export const hWindowAt = (props: CandleLessonProps, frame: number) => {
-  const idx = props.pattern.indices;
-  const first = idx[0];
-  const last = idx[idx.length - 1];
+export const shownAt = (props: CandleLessonProps, frame: number): number => {
+  const start = patternStart(props);
+  const patternLen = props.pattern.indices.length;
 
-  // Setup only. The withheld candles get no width until the reveal needs them.
-  const wide = {from: -0.6, to: props.setupCount - 0.4};
-  // Pattern plus a few bars of context, so it reads as part of a chart.
-  const near = {from: first - 4.5, to: last + 4.5};
-  const full = {from: -0.6, to: lastShown(props) + 0.6};
-
-  const lerp = (a: typeof wide, b: typeof wide, t: number) => ({
-    from: a.from + (b.from - a.from) * t,
-    to: a.to + (b.to - a.to) * t,
-  });
-
-  if (frame < CB.focus[0]) return wide;
-  if (frame < CB.zoomOut[0]) return lerp(wide, near, ease(cramp(frame, CB.focus)));
-  return lerp(near, full, ease(cramp(frame, CB.zoomOut)));
+  if (frame < CB.patternIn[0]) {
+    // Opens with most of the approach leg already on screen. Streaming in from a
+    // single candle meant frame 0 — the one frame that decides whether anyone
+    // watches — was an empty chart, and the first second was spent drawing what
+    // is only context anyway.
+    const OPEN_AT = 0.55;
+    return Math.max(1, (OPEN_AT + (1 - OPEN_AT) * cramp(frame, CB.context)) * start);
+  }
+  if (frame < CB.reveal[0]) {
+    // Not `max(1, …)`. That floor meant a one-candle pattern — the hammer, the
+    // shooting star, every doji — appeared whole on the first frame of its own
+    // beat and then nothing moved for three seconds. The pattern candle is the
+    // subject of the video; watching it print its wick and pull back is the shot,
+    // and the floor was skipping it.
+    return start + Math.max(0.02, cramp(frame, CB.patternIn) * patternLen);
+  }
+  const last = lastShown(props);
+  const span = Math.max(0, last + 1 - props.setupCount);
+  return Math.min(props.candles.length, props.setupCount + cramp(frame, CB.reveal) * span);
 };
 
+/** Whole candles on screen, for anything that needs a count rather than a phase. */
+export const closedAt = (props: CandleLessonProps, frame: number) =>
+  Math.max(1, Math.min(props.candles.length, Math.floor(shownAt(props, frame))));
+
+/**
+ * How much of the chart box each beat hands over to something else.
+ *
+ * Returned as insets rather than by resizing the chart element: resizing makes
+ * lightweight-charts re-lay-out mid-video and every candle slides sideways.
+ * Padding the *scale* moves nothing but the numbers.
+ */
+const insetsAt = (frame: number) => {
+  // The rule panel is the tallest thing that ever covers the chart.
+  const panel = clamp01(
+    Math.min(ramp(frame, CB.rule[0] - 40, CB.rule[0] + 10), 1 - ramp(frame, CB.zoomOut[0] - 40, CB.zoomOut[0])),
+  );
+  // The verdict and the statistics own the bottom from the reveal onward.
+  const caption = Math.max(ramp(frame, CB.reveal[0] - 30, CB.reveal[0] + 20), 0);
+  return {
+    top: 26,
+    bottom: 40 + 300 * ease(panel) + 150 * ease(caption),
+    left: 26,
+    // Clear of the platform's own button column, so a wick never sits under it.
+    right: SAFE.right - 20,
+  };
+};
+
+/**
+ * Vertical window. Tracks the candles that are actually on screen, then leans
+ * in on the pattern while it is being explained and back out for the trade.
+ *
+ * Tracking is what the old fixed window got wrong: framing for bars that have
+ * not arrived leaves the drawn ones squashed into a corner of their own chart.
+ */
+const priceTargetAt = (props: CandleLessonProps, frame: number): PriceWindow => {
+  const vis = visibleCandles(props.candles, shownAt(props, frame));
+  const track = extentOf(vis, [], 0.09);
+  // The bars the lesson is about, plus every price a mark names — a Fibonacci
+  // grid's outer levels and a range's ceiling are part of the subject, and a
+  // window fitted only to the candles cropped them off the top of the frame.
+  const sub = subjectRange(props);
+  const subjectCandles = props.candles.slice(
+    Math.max(0, Math.floor(sub.from)),
+    Math.min(props.candles.length, Math.ceil(sub.to) + 1),
+  );
+  const markPrices: number[] = [];
+  for (const m of props.marks ?? []) {
+    if (m.kind === 'hline') markPrices.push(m.price);
+    else if (m.kind === 'zone') markPrices.push(m.top, m.bottom);
+    else for (const p of m.points) markPrices.push(p.price);
+  }
+  const wide = (props.marks?.length ?? 0) > 0;
+  const near = capZoom(
+    // 0.30 of padding around the pattern, not 0.55. The cap above was never the
+    // binding constraint — this was: at 0.55 the candle the whole video is
+    // about was given more than half its own frame as empty margin, so it read
+    // as a small shape in a large dark field on a phone. At 0.30 it fills about
+    // a third of the chart and the approach bars are all still in shot.
+    extentOf(subjectCandles.length ? subjectCandles : props.candles, markPrices, wide ? 0.16 : 0.30),
+    track,
+    wide,
+  );
+
+  if (frame < CB.focus[0]) return track;
+  if (frame < CB.zoomOut[0]) {
+    // A slow push-in across the explaining beats. Without it the chart is
+    // perfectly still for the eight seconds that name the parts and state the
+    // rule — the frame checker reads three separate freezes there, and so does a
+    // viewer, as "this is a slideshow".
+    return lerpPrice(track, tighten(near, drift(frame)), ease(cramp(frame, CB.focus)));
+  }
+  // Once the levels are drawn they are part of the subject and must fit.
+  const withTrade = extentOf(vis, [props.trade.stop, props.trade.target], 0.1);
+  return lerpPrice(near, withTrade, ease(cramp(frame, CB.zoomOut)));
+};
+
+export const windowAt = (props: CandleLessonProps, frame: number): PriceWindow =>
+  insetPrice(
+    smoothed(frame, (f) => priceTargetAt(props, f), lerpPrice),
+    LAYOUT.chart,
+    insetsAt(frame),
+  );
+
+/**
+ * Horizontal window, the other half of the same camera. Bars keep a workable
+ * minimum width by scrolling once the series outgrows the frame, which is what
+ * a chart does; reserving a slot per candle from frame zero is what a static
+ * screenshot does.
+ */
+const MAX_BARS = 30;
+
+/**
+ * The index range the lesson is actually about.
+ *
+ * For a candlestick lesson that is one bar, and the camera closes right in on
+ * it. For a concept lesson it is the whole drawing — a head and shoulders spans
+ * twenty bars, a range fourteen — and closing in on the last bar of it framed
+ * one candle while the formation being explained sat off screen. So the subject
+ * is whatever the marks touch, and the camera frames that.
+ */
+export const subjectRange = (props: CandleLessonProps) => {
+  const idx = props.pattern.indices;
+  let from = idx[0];
+  let to = idx[idx.length - 1];
+  for (const m of props.marks ?? []) {
+    if (m.kind === 'zone') {
+      from = Math.min(from, m.from);
+      to = Math.max(to, m.to ?? to);
+    } else if (m.kind === 'path') {
+      for (const p of m.points) {
+        from = Math.min(from, p.index);
+        to = Math.max(to, p.index);
+      }
+    } else if (m.from !== undefined) {
+      from = Math.min(from, m.from);
+    }
+  }
+  return {from, to};
+};
+
+const logicalTargetAt = (props: CandleLessonProps, frame: number): LogicalWindow => {
+  const shown = shownAt(props, frame);
+  const sub = subjectRange(props);
+  const wide = (props.marks?.length ?? 0) > 0;
+  const track = {
+    from: Math.max(-0.7, shown - (wide ? MAX_BARS + 14 : MAX_BARS)),
+    to: shown + 0.7,
+  };
+  // A drawing needs room around it to read as a drawing; a single candle needs
+  // to be filled. Same camera, two different subjects.
+  const pad = wide ? 2.2 : 3.5;
+  const near = {from: sub.from - pad, to: sub.to + pad};
+
+  if (frame < CB.focus[0]) return track;
+  if (frame < CB.zoomOut[0]) {
+    return lerpLogical(track, tightenLogical(near, drift(frame)), ease(cramp(frame, CB.focus)));
+  }
+  return lerpLogical(tightenLogical(near, 1), track, ease(cramp(frame, CB.zoomOut)));
+};
+
+export const hWindowAt = (props: CandleLessonProps, frame: number): LogicalWindow =>
+  insetLogical(
+    smoothed(frame, (f) => logicalTargetAt(props, f), lerpLogical),
+    LAYOUT.chart,
+    insetsAt(frame),
+  );
+
 /** Index range the spotlight keeps lit while the pattern is discussed. */
-export const focusRange = (props: CandleLessonProps) => ({
-  from: props.pattern.indices[0] - 1,
-  to: props.pattern.indices[props.pattern.indices.length - 1] + 1,
-});
+export const focusRange = (props: CandleLessonProps) => {
+  const sub = subjectRange(props);
+  return {from: sub.from - 1, to: sub.to + 1};
+};
