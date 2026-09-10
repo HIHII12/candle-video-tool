@@ -22,12 +22,27 @@ TELEGRAM_CHAT_ID=<id chat cua anh>
 > ⚠️ Token không bao giờ nằm plain-text trong repo hay trong vault. n8n giữ trong
 > credential store đã mã hoá; nhớ đặt `N8N_ENCRYPTION_KEY` ở biến môi trường máy.
 
-**4. Import** `n8n-dang-video.json` → gán credential cho node **Đăng YouTube**.
+**4. Import** `n8n-dang-youtube.json` → gán credential:
+
+| Node | Credential |
+|---|---|
+| `YouTube GoldFather` | YT GoldFather |
+| `YouTube Van Thang` | YT Van Thang |
+
+Hai node riêng là **bắt buộc** — một node YouTube chỉ giữ được một credential, dùng chung
+thì cả hai kênh đăng vào cùng một chỗ.
+
+**Nếu n8n chạy trên Windows**, sửa 4 node lệnh (node nào cũng có ghi chú sẵn):
+`ls` → `dir /b` · `cat` → `type` · `mv` → `move`
 
 ## Hàng ngày — không phải làm gì
 
 Cron chạy **8h · 13h · 20h**, mỗi lần đăng **1 bài/kênh** → **3 bài/ngày/kênh**.
 Telegram báo mỗi lần đăng xong hoặc hỏng.
+
+Video 1080×1920 dài 35 giây được YouTube **tự nhận là Shorts** — không cần thêm `#Shorts`.
+
+Hết hàng đợi thì workflow **dừng im lặng**, không báo lỗi. Hết bài không phải là hỏng.
 
 ## Nạp thêm video vào hàng đợi
 
