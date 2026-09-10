@@ -51,3 +51,4 @@ video-engine/out/qa/
 
 # Configs stamped for one run; the sources they copy are checked in.
 video-engine/src/data/_run/
+lich/
