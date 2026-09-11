@@ -326,6 +326,7 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
       </div>
 
       <Soundtrack
+        nhac={props.nhac}
         bed="dark"
         cues={[
           {at: KB.drawA[0], sound: 'whoosh', gain: 0.8},

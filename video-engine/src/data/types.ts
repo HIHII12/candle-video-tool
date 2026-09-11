@@ -81,6 +81,8 @@ export type ForexChartProps = {
   locale?: Locale;
   /** Corner mark, from public/brand. Absent means the video carries none. */
   brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   timeframe: string; // e.g. "15m"
   title: string; // headline caption drawn on screen
   hook: string; // first-seconds teaser question
@@ -143,6 +145,8 @@ export type MarketMapProps = {
   locale?: Locale;
   /** Corner mark, from public/brand. Absent means the video carries none. */
   brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   pair: string;
   timeframe: string;
   bias: 'bullish' | 'bearish';
@@ -225,6 +229,8 @@ export type CandleLessonProps = {
   locale?: Locale;
   /** Corner mark, from public/brand. Absent means the video carries none. */
   brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   pattern: CandlePattern;
   anatomy: Anatomy[];
   candles: Candle[];
@@ -267,6 +273,8 @@ export type CandleCompareProps = {
   quizAsk?: 'left' | 'right';
   locale?: Locale;
   brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   /** Which measurement decides it: the body, or the leg that came before. */
   metric: 'body' | 'direction' | 'upper' | 'lower';
   title: string;

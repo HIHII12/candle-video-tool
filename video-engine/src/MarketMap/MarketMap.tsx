@@ -498,7 +498,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
       >
         {t.disclaimer}
       </div>
-      <Soundtrack bed="light" cues={mapCues()} durationInFrames={durationInFrames} fps={fps} />
+      <Soundtrack nhac={props.nhac} bed="light" cues={mapCues()} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>
   );
 };

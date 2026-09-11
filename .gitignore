@@ -52,3 +52,14 @@ video-engine/out/qa/
 # Configs stamped for one run; the sources they copy are checked in.
 video-engine/src/data/_run/
 lich/
+
+# Thu vien nhac: file am thanh nap tu may anh, khong day len repo.
+# Ly do 1 — day file nhac thuong mai len GitHub la PHAT TAN no, khac han voi
+#   dung trong video cua minh. Repo la cho ai cung tai ve duoc.
+# Ly do 2 — nhac la thu doi nhieu nhat, moi ban vai MB. Git giu mai mai moi
+#   phien ban, repo phinh ra va khong bao gio nho lai duoc.
+# Moi may tu nap nhac cua minh:  python3 scripts/nap_nhac.py bai.mp3 --ten ten
+video-engine/public/audio/nhac/*.mp3
+video-engine/public/audio/nhac/*.wav
+video-engine/public/audio/nhac/*.m4a
+video-engine/public/audio/nhac/danh-sach.json

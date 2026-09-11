@@ -402,7 +402,7 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
       >
         {t.realData(props.pair)}
       </div>
-      <Soundtrack bed="light" cues={lessonCues(win)} durationInFrames={durationInFrames} fps={fps} />
+      <Soundtrack nhac={props.nhac} bed="light" cues={lessonCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>
   );
 };

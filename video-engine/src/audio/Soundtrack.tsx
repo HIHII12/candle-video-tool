@@ -51,8 +51,23 @@ export const Soundtrack: React.FC<{
   fps: number;
   /** Per-frame multiplier on the bed, used to duck it under narration. */
   bedGain?: (frame: number) => number;
-}> = ({bed, cues, durationInFrames, fps, bedGain}) => {
+  /**
+   * A real music track from public/audio/nhac, chosen per video.
+   *
+   * When one is present it takes over the bed's job — carrying the video when
+   * nothing else is sounding — so the synthesized bed drops most of the way
+   * out rather than playing underneath it. Two musical beds at once is mud,
+   * and the synthesized one loses: it exists so the video is never silent, and
+   * silence is exactly what has stopped being a risk.
+   *
+   * The cues stay at full level either way. They are cut to the storyboard —
+   * the tick when a candle closes, the riser before the answer lands — and no
+   * music track can do that job.
+   */
+  nhac?: string | null;
+}> = ({bed, cues, durationInFrames, fps, bedGain, nhac}) => {
   const fadeFrames = Math.round(fps * 0.8);
+  const BED_DUCK = nhac ? 0.22 : 1;
 
   return (
     <>
@@ -69,9 +84,27 @@ export const Soundtrack: React.FC<{
             Math.max(0, (durationInFrames - f) / fadeFrames),
           ) *
           BED_GAIN *
+          BED_DUCK *
           (bedGain ? bedGain(f) : 1)
         }
       />
+
+      {/* Looped because the library holds short clips — the first track is 16
+          seconds against a 35-second video. The same fade shape as the bed, so
+          a video never opens or closes on a hard musical edge. */}
+      {nhac ? (
+        <Audio
+          src={staticFile('audio/nhac/' + nhac)}
+          loop
+          volume={(f) =>
+            Math.min(
+              1,
+              f / fadeFrames,
+              Math.max(0, (durationInFrames - f) / fadeFrames),
+            ) * (bedGain ? bedGain(f) : 1)
+          }
+        />
+      ) : null}
 
       {cues.map((c, i) => (
         // Sequence rather than a raw start offset: it bounds the clip to its own

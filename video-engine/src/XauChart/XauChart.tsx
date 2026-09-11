@@ -320,7 +320,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
       >
         {strings(props.locale).realData(props.pair)}
       </div>
-      <Soundtrack bed="dark" cues={quizCues(win)} durationInFrames={durationInFrames} fps={fps} />
+      <Soundtrack nhac={props.nhac} bed="dark" cues={quizCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>
   );
 };

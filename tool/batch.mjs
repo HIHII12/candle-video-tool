@@ -260,10 +260,43 @@ async function buildData(job) {
   };
 }
 
+/**
+ * The music library, read once.
+ *
+ * Remotion renders in a browser and cannot list a directory, so the library
+ * announces itself through a manifest that scripts/nap_nhac.py writes. An empty
+ * or missing library is not an error: the videos had a synthesized bed before
+ * any of this existed and still do.
+ */
+function thuVienNhac() {
+  const f = join(ENGINE, 'public', 'audio', 'nhac', 'danh-sach.json');
+  if (!existsSync(f)) return [];
+  try {
+    return JSON.parse(readFileSync(f, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+const NHAC = thuVienNhac();
+
+/**
+ * Which track this video gets.
+ *
+ * Chosen from the job's own seed rather than at random, so re-rendering a video
+ * gives back the same one — a batch that had to be restarted does not come out
+ * half scored with one track and half with another.
+ */
+function chonNhac(job) {
+  if (!NHAC.length) return null;
+  const seed = Number(job?.seed ?? 0) || 0;
+  return NHAC[Math.abs(seed) % NHAC.length].file;
+}
+
 /** Stamp the track's own settings onto a config before it is rendered. */
 function applyTrack(cfg, job) {
   cfg.locale = locale;
   cfg.brandMark = brand === 'none' ? null : brand;
+  cfg.nhac = chonNhac(job);
   // The quiz flags live on the plan, not in the generator: the same generated
   // setup is a lesson or a quiz depending only on whether it is asked first.
   if (job?.quiz) {

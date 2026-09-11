@@ -630,6 +630,7 @@ export const CandleLesson: React.FC<CandleLessonProps> = (props) => {
       ) : null}
 
       <Soundtrack
+        nhac={props.nhac}
         bed="dark"
         cues={candleCues(win, props.outcome.result !== 'OPEN')}
         durationInFrames={durationInFrames}

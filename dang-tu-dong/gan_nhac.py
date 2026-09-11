@@ -58,6 +58,8 @@ def main() -> int:
                     help="giu lai bao nhieu phan nhac/tieng hieu ung cu")
     ap.add_argument("--thu", type=int, default=0,
                     help="chi lam N video dau roi dung, de nghe thu")
+    ap.add_argument("--de-len", action="store_true",
+                    help="ghi de len ban goc thay vi tao thu muc moi (khong lui duoc)")
     a = ap.parse_args()
 
     nhac, thu_muc = Path(a.nhac), Path(a.thu_muc)
@@ -78,10 +80,30 @@ def main() -> int:
         print(f"khong co video nao khop '{a.loc}' trong {thu_muc}")
         return 1
 
+    # Mac dinh KHONG ghi de. Nhac la thu doi y nhieu nhat trong ca day chuyen —
+    # nghe ba ngay chan thi doi bai khac — ma video goc thi mat vai tieng may
+    # chay moi render lai duoc. Giu ban goc ton them dung so dung luong cua no,
+    # va do la cai gia re nhat trong ca viec nay.
+    ra_lo = None
+    if not a.thu and not a.de_len:
+        ra_lo = thu_muc.parent / (thu_muc.name + "-nhac")
+        ra_lo.mkdir(exist_ok=True)
+
     for i, v in enumerate(vids, 1):
         if a.thu:
             dich = ra_thu / v.name
             tron(ff, v, nhac, dich, a.muc_nhac, a.muc_cu)
+        elif ra_lo:
+            dich = ra_lo / v.name
+            if dich.exists():
+                print(f"[{i}/{len(vids)}] bo qua (da co) {v.name}", flush=True)
+                continue
+            tron(ff, v, nhac, dich, a.muc_nhac, a.muc_cu)
+            # File .txt di kem phai theo sang, neu khong hang doi moi khong co
+            # tieu de va mo ta de dang.
+            ghi_chu = v.with_suffix(".txt")
+            if ghi_chu.exists():
+                shutil.copy2(ghi_chu, dich.with_suffix(".txt"))
         else:
             tam = v.with_suffix(".tam.mp4")
             tron(ff, v, nhac, tam, a.muc_nhac, a.muc_cu)
@@ -92,8 +114,11 @@ def main() -> int:
     if a.thu:
         print(f"\nNghe thu o: {ra_thu}")
         print("Nghe ung thi chay lai KHONG co --thu de ap cho ca lo.")
+    elif ra_lo:
+        print(f"\nxong {len(vids)} video -> {ra_lo}")
+        print("Ban goc van nguyen o thu muc cu. Doi y thi xoa thu muc -nhac la xong.")
     else:
-        print(f"\nxong {len(vids)} video")
+        print(f"\nxong {len(vids)} video (da ghi de ban goc)")
     return 0
 
 
