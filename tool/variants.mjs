@@ -479,3 +479,28 @@ export function quizPlan(isoDate, count = 100, locale = 'en') {
   }
   return jobs.slice(0, count);
 }
+
+/**
+ * Position-sizing quiz.
+ *
+ * Seeds are spread rather than sequential: the generator picks balance, risk and
+ * stop from three lists by dividing the seed differently for each, so 1,2,3 in a
+ * row would change only the stop and leave every other number identical across
+ * three videos.
+ */
+export function lotPlan(isoDate, count = 30, locale = 'vi') {
+  const day = dayIndex(isoDate);
+  const jobs = [];
+  for (let i = 0; i < count; i += 1) {
+    const seed = day * 100 + i * 7 + 3;
+    jobs.push({
+      id: `${locale}-lot-${String(i + 1).padStart(2, '0')}`,
+      locale,
+      format: 'lot-quiz',
+      pair: 'XAU/USD',
+      seed,
+      label: `bao nhiêu lot · ${i + 1}`,
+    });
+  }
+  return jobs;
+}

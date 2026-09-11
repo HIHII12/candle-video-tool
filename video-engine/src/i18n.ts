@@ -123,6 +123,22 @@ type Strings = {
   };
   /** Side-by-side comparison of two confusable patterns. */
   compare: {badge: string; body: string; bar: string; upper: string; lower: string};
+  /** Position sizing quiz. */
+  lot: {
+    badge: string;
+    hook: (pair: string) => string;
+    soDu: string;
+    ruiRo: string;
+    stop: string;
+    hoi: string;
+    dapAn: string;
+    lot: string;
+    b1: (pct: number) => string;
+    b2: (oz: number, stop: string) => string;
+    b3: string;
+    gia: (tien: string, pct: string) => string;
+    luuY: string;
+  };
   /** Disclaimer for the formats built on live market data. */
   realData: (pair: string) => string;
   /**
@@ -225,6 +241,22 @@ const EN: Strings = {
   },
   compare: {badge: 'TELL THEM APART', body: 'the body', bar: 'the bar',
             upper: 'the upper wick', lower: 'the lower wick'},
+  lot: {
+    badge: 'POSITION SIZE',
+    hook: (pair) => `Same ${pair} trade. Two account sizes.`,
+    soDu: 'Account',
+    ruiRo: 'Risk on this trade',
+    stop: 'Stop is this far away',
+    hoi: 'HOW MANY LOTS?',
+    dapAn: 'ANSWER',
+    lot: 'lots',
+    b1: (pct) => `${pct}% of the account is what you can lose`,
+    b2: (oz, stop) => `One lot is ${oz} oz, so a ${stop} stop costs`,
+    b3: 'Risk divided by cost per lot',
+    gia: (tien, pct) =>
+      `One full lot on this same stop loses ${tien} — ${pct}% of the account, on one trade.`,
+    luuY: 'Check your own contract size: cent, micro and suffixed symbols are not 100 oz.',
+  },
   realData: (pair) => `Real ${pair} data · Educational only, not financial advice`,
   term: (english) => english,
 };
@@ -314,6 +346,22 @@ const VI: Strings = {
   },
   compare: {badge: 'PHÂN BIỆT', body: 'thân nến', bar: 'cả cây nến',
             upper: 'bóng trên', lower: 'bóng dưới'},
+  lot: {
+    badge: 'KHỐI LƯỢNG LỆNH',
+    hook: (pair) => `Cùng một lệnh ${pair}. Khác mỗi kích cỡ.`,
+    soDu: 'Số dư',
+    ruiRo: 'Rủi ro lệnh này',
+    stop: 'Stop cách entry',
+    hoi: 'BAO NHIÊU LOT?',
+    dapAn: 'ĐÁP ÁN',
+    lot: 'lot',
+    b1: (pct) => `${pct}% số dư là số tiền được phép mất`,
+    b2: (oz, stop) => `Một lot là ${oz} oz, nên stop ${stop} tốn`,
+    b3: 'Tiền rủi ro chia cho tiền mỗi lot',
+    gia: (tien, pct) =>
+      `Vào nguyên 1 lot với đúng stop này là mất ${tien} — ${pct}% tài khoản, chỉ một lệnh.`,
+    luuY: 'Kiểm lại contract size của sàn anh: tài khoản cent, micro hay ký hiệu có hậu tố không phải 100 oz.',
+  },
   realData: (pair) =>
     `Dữ liệu ${pair} thật · Chỉ mang tính giáo dục, không phải lời khuyên đầu tư`,
   term: (english) => VI_TERMS[english] ?? english,

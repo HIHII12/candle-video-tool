@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, lotPlan, replayPlan, mixedPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -176,6 +176,21 @@ async function buildData(job) {
       configPath: out,
       cfg,
       facts: { patternName: cfg.pattern.name },
+    };
+  }
+
+  if (job.format === 'lot-quiz') {
+    const out = `src/data/batch_${job.id}.json`;
+    // Khong can mang: moi con so deu tu sinh ra, khong lay tu thi truong.
+    await sh(python, ['scripts/make_lot_quiz.py',
+      '--seed', String(job.seed), '--locale', job.locale ?? locale,
+      '--pair', job.pair ?? 'XAU/USD', '--out', out]);
+    const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
+    return {
+      composition: 'LotQuiz',
+      configPath: out,
+      cfg,
+      facts: {pair: cfg.pair, soDu: cfg.soDu, ruiRo: cfg.ruiRo},
     };
   }
 
@@ -351,6 +366,7 @@ async function runJob(job) {
       // model paraphrasing "close above the neckline" is how a rule quietly
       // becomes a different rule.
       job.format === 'concept-lesson' ||
+      job.format === 'lot-quiz' ||
       job.replay
       // A replay keeps the copy the config already carries: it was written for
       // this exact chart, and a fresh line generated now would be about data it
@@ -534,9 +550,11 @@ let plan = mix
               ? anatomyPlan(date, count, locale)
               : format === 'quiz'
                 ? quizPlan(date, count, locale)
+                : format === 'lot-quiz'
+                  ? lotPlan(date, count, locale)
               : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz'].includes(format)) {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz', 'lot-quiz'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
 // Comma-separated, so a smoke test can name one job per format rather than

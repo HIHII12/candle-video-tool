@@ -288,3 +288,30 @@ export type CandleCompareProps = {
   right: CompareSide;
   note: string;
 };
+
+/**
+ * Position sizing quiz.
+ *
+ * The stop is a distance in DOLLARS OF PRICE, never in pips: "a pip of gold"
+ * means $0.01 to some brokers and $0.10 to others, and being ambiguous by a
+ * factor of ten on the one topic where sizing errors empty accounts is worse
+ * than saying nothing.
+ */
+export type LotQuizProps = {
+  kind: 'lotQuiz';
+  locale?: Locale;
+  brandMark?: string | null;
+  nhac?: string | null;
+  /** Instrument label shown on screen. */
+  pair: string;
+  /** Account balance, in the account's currency. */
+  soDu: number;
+  /** Percent of the balance risked on this trade. */
+  ruiRo: number;
+  /** Stop distance as a move in price, e.g. 5.00 means five dollars of gold. */
+  stopDo: number;
+  /** Units in one standard lot. 100 troy ounces for most XAU/USD symbols. */
+  ozMotLot?: number;
+  /** Smallest lot step the broker allows; the answer is rounded DOWN to it. */
+  buocLot?: number;
+};

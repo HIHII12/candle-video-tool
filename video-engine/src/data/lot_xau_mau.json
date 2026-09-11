@@ -1,0 +1,12 @@
+{
+  "kind": "lotQuiz",
+  "locale": "vi",
+  "pair": "XAU/USD",
+  "soDu": 5000,
+  "ruiRo": 2,
+  "stopDo": 5.0,
+  "ozMotLot": 100,
+  "buocLot": 0.01,
+  "brandMark": null,
+  "nhac": null
+}
