@@ -21,7 +21,9 @@ Muon nghe thu truoc khi chay ca lo:
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
+import zlib
 import subprocess
 import sys
 from pathlib import Path
@@ -49,7 +51,7 @@ def tron(ff: str, video: Path, nhac: Path, ra: Path,
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("nhac", help="file mp3/wav cua anh")
+    ap.add_argument("nhac", help="file mp3/wav, hoac 'kho' de xoay vong ca thu vien")
     ap.add_argument("thu_muc", help="thu muc chua .mp4")
     ap.add_argument("--loc", default="", help="chi lam file co chuoi nay trong ten")
     ap.add_argument("--muc-nhac", type=float, default=0.55,
@@ -62,10 +64,29 @@ def main() -> int:
                     help="ghi de len ban goc thay vi tao thu muc moi (khong lui duoc)")
     a = ap.parse_args()
 
-    nhac, thu_muc = Path(a.nhac), Path(a.thu_muc)
-    if not nhac.exists():
-        print(f"khong thay file nhac: {nhac}")
-        return 1
+    thu_muc = Path(a.thu_muc)
+
+    # 'kho' = xoay vong ca thu vien thay vi mot bai duy nhat. Mot tram video
+    # cung mot bai thi nguoi xem kenh ba ngay la thuoc long — dung cai benh ma
+    # ca viec nay sinh ra de chua.
+    kho: list[Path] = []
+    if a.nhac == "kho":
+        ds_f = Path(__file__).resolve().parent.parent / "video-engine/public/audio/nhac/danh-sach.json"
+        if not ds_f.exists():
+            print("thu vien trong — chay  python3 video-engine/scripts/sinh_nhac.py  truoc")
+            return 1
+        kho = [ds_f.parent / b["file"] for b in json.loads(ds_f.read_text(encoding="utf-8"))]
+        thieu = [p for p in kho if not p.exists()]
+        if thieu:
+            print(f"danh sach co {len(kho)} bai nhung thieu file: {[p.name for p in thieu]}")
+            return 1
+        print(f"xoay vong {len(kho)} bai trong thu vien")
+        nhac = kho[0]
+    else:
+        nhac = Path(a.nhac)
+        if not nhac.exists():
+            print(f"khong thay file nhac: {nhac}")
+            return 1
 
     ff = imageio_ffmpeg.get_ffmpeg_exe()
     vids = sorted(p for p in thu_muc.glob("*.mp4") if a.loc in p.name)
@@ -90,6 +111,10 @@ def main() -> int:
         ra_lo.mkdir(exist_ok=True)
 
     for i, v in enumerate(vids, 1):
+        if kho:
+            # Chon theo TEN file, khong theo thu tu duyet: them video moi vao
+            # thu muc thi nhung cai cu van giu dung bai cu, khong bi day lech.
+            nhac = kho[zlib.crc32(v.stem.encode()) % len(kho)]
         if a.thu:
             dich = ra_thu / v.name
             tron(ff, v, nhac, dich, a.muc_nhac, a.muc_cu)
