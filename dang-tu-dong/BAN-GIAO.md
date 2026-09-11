@@ -1,7 +1,7 @@
 # BÀN GIAO — Đăng YouTube tự động 2 kênh
 
 > **File này tự chứa đủ.** Một phiên mới chưa biết gì đọc file này là triển được ngay.
-> Cập nhật: **2026-09-10**
+> Cập nhật: **2026-09-11**
 
 ---
 
@@ -251,30 +251,92 @@ mở YouTube Studio của cả hai kênh ở bước chạy thử.
 
 ---
 
-## 8. Nhạc — đang nghiên cứu, script đã sẵn sàng
+## 8. Nhạc — đã xong, thêm bài được
 
-**Video hiện đã CÓ nhạc rồi**, không phải im lặng: nền nhạc (`bed-dark` / `bed-light`) +
-6 tiếng hiệu ứng (tick · thud · whoosh · riser · win · loss), **tự tổng hợp** bằng
-`video-engine/scripts/make_audio.py` → **không ai claim bản quyền được**, và các tiếng đó
-**bắn đúng nhịp storyboard** (tick lúc nến đóng, riser trước lúc lộ đáp án).
+### Video đã có gì
 
-**Điểm yếu thật:** 300 video chia nhau đúng **2 nền nhạc** → nghe quen là thấy giống nhau.
+Nhạc nền tự tổng hợp (`bed-dark` / `bed-light`) + **6 tiếng hiệu ứng** cắt đúng nhịp
+storyboard (tick lúc nến đóng, riser trước lúc lộ đáp án), sinh bằng
+`video-engine/scripts/make_audio.py`. **Không ai claim bản quyền được.**
 
-Anh Tuấn Anh sẽ gửi một bản nhạc. Khi có file, bỏ vào `nhac/` rồi:
+Từ 11/09 có thêm **thư viện nhạc thật** chồng lên trên.
+
+### Thêm một bài vào thư viện
 
 ```bash
-# nghe thử 3 cái trước — KHÔNG đụng vào bản gốc, ghi ra thư mục nghe-thu/
-python3 dang-tu-dong/gan_nhac.py nhac/bai-cua-anh.mp3 video-engine/out/batch/<ngay> --thu 3
-
-# ưng thì bỏ --thu, áp cho cả lô
-python3 dang-tu-dong/gan_nhac.py nhac/bai-cua-anh.mp3 video-engine/out/batch/<ngay>
+python3 video-engine/scripts/nap_nhac.py duong/dan/bai.mp3 --ten ten-ngan
+python3 video-engine/scripts/nap_nhac.py --xem      # xem thư viện đang có gì
 ```
 
-**Không render lại** — chỉ trộn tiếng, giữ nguyên luồng hình (`-c:v copy`), vài giây/video.
-Nhạc nền cũ và tiếng hiệu ứng được **giữ lại và hạ xuống dưới**, không bị thay thế.
-Chỉnh: `--muc-nhac 0.55` (nhạc mới) · `--muc-cu 0.75` (giữ bao nhiêu phần cũ).
+Bước nạp **chuẩn hoá mọi bài về −20 LUFS**. Không có bước này thì bài tải chỗ này
+−8 LUFS, bài chỗ kia −22 — video này nhạc đinh tai, video kia nghe như không có nhạc,
+trên cùng một kênh.
 
-**Đã test thật** trên 1 video: trộn xong vẫn qua `kiem_video.py`, −13.7 LUFS, đúng chuẩn nền tảng.
+Thư viện có bao nhiêu bài thì engine **xoay vòng theo seed** của từng video. Seed cố định
+nên render lại ra đúng bài cũ — lô chạy dở bị ngắt không bị nửa bài này nửa bài kia.
+
+### Nhạc ở đâu trong bản mix
+
+| Lớp | Mức |
+|---|---|
+| Nhạc thật | mức chính |
+| Nền tự tổng hợp | **hạ còn 0.22** khi có nhạc thật |
+| Tiếng hiệu ứng | **giữ nguyên** |
+
+Có nhạc thật rồi thì nền tổng hợp thành thừa — hai nền nhạc chồng nhau là đục. Nhưng
+tiếng hiệu ứng thì giữ: chúng cắt theo storyboard, không bản nhạc nào thay được.
+
+### File nhạc KHÔNG nằm trong git
+
+`.gitignore` chặn `video-engine/public/audio/nhac/*`. Hai lý do: đẩy nhạc thương mại lên
+GitHub là **phát tán** nó (khác hẳn dùng trong video của mình), và file âm thanh là thứ
+git phình ra rồi không bao giờ nhỏ lại được. **Máy mới clone về phải tự chạy `nap_nhac.py`.**
+
+### Gắn nhạc cho video ĐÃ render xong
+
+```bash
+# nghe thử 3 cái — ghi ra thư mục nghe-thu/, không đụng bản gốc
+python3 dang-tu-dong/gan_nhac.py video-engine/public/audio/nhac/nhac-01.mp3 \
+    video-engine/out/batch/<ngay> --thu 3
+
+# áp cả lô — ghi ra thư mục <ngay>-nhac/, bản gốc vẫn nguyên
+python3 dang-tu-dong/gan_nhac.py video-engine/public/audio/nhac/nhac-01.mp3 \
+    video-engine/out/batch/<ngay> --muc-nhac 0.6 --muc-cu 0.7
+```
+
+**Mặc định không ghi đè.** Nhạc là thứ đổi ý nhiều nhất, mà video gốc thì mất vài tiếng
+máy chạy mới render lại được. Đổi ý thì xoá thư mục `-nhac` là xong. Muốn ghi đè thật
+thì thêm `--de-len`.
+
+Không render lại — chỉ trộn tiếng, giữ nguyên luồng hình (`-c:v copy`), vài giây/video.
+File `.txt` đi kèm được chép sang cùng.
+
+> ⚠️ **Với video đã render, `--muc-cu` là một núm cho CẢ nền lẫn tiếng hiệu ứng** — trong
+> file mp4 chúng đã trộn sẵn, không tách ra được nữa. Chỉ video render MỚI mới tách được
+> hai lớp như bảng ở trên. Đó là lý do 0.7 chứ không phải 0.22.
+
+### Hàng đợi phải trỏ lại
+
+Sau khi trộn xong, hàng đợi n8n vẫn trỏ vào **bản gốc không nhạc**. Trỏ lại:
+
+```bash
+rm -rf lich/hang-doi
+python3 dang-tu-dong/tao_lich.py video-engine/out/batch/2026-09-10-nhac --kenh gf
+python3 dang-tu-dong/tao_lich.py video-engine/out/batch/2026-09-06-nhac --kenh vt
+python3 dang-tu-dong/tao_lich.py video-engine/out/batch/2026-08-31-nhac --kenh vt
+```
+
+### ⚠️ Bài `nhac-01` hiện tại — rủi ro Content ID
+
+Bài đang dùng (`viral-22m`) **rip từ YouTube bằng Y2Mate**, gần như chắc chắn là nhạc
+thương mại có bản quyền. Đăng lên YouTube thì Content ID sẽ nhận ra.
+
+**Không bị gỡ video** — nhưng doanh thu của những video đó **chảy về chủ bản quyền**, và
+vài quốc gia có thể bị chặn. Anh Tuấn Anh đã biết và quyết dùng tạm. Ghi ở đây để phiên
+sau không tưởng là đã sạch bản quyền.
+
+Muốn sạch hoàn toàn: **YouTube Audio Library** (miễn phí, đã cấp phép sẵn cho YouTube)
+hoặc Uppbeat / Epidemic Sound. Nạp bằng `nap_nhac.py` y hệt.
 
 ---
 
@@ -284,7 +346,7 @@ Chỉnh: `--muc-nhac 0.55` (nhạc mới) · `--muc-cu 0.75` (giữ bao nhiêu p
 |---|---|
 | Luồng upload YouTube thật | **Chưa chạy thử** — máy render không có credential của anh. Logic file/hàng đợi thì đã chạy thật (300 bài xếp đúng, không trùng) |
 | TikTok | **Chưa nối.** n8n không có node TikTok sẵn, phải dựng bằng HTTP Request + qua audit riêng của TikTok. Chưa audit thì bài bị ép `SELF_ONLY` (chỉ mình mình thấy) |
-| Nhạc mới | Đang chờ file của anh Tuấn Anh. Script đã sẵn và đã test |
+| Nhạc | **Xong 11/09.** Thư viện 1 bài (`viral-22m`), engine xoay vòng theo seed, 300 video đã trộn ra thư mục `-nhac`. Bài hiện tại có rủi ro Content ID — xem mục 8 |
 | Số "7 ngày" ở Bẫy #1 | Chưa tra lại được nguồn — nên tra và sửa |
 
 ---
