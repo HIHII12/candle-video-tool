@@ -1,7 +1,7 @@
 # BÀN GIAO — Đăng YouTube tự động 2 kênh
 
 > **File này tự chứa đủ.** Một phiên mới chưa biết gì đọc file này là triển được ngay.
-> Cập nhật: **2026-09-11**
+> Cập nhật: **2026-09-11** · n8n → **Make**
 
 ---
 
@@ -87,129 +87,85 @@ python3 dang-tu-dong/tao_lich.py video-engine/out/batch/<ngay> --kenh vt
 
 ---
 
-## 4. ⛔ Đọc trước khi cài — n8n Cloud KHÔNG chạy được
+## 4. ⛔ Chọn công cụ — Make hay n8n
 
-Hai lý do, cái nào cũng đủ để tắc:
+| | n8n tự cài | **Make** |
+|---|---|---|
+| Đọc ổ cứng máy anh | ✅ | ❌ **không bao giờ** |
+| Máy phải bật | ✅ phải bật | ❌ không cần |
+| Độ khó | cao hơn | dễ hơn |
 
-1. Node **Execute Command không có trên n8n Cloud** — họ chặn vì hạ tầng dùng chung.
-   Workflow này dùng 4 node đó để lấy bài và chuyển thẻ.
-2. 300 video nằm trên **ổ cứng máy anh**. n8n Cloud chạy máy khác, không nhìn thấy ổ đó.
-   Kể cả có Execute Command thì cũng không có file để đăng.
+**n8n Cloud thì không dùng được** — node `Execute Command` không tồn tại trên đó, và
+video nằm trên ổ cứng máy anh nên Cloud cũng không thấy file.
+*(Nguồn: docs.n8n.io — tra 2026-09-10.)*
 
-→ Bắt buộc **n8n cài trên máy anh** (`npx n8n` hoặc n8n Desktop), hoặc **VPS có chứa video**.
+**Make cũng không đọc được ổ cứng** — nó chạy trên máy chủ của họ. Nhưng vì anh vốn đã
+định cho video vào Google Drive, nên ràng buộc đó **không còn là ràng buộc**:
 
-*Nguồn: docs.n8n.io — tra ngày 2026-09-10.*
+```
+Google Drive  →  Make  →  YouTube
+```
+
+Make xem một thư mục Drive, có file mới là đẩy lên YouTube rồi chuyển sang thư mục "đã
+đăng". Không máy nào phải bật. Đây là **đường em khuyên** — dễ hơn thật, và hợp với cách
+anh đang định làm.
+
+*(Nguồn: make.com — tra 2026-09-11.)*
 
 ---
 
-## 5. Cài đặt — 6 giai đoạn
+## 5. Dựng trên Make
 
-### 01 · Google Cloud — **hai project riêng** (làm 2 lần)
+### Chuẩn bị — làm một lần
 
-> **Vì sao hai project:** quota YouTube là **10.000 đơn vị/ngày tính theo project**, không
-> phải theo kênh. Mỗi upload tốn **1.600** → khoảng **6 video/ngày/project**. Nhét hai kênh
-> vào một project là hai kênh chia nhau 6 suất đó.
-> *Nguồn: docs Google YouTube Data API v3 — tra ngày 2026-09-10.*
+1. **Chia video theo loại** (không còn lẫn ngày với ngày):
+   ```bash
+   python3 dang-tu-dong/sap_xep.py
+   ```
+   Ra `~/giao-hang/da-phan-loai/viet/<loại>/` và `.../global/<loại>/`.
+   Dùng **liên kết cứng** — không tốn thêm dung lượng ổ đĩa.
 
-1. [console.cloud.google.com](https://console.cloud.google.com) → **New Project**.
-   Đặt tên `yt-goldfather` / `yt-vanthang`. Đăng nhập bằng đúng tài khoản sở hữu kênh đó.
-2. **APIs & Services → Library** → `YouTube Data API v3` → **Enable**.
-   *Quên bước này thì mọi thứ sau đó báo 403 mà không nói rõ vì sao.*
-3. **OAuth consent screen** → **External** → Create. Điền App name, User support email,
-   Developer contact email (ba ô bắt buộc, còn lại bỏ trống được).
-4. Màn **Scopes** → Add or Remove Scopes → thêm `.../auth/youtube.upload` và `.../auth/youtube`.
-5. Màn **Test users** → thêm chính email sở hữu kênh.
-6. Quay lại **OAuth consent screen** → bấm **PUBLISH APP** → Confirm. ← **xem Bẫy #1**
-7. **Credentials → Create Credentials → OAuth client ID** → **Web application**.
-8. **Chưa bấm Create** — sang giai đoạn 02 lấy Redirect URI rồi quay lại dán vào.
+2. **Sinh bảng hàng đợi**:
+   ```bash
+   python3 dang-tu-dong/tao_bang.py
+   ```
+   Ra `~/giao-hang/hang-doi-make.csv` — một dòng một video, có sẵn tiêu đề · mô tả ·
+   hashtag · cột `trang_thai`.
 
-### 02 · Nối n8n với Google (làm 2 lần)
+3. **Tải lên Google Drive** — một thư mục cho mỗi kênh:
+   `GoldFather-cho-dang/` và `VanThang-cho-dang/`, thêm `da-dang/`.
 
-1. n8n → **Credentials → Add credential** → **YouTube OAuth2 API**.
-2. Copy dòng **OAuth Redirect URL** n8n hiện ra
-   (thường là `http://localhost:5678/rest/oauth2-credential/callback`).
-3. Về Google Cloud → dán vào **Authorized redirect URIs** → **Create**.
-   *Phải khớp từng ký tự, kể cả dấu `/` cuối. Lệch một ký tự là `redirect_uri_mismatch`.*
-4. Copy **Client ID** + **Client Secret** → dán ngược vào n8n.
-5. **Connect my account** → chọn tài khoản Google của kênh → Cho phép.
-   *Gặp "Google hasn't verified this app" thì **Advanced → Go to (tên app)**. App của mình, không sao.*
-6. Đặt tên credential: kênh English → **`YT GoldFather`** · kênh Việt → **`YT Van Thang`**.
-7. **Lặp lại toàn bộ 01 + 02 cho kênh thứ hai.** Project mới, OAuth client mới, credential mới.
+4. **Nhập CSV vào Google Sheets** (File → Import → Upload).
+   File đã có BOM nên **dấu tiếng Việt không bị vỡ**.
 
-### 03 · Hai biến môi trường
+### Kịch bản Make — làm 2 lần, mỗi kênh một cái
 
-| Biến | Giá trị |
-|---|---|
-| `THU_MUC_TOOL` | Đường dẫn tới thư mục `candle-video-tool` |
-| `TELEGRAM_CHAT_ID` | ID chat để n8n báo mỗi lần đăng xong / hỏng |
-
-**Windows + `npx n8n`** — chạy trong PowerShell, khởi động n8n *trong chính cửa sổ đó*:
-
-```powershell
-$env:THU_MUC_TOOL = "D:\duong\dan\candle-video-tool"
-$env:TELEGRAM_CHAT_ID = "123456789"
-npx n8n
-```
-
-**Docker** — nhớ **mount ổ chứa video vào container**:
-
-```bash
-docker run -it --rm -p 5678:5678 \
-  -e THU_MUC_TOOL=/data/candle-video-tool \
-  -e TELEGRAM_CHAT_ID=123456789 \
-  -e N8N_ENCRYPTION_KEY=chuoi-bi-mat \
-  -v /duong/dan/candle-video-tool:/data/candle-video-tool \
-  -v n8n_data:/home/node/.n8n \
-  docker.n8n.io/n8nio/n8n
-```
-
-> 🔒 **Ranh giới cứng:** Client Secret và token **không bao giờ** nằm dạng chữ thường trong
-> repo, trong vault, hay trong file commit lên git. n8n giữ trong credential store đã mã hoá —
-> nhưng chỉ khi đặt `N8N_ENCRYPTION_KEY` ở biến môi trường máy. Không đặt thì n8n tự sinh khoá
-> và cất cùng chỗ với dữ liệu, tức là gần như không mã hoá gì.
-
-### 04 · Nạp workflow
-
-1. **Workflows → Import from File** → `dang-tu-dong/n8n-dang-youtube.json`.
-2. Node **`YouTube GoldFather`** → gán credential `YT GoldFather`.
-3. Node **`YouTube Van Thang`** → gán credential `YT Van Thang`.
-4. Hai node **Telegram** → gán credential bot Telegram.
-5. **Chạy trên Windows?** Sửa lệnh trong 4 node (node nào cũng có ghi chú sẵn):
-
-| Node | Sửa từ | Thành |
+| # | Module | Cài gì |
 |---|---|---|
-| Lay bai ke tiep | `ls` | `dir /b` |
-| Doc the bai | `cat` | `type` |
-| Chuyen sang da-dang | `mv` | `move` |
-| Chuyen sang loi | `mv` | `move` |
+| 1 | **Schedule** | 3 lần/ngày: 8h · 13h · 20h |
+| 2 | **Google Sheets → Search Rows** | Lọc `kenh` = tên kênh **và** `trang_thai` = `cho` · Limit **1** |
+| 3 | **Google Drive → Search Files** | Tìm theo `ten_file` của dòng vừa lấy |
+| 4 | **Google Drive → Download a File** | Lấy nội dung file |
+| 5 | **YouTube → Upload a Video** | Title = `tieu_de` · Description = `mo_ta` + `hashtag` · Privacy **private** lúc thử, đổi **public** sau |
+| 6 | **Google Sheets → Update a Row** | `trang_thai` = `xong`, `link_youtube` = id vừa nhận |
+| 7 | **Google Drive → Move a File** | Sang `da-dang/` |
 
-> **Hai node YouTube riêng là bắt buộc** — một node YouTube chỉ giữ được một credential.
-> Dùng chung là cả hai kênh đăng vào một chỗ, và **không có gì trong lần chạy báo cho biết**.
+> **Bước 6 là bước không được bỏ.** Không cập nhật `trang_thai` thì lần chạy sau
+> module 2 vớ đúng dòng cũ và đăng lại y hệt video đó — mỗi ngày ba lần, mãi mãi.
 
-### 05 · Chạy thử — một bài, để riêng tư
+> **Limit = 1 ở bước 2.** Để trống thì Make lấy hết mấy trăm dòng và đẩy tất cả lên
+> YouTube trong một lần chạy. Quota cho khoảng **6 video/ngày**, phần còn lại báo lỗi.
 
-> Lần chạy đầu là lúc dễ lộ nhất: sai credential thì video tiếng Việt rơi lên kênh English và
-> **khán giả nhìn thấy trước khi kịp xoá**. Đăng riêng tư thì sai bao nhiêu lần cũng không ai biết.
+### Hai kênh, hai kết nối YouTube riêng
 
-1. Cả hai node YouTube → đổi `privacyStatus` từ `public` → **`private`**.
-2. Bấm **Execute Workflow** (chạy tay, chưa bật lịch).
-3. Đợi 1–2 phút → YouTube Studio **cả hai kênh** → mỗi kênh phải có đúng **1 video mới**.
-   *Hai video cùng rơi vào một kênh = gán nhầm credential, quay lại 04.*
-4. Kiểm tiêu đề và mô tả đúng nội dung, không phải tên file.
-5. Kiểm video có ra dạng **Shorts** không. *(1080×1920 dài 35s thì YouTube tự nhận, không cần `#Shorts`.)*
-6. `lich/da-dang/` phải có 2 thẻ vừa chuyển sang.
-   *Còn ở `hang-doi/` nghĩa là node chuyển file chưa chạy — sẽ đăng lại đúng bài đó lần sau.*
-7. Xoá 2 video thử → kéo 2 thẻ từ `da-dang/` ngược về `hang-doi/`.
-8. Đổi `privacyStatus` về **`public`**.
+Mỗi kịch bản dùng một connection YouTube khác nhau. Dùng chung là cả hai kênh đăng vào
+một chỗ, và **không có gì trong lần chạy báo cho anh biết**.
 
-### 06 · Bật lịch
+### Chạy thử
 
-1. Gạt công tắc **Active** góc trên phải.
-2. Để máy chạy n8n **không tắt**. *n8n tắt thì lịch không chạy, và **không đăng bù** lúc bật lại.*
-3. Sáng hôm sau kiểm Telegram: phải có **6 tin** (3 bài × 2 kênh).
-
-Lịch **8h · 13h · 20h**, mỗi lần 1 bài/kênh. Hết hàng đợi thì workflow **dừng im lặng**,
-không báo lỗi giả — hết bài không phải là hỏng.
+Đặt privacy **private**, bấm **Run once**, mở YouTube Studio cả hai kênh kiểm đúng 1
+video mỗi kênh. Xong thì xoá video thử, sửa `trang_thai` về `cho`, đổi privacy
+**public**, bật **Scheduling ON**.
 
 ---
 
