@@ -7,83 +7,71 @@
 
 ## 0. Tóm tắt một đoạn
 
-Có sẵn **300 video đã render xong, đã kiểm 0 lỗi**, và một hệ thống hàng đợi + workflow n8n
-để tự đăng lên **2 kênh YouTube** với nhịp **3 bài/ngày/kênh**. Toàn bộ code đã commit và push.
-**Việc còn lại là cài đặt trên máy anh Tuấn Anh** — chưa ai chạy thử luồng upload thật vì
+Một kho video ngắn về giao dịch, **đã render xong, đã có nhạc, đã kiểm 0 lỗi**, chia sẵn
+theo loại nội dung, kèm một bảng hàng đợi để **Make** tự đăng lên **2 kênh YouTube**.
+Toàn bộ code đã commit và push.
+
+**Việc còn lại là dựng kịch bản Make** (mục 5) — chưa ai chạy thử luồng upload thật vì
 máy render không có credential YouTube.
 
 | | |
 |---|---|
 | Repo | `https://github.com/HIHII12/candle-video-tool` |
 | Nhánh | `claude/nang-cap-video-engine` |
-| Commit lúc bàn giao | `c307ed7` |
 | Thư mục việc này | `dang-tu-dong/` |
+
+> ⚠️ **Số lượng video trong file này cập nhật lúc bàn giao.** Muốn biết con số thật ngay
+> lúc đọc thì chạy `python3 dang-tu-dong/sap_xep.py` — nó đếm lại từ ổ đĩa.
 
 ---
 
 ## 1. Hai kênh
 
-| Mã | Kênh | Ngôn ngữ | Logo | Video sẵn |
-|---|---|---|---|---|
-| `gf` | **GoldFather FX** | English | `goldfather-fx.png` | **100** |
-| `vt` | **Văn Thắng Invest** | Tiếng Việt | `van-thang-trading.png` | **200** |
+| Kênh | Ngôn ngữ | Logo | Tiền tố file |
+|---|---|---|---|
+| **GoldFather FX** | English | `goldfather-fx.png` | `en-` hoặc không có |
+| **Văn Thắng Invest** | Tiếng Việt | `van-thang-trading.png` | `vi-` |
 
-Chạy 3 bài/ngày/kênh → GoldFather đủ **33 ngày**, Văn Thắng đủ **66 ngày**.
-
-**Không đăng chéo** video giữa hai kênh. Khác ngôn ngữ nên tự nhiên đã tách, chỉ cần đừng lỡ tay.
+**Không đăng chéo** video giữa hai kênh.
 
 ---
 
 ## 2. Video nằm ở đâu
 
-| Thư mục | Nội dung |
-|---|---|
-| `video-engine/out/batch/2026-09-10/` | 100 video quiz **English** (`en-quiz-*.mp4`) |
-| `video-engine/out/batch/2026-09-06/` | 100 video giải phẫu nến **tiếng Việt** (`vi-*.mp4`) |
-| `video-engine/out/batch/2026-08-31/` | 100 video **tiếng Việt** lô trước (`vi-*.mp4`) |
+Day chuyền lưu theo **ngày chạy** (`video-engine/out/batch/<ngày>/`) — hợp lý cho máy,
+vô dụng cho người đăng bài, vì một thư mục có cả nến, so sánh, market map, cả hai thứ tiếng.
 
-Mỗi `.mp4` có một `.txt` **cùng tên** nằm cạnh, chứa sẵn tiêu đề · mô tả · hashtag.
-Script hàng đợi đọc thẳng từ file `.txt` này.
+**Chạy lệnh này để chia lại theo loại:**
 
-**Thông số đã đo:** 1080×1920 · 60fps · ~35 giây · dừng hình cao nhất 1.0s ·
-âm lượng −13.7 → −14.1 LUFS · đỉnh −1.0 → −1.4 dBTP. Toàn bộ **0 lỗi** qua
-`video-engine/scripts/kiem_video.py`.
+```bash
+python3 dang-tu-dong/sap_xep.py
+```
+
+Ra `~/giao-hang/da-phan-loai/viet/<loại>/` và `.../global/<loại>/`.
+Dùng **liên kết cứng** — không tốn thêm dung lượng ổ đĩa, xoá bên này không mất bên kia.
+
+Thư mục có hậu tố **`-nhac`** là bản đã trộn nhạc. Bản gốc không nhạc vẫn nằm cạnh —
+`sap_xep.py` tự bỏ qua bản gốc khi đã có bản `-nhac`.
+
+**Thông số:** 1080×1920 · 60fps · ~35 giây · âm lượng −14 LUFS · qua `kiem_video.py` 0 lỗi.
 
 **Tiêu đề bài quiz cố ý KHÔNG ghi tên mẫu nến** — tên chính là đáp án, ghi lên tiêu đề là
-tự lộ ngay trên feed. Tên nằm trong mô tả và hashtag, vẫn search ra được.
-Đừng "sửa lại cho đầy đủ".
+tự lộ ngay trên feed. Tên nằm trong mô tả và hashtag. Đừng "sửa lại cho đầy đủ".
 
 ---
 
-## 3. Bốn file trong `dang-tu-dong/`
+## 3. Năm file trong `dang-tu-dong/`
 
 | File | Việc |
 |---|---|
-| `tao_lich.py` | Biến một thư mục video thành hàng đợi |
-| `n8n-dang-youtube.json` | Workflow n8n, import thẳng |
-| `gan_nhac.py` | Trộn nhạc vào video đã render, không render lại |
+| `sap_xep.py` | Chia video theo loại nội dung |
+| `tao_bang.py` | Sinh bảng CSV hàng đợi cho Make |
+| `gan_nhac.py` | Trộn nhạc vào video đã render, **không** render lại |
+| `cuu_tieu_de.mjs` | Sinh lại `.txt` cho video lô cũ bị thiếu |
 | `BAN-GIAO.md` | Chính là file này — bản hướng dẫn duy nhất |
 
-### Hàng đợi — tại sao là file rời chứ không phải bảng
-
-`lich/hang-doi/` · `lich/da-dang/` · `lich/loi/` — mỗi video một file JSON, đăng xong thì
-**chuyển file** sang thư mục khác.
-
-Lý do: n8n chạy nhiều nhánh cùng lúc và máy có thể tắt giữa chừng. Sửa chung một bảng CSV
-thì hai nhánh ghi đè lên nhau, tắt máy giữa lúc ghi thì mất cả bảng. Chuyển file thì **hoặc
-nó ở hàng-đợi, hoặc nó ở đã-đăng** — không có trạng thái lửng lơ phải đi dò lại.
-
-**Bài hỏng chuyển sang `loi/`, KHÔNG nằm lại `hang-doi/`.** Nằm lại thì lần chạy sau vớ đúng
-nó, hỏng y hệt, và hàng đợi đứng tại chỗ mãi mãi.
-
-Hàng đợi hiện tại: **100 `gf` + 200 `vt`** (thư mục `lich/` không commit lên git).
-
-Nạp thêm — chạy lại bao nhiêu lần cũng không sinh bài trùng:
-
-```bash
-python3 dang-tu-dong/tao_lich.py video-engine/out/batch/<ngay> --kenh gf
-python3 dang-tu-dong/tao_lich.py video-engine/out/batch/<ngay> --kenh vt
-```
+> **`tao_lich.py` và `n8n-dang-youtube.json` là đường n8n cũ.** Giữ lại phòng khi cần,
+> nhưng **đường đang dùng là Make** — xem mục 4 và 5. Đừng làm theo cả hai.
 
 ---
 
