@@ -67,6 +67,30 @@ def phan_loai(ten: str) -> tuple[str, str]:
     return "khac", "chua phan loai"
 
 
+def doc_loai_bo() -> tuple[set[str], str]:
+    """Ten cac video bi loai, va thu muc lo duy nhat duoc phep di qua.
+
+    Chan theo TEN FILE chu khong theo duong dan: cung mot video hong nam o nam
+    sau thu muc lo khac nhau (lo goc, lo -nhac, cac lan chay lai), va liet ke
+    tung duong dan thi chac chan sot — da sot that, bay cai lot nguoc vao bang
+    hang doi sau khi tuong da chan het.
+
+    Ban render lai bang code hien tai cung TRUNG TEN voi ban hong, nen phai co
+    mot lo duoc mien tru; moi ban khac cung ten deu bi bo.
+    """
+    f = Path(__file__).resolve().parent / "loai-bo.txt"
+    if not f.exists():
+        return set(), ""
+    ten, dung_lo = set(), ""
+    for d in f.read_text(encoding="utf-8").splitlines():
+        d = d.strip()
+        if d.startswith("# DUNG_LO:"):
+            dung_lo = d.split(":", 1)[1].strip()
+        elif d and not d.startswith("#"):
+            ten.add(d)
+    return ten, dung_lo
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ra", default=str(Path.home() / "giao-hang" / "da-phan-loai"))
@@ -75,6 +99,8 @@ def main() -> int:
     a = ap.parse_args()
 
     ra = Path(a.ra)
+    loai_bo, dung_lo = doc_loai_bo()
+    da_loai = 0
     dem: dict[tuple[str, str], int] = {}
     mo_ta_cua: dict[str, str] = {}
 
@@ -90,6 +116,9 @@ def main() -> int:
             continue
 
         for mp4 in sorted(lo.glob("*.mp4")):
+            if mp4.name in loai_bo and lo.name.replace("-nhac", "") != dung_lo:
+                da_loai += 1
+                continue
             ten = mp4.name
             tieng = doan_tieng(mp4)
             thu_muc, mo_ta = phan_loai(ten)
@@ -97,10 +126,20 @@ def main() -> int:
             dich_lo = ra / tieng / thu_muc
             dich_lo.mkdir(parents=True, exist_ok=True)
 
+            # Hai lo khac ngay co the chua file TRUNG TEN (vi-candle-hammer-v01
+            # nam ca o 2026-08-31 lan 2026-09-11). Gom phang vao mot thu muc thi
+            # cai sau dung cai truoc. Truoc day no bi bo qua im lang va bo dem
+            # van cong — bao 324 trong khi o dia chi co 179.
+            # Gio them ngay cua lo vao ten khi va cham, giu ca hai.
+            ten_goc = mp4.stem
+            if (dich_lo / mp4.name).exists():
+                ngay = lo.name.replace("-nhac", "")
+                ten_goc = f"{mp4.stem}__{ngay}"
+
             for f in (mp4, mp4.with_suffix(".txt")):
                 if not f.exists():
                     continue
-                dich = dich_lo / f.name
+                dich = dich_lo / f"{ten_goc}{f.suffix}"
                 if dich.exists():
                     continue
                 try:
@@ -123,6 +162,8 @@ def main() -> int:
             tong += muc[thu_muc]
         print()
     print(f"  tong {tong} video")
+    if da_loai:
+        print(f"  (da bo qua {da_loai} ban bi loai — xem dang-tu-dong/loai-bo.txt)")
     print("\n  (lien ket cung — khong ton them dung luong o dia)")
     return 0
 
