@@ -36,13 +36,13 @@ export const LB = {
   /** The question. */
   hoi: [480, 560] as const,
   /** Three, two, one. */
-  dem: [680, 860] as const,
+  dem: [570, 860] as const,
   /** The answer. */
   dap: [860, 980] as const,
   /** Three lines of working, one at a time. */
-  buoc: [1000, 1520] as const,
+  buoc: [940, 1520] as const,
   /** What the wrong size would have cost. */
-  gia: [1540, 1880] as const,
+  gia: [1500, 1880] as const,
   /** Broker specs differ — said last, and said plainly. */
   luu: [1890, 2100] as const,
 } as const;
@@ -55,6 +55,9 @@ export const LLAYOUT = {
   dapTop: 880,
   /** Working, under the answer. */
   buocTop: 1180,
+  /** Bang gia chay — nam sau chu, lam nen dong cho ca video. */
+  giaTop: 668,
+  giaCao: 196,
   readableBottom: 1920 - SAFE.bottom,
   disclaimerY: 1862,
 } as const;

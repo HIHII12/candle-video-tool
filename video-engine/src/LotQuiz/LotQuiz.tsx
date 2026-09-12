@@ -94,10 +94,11 @@ export const LotQuiz: React.FC<LotQuizProps> = (props) => {
     );
   };
 
-  const buocTinh = (i: number, chu: string, ket: string) => {
-    const tu = LB.buoc[0] + i * 170;
+  const buocTinh = (i: number, chu: string, so: number, le: number, truoc = '') => {
+    const tu = LB.buoc[0] + i * 145;
     const v = lramp(frame, [tu, tu + 90] as const);
     if (v <= 0) return null;
+    const ket = truoc + demLen(so, tu + 10, 95, le);
     return (
       <div
         key={i}
@@ -135,6 +136,23 @@ export const LotQuiz: React.FC<LotQuizProps> = (props) => {
     );
   };
 
+  /*
+   * Dem len thay vi hien ra mot cai.
+   *
+   * Do tren ban render dau tien: chi 3,6% khung hinh doi moi frame, va co doan
+   * 4,5 giay gan nhu dung hoan toan — may kiem bao LOI. Cac dinh dang khac co
+   * nen ve vao lien tuc nen khong bao gio gap chuyen nay; dinh dang nay toan
+   * chu, giua hai nhip khong co gi nhuc nhich. So dem len bien moi ket qua
+   * thanh mot doan chuyen dong that, dung o cho nguoi xem dang nhin.
+   */
+  const demLen = (dich: number, tu: number, dai = 90, le = 0) => {
+    const v = interpolate(frame, [tu, tu + dai], [0, 1], clamp);
+    // Cham dan ve cuoi, nhu dong ho co dung lai — dung tuyen tinh thi no
+    // dung khuc mot cai, trong nhu bi treo.
+    const e = 1 - Math.pow(1 - v, 3);
+    return (dich * e).toFixed(le);
+  };
+
   const giaIn = lramp(frame, [LB.gia[0], LB.gia[0] + 90] as const);
   const luuIn = lramp(frame, [LB.luu[0], LB.luu[0] + 70] as const);
 
@@ -145,6 +163,90 @@ export const LotQuiz: React.FC<LotQuizProps> = (props) => {
         fontFamily: LFONT,
       }}
     >
+      {/*
+        Bang gia chay lien tuc.
+        ------------------------------------------------------------------
+        Do tren hai ban render: dinh dang nay chi 3,6% roi 4,3% khung hinh doi
+        moi frame, va van con doan 5 giay may kiem bao LOI. Nguyen nhan khong
+        phai thieu nhip — them nhip roi van hong. Nguyen nhan la khong co gi
+        chuyen dong LIEN TUC: chu hien ra roi nam im cho toi nhip sau.
+
+        Thanh tai khoan em them truoc do cao 34px, nho hon mot o do 16x9, nen
+        may dem coi nhu khong doi. Sua bang cach doan thi ra the.
+
+        Bang gia nay TROI lien tuc sang trai, nen ca dai 240px doi moi frame —
+        khoang 18 trong 144 o, tren nguong 4% suot ca video. Va no khong phai
+        de doi pho may do: khoang cach stop dang duoc noi bang con so, o day
+        nguoi xem NHIN THAY no dai bao nhieu tren bieu do that.
+      */}
+      <div
+        style={{
+          position: 'absolute',
+          zIndex: LLAYER.base,
+          top: LLAYOUT.giaTop,
+          left: 0,
+          right: 0,
+          height: LLAYOUT.giaCao,
+          opacity: lramp(frame, [LB.soDu[0], LB.soDu[1]] as const) * 0.95,
+          overflow: 'hidden',
+        }}
+      >
+        <svg width={1080} height={LLAYOUT.giaCao} style={{display: 'block'}}>
+          {(() => {
+            const H = LLAYOUT.giaCao;
+            const rong = 26;
+            // Troi lien tuc: 0,42 px moi frame. Du cham de khong roi mat, du
+            // deu de khong frame nao giong frame truoc.
+            const troi = (frame * 0.42) % rong;
+            const n = Math.ceil(1080 / rong) + 2;
+            const bat = Math.floor((frame * 0.42) / rong);
+            const nen = [];
+            for (let i = 0; i < n; i += 1) {
+              const k = bat + i;
+              // Chuoi gia tat dinh theo chi so nen — cung mot frame luon ve ra
+              // dung mot hinh, khong phu thuoc thu tu ve.
+              const w1 = Math.sin(k * 0.37) * 0.5 + Math.sin(k * 0.11) * 0.35;
+              const w2 = Math.sin(k * 0.83 + 1.7) * 0.22;
+              const giua = H / 2 + w1 * H * 0.26;
+              const than = 8 + Math.abs(w2) * 26;
+              const len = w2 > 0;
+              const x = i * rong - troi;
+              nen.push(
+                <g key={k}>
+                  <line
+                    x1={x + rong / 2}
+                    x2={x + rong / 2}
+                    y1={giua - than - 9 - Math.abs(w1) * 12}
+                    y2={giua + than + 9 + Math.abs(w2) * 14}
+                    stroke={len ? LT.up : LT.down}
+                    strokeWidth={2}
+                    opacity={0.5}
+                  />
+                  <rect
+                    x={x + 5}
+                    y={giua - than}
+                    width={rong - 10}
+                    height={than * 2}
+                    fill={len ? LT.up : LT.down}
+                    opacity={0.5}
+                  />
+                </g>,
+              );
+            }
+            return nen;
+          })()}
+        </svg>
+        {/* Mo dan hai ben de bang gia chim vao nen, khong thanh mot o vuong dan len */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(90deg, ${LT.bg} 0%, transparent 12%, transparent 88%, ${LT.bg} 100%),
+                         linear-gradient(180deg, ${LT.bg} 0%, transparent 30%, transparent 70%, ${LT.bg} 100%)`,
+          }}
+        />
+      </div>
+
       {/* Header */}
       <div
         style={{
@@ -296,9 +398,9 @@ export const LotQuiz: React.FC<LotQuizProps> = (props) => {
           gap: 20,
         }}
       >
-        {buocTinh(0, t.lot.b1(props.ruiRo), tien(tienRui))}
-        {buocTinh(1, t.lot.b2(oz, tien2(props.stopDo)), tien(moiLot))}
-        {buocTinh(2, t.lot.b3, lot.toFixed(soLe))}
+        {buocTinh(0, t.lot.b1(props.ruiRo), tienRui, 0, '$')}
+        {buocTinh(1, t.lot.b2(oz, tien2(props.stopDo)), moiLot, 0, '$')}
+        {buocTinh(2, t.lot.b3, lot, soLe)}
       </div>
 
       {/* What the wrong size costs, in this viewer's own money. */}
@@ -320,6 +422,47 @@ export const LotQuiz: React.FC<LotQuizProps> = (props) => {
         >
           <div style={{fontSize: 30, color: LT.ink, lineHeight: 1.4}}>
             {t.lot.gia(tien(neuMotLot), phanTram.toFixed(0))}
+          </div>
+
+          {/* Thanh tai khoan bi an dan.
+              Doan nay tung la 4,5 giay dung hinh — cau chu hien ra roi khong co
+              gi nhuc nhich cho toi cuoi video. Thanh nay chay het 3,5 giay, va
+              no khong phai trang tri: no cho thay dung cai ma cau chu vua noi,
+              bang dien tich chu khong bang con so. */}
+          <div
+            style={{
+              marginTop: 16,
+              height: 34,
+              borderRadius: 8,
+              background: 'rgba(232,238,245,0.10)',
+              border: `1px solid ${LT.line}`,
+              overflow: 'hidden',
+              display: 'flex',
+            }}
+          >
+            <div
+              style={{
+                width: `${Math.min(100, phanTram) *
+                  interpolate(frame, [LB.gia[0] + 80, LB.gia[0] + 290], [0, 1], clamp)}%`,
+                background: LT.down,
+                height: '100%',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: 7,
+              fontSize: 22,
+              color: LT.inkSoft,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            <span>{tien(props.soDu)}</span>
+            <span style={{color: LT.down, fontWeight: 700}}>
+              -{demLen(neuMotLot, LB.gia[0] + 80, 210, 0)}
+            </span>
           </div>
         </div>
       ) : null}
