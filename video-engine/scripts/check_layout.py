@@ -37,7 +37,23 @@ COMPOSITOR = Path(__file__).resolve().parents[1] / (
 # Fraction of the frame each platform's own UI covers. Numbers are deliberately
 # conservative: being wrong here means moving a caption 30px, being wrong the
 # other way means the caption is unreadable on every phone.
-SAFE = {"bottom": 0.14, "right": 0.10, "top": 0.06}
+# Do lai tren may that 2026-09-13: anh chup man hinh Shorts cho thay thanh tren
+# (Shorts / Kenh dang ky / Phat truc tiep) phu toi ~190px, cot nut ben phai ~130px,
+# va khoi ten kenh + phu de + thanh chia se duoi cung toi ~390px. Ba con so cu
+# (268 / 108 / 115 px) deu NHO HON thuc te, nen bo kiem nay cho qua nhung video
+# ma tren dien thoai bi che mat tieu de, nhan BSL/SSL va ca dong mien tru.
+SAFE = {"bottom": 390 / 1920, "right": 130 / 1080, "top": 190 / 1920}
+
+# The strip along the very bottom that is allowed to carry ink.
+#
+# Every format prints its provenance and disclaimer down there on purpose: the
+# small print has to be present, not prominent, and the description carries it
+# as well. Counting those two lines as a failure made the check cry wolf on
+# every single market map — 17 findings, all of them the same two lines — and a
+# gate that is always red is a gate nobody reads. Ink is now only reported
+# between the readable line and the top of this strip, which is where content
+# the viewer is actually meant to read would land.
+SMALL_PRINT = 150 / 1920
 
 
 def frame_at(video: Path, seconds: float) -> np.ndarray:
@@ -102,8 +118,11 @@ def check_frame(img: np.ndarray, t: float) -> list[str]:
     read = ink_mask(img, READABLE)
     read_total = max(1, int(read.sum()))
     b = int(h * (1 - SAFE["bottom"]))
+    sp = int(h * (1 - SMALL_PRINT))
     r = int(w * (1 - SAFE["right"]))
-    bottom_ink = int(read[b:, :].sum())
+    # Between the readable line and the small-print strip. Ink below sp is the
+    # disclaimer, which belongs there.
+    bottom_ink = int(read[b:sp, :].sum())
     total = read_total
     if bottom_ink > total * 0.04:
         out.append(

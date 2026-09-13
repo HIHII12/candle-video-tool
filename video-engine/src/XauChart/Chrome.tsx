@@ -3,6 +3,7 @@ import {interpolate, spring} from 'remotion';
 import {TV, FONT, stroke} from './chartTheme';
 import {strings, type Locale} from '../i18n';
 import {CHANNEL_MARK} from '../brand';
+import {SAFE} from '../safeArea';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -100,7 +101,8 @@ export const QuizPills: React.FC<{
     <div
       style={{
         position: 'absolute',
-        top: 176,
+        // Was 176, i.e. 14px inside the Shorts chip row.
+        top: SAFE.top + 14,
         left: 0,
         right: 0,
         display: 'flex',
@@ -166,7 +168,9 @@ export const Countdown: React.FC<{
     <div
       style={{
         position: 'absolute',
-        bottom: 330,
+        // Was 330. This is the verdict, set at 150px, so its box reached up
+        // from y=1590 — the bottom third of it printed under the caption bar.
+        bottom: SAFE.bottom + 24,
         left: 0,
         right: 0,
         textAlign: 'center',
@@ -199,7 +203,9 @@ export const AnswerBadge: React.FC<{
     <div
       style={{
         position: 'absolute',
-        bottom: 330,
+        // Was 330. This is the verdict, set at 150px, so its box reached up
+        // from y=1590 — the bottom third of it printed under the caption bar.
+        bottom: SAFE.bottom + 24,
         left: 0,
         right: 0,
         textAlign: 'center',

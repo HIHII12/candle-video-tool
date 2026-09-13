@@ -3,6 +3,7 @@ import type {ChochPoint, MapWaypoint, MapZone} from '../data/types';
 import type {Coords} from '../XauChart/useLightweightChart';
 import {MT, MTEXT, mease, zoneColor} from './theme';
 import {pillWidth} from '../textWidth';
+import {SAFE} from '../safeArea';
 
 /**
  * A labelled price band.
@@ -221,8 +222,15 @@ export const PlanPath: React.FC<{
   // candles set, and an unclamped path then walks off the bottom of the chart
   // and out of the frame — the plan is the one line the video exists to draw,
   // so it is the one line that must stay on screen.
+  // x was left unclamped, and the last waypoint is projected out into the empty
+  // space on the right on purpose — which is the same space the platform puts
+  // its like and comment buttons in. The numbered circle that ends the plan,
+  // the one carrying the target, was landing underneath them. Clamped by the
+  // same rule the y axis already used: the marker is r=22 plus a 4px ring, so
+  // 30px of margin keeps the whole thing clear.
+  const planRight = Math.min(width, 1080 - SAFE.right) - 30;
   const pts = path.map((w) => ({
-    x: coords.logicalToX(w.index),
+    x: Math.max(30, Math.min(planRight, coords.logicalToX(w.index))),
     y: Math.max(30, Math.min(height - 30, coords.priceToY(w.price))),
     label: w.label,
   }));

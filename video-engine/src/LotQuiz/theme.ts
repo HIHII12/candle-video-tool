@@ -48,7 +48,8 @@ export const LB = {
 } as const;
 
 export const LLAYOUT = {
-  headerTop: 90,
+  // Was 90 — under the Shorts chip row.
+  headerTop: SAFE.top + 14,
   /** The three inputs sit here as a stack of rows. */
   soTop: 380,
   /** The answer, dead centre — it is the thing the video exists to deliver. */

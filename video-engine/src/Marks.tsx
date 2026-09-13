@@ -2,6 +2,7 @@ import React from 'react';
 import {interpolate} from 'remotion';
 import type {Coords} from './XauChart/useLightweightChart';
 import {pillWidth} from './textWidth';
+import {SAFE} from './safeArea';
 
 /**
  * The drawing layer: horizontal levels, zones, and paths, described as data.
@@ -77,7 +78,8 @@ const stagger = (progress: number, order = 0, count = 1) => {
 export const Marks: React.FC<{
   marks: Mark[];
   coords: Coords;
-  box: {width: number; height: number};
+  /** left is the box's offset in the frame; absent means it starts at 0. */
+  box: {left?: number; width: number; height: number};
   progress: number;
   opacity?: number;
   /**
@@ -110,7 +112,14 @@ export const Marks: React.FC<{
     // longest Vietnamese strings, and a pill that is short by 8% puts its last
     // word outside the frame.
     const M = EDGE;
-    const limit = avoidFromX === undefined ? box.width - M : Math.min(avoidFromX - 10, box.width - M);
+    // The box's own right edge is not the limit — the platform's button column
+    // is. Worked out in frame coordinates and converted back, so a format whose
+    // box is already inset (the quiz chart starts at x=26 and is 940 wide) is
+    // not charged for that inset twice. Without this the Fibonacci grid printed
+    // 1.0, 0.5 and 0.382 out at x=1060, underneath the like button.
+    const safeLimit = 1080 - SAFE.right - (box.left ?? 0);
+    const boxLimit = Math.min(box.width - M, safeLimit);
+    const limit = avoidFromX === undefined ? boxLimit : Math.min(avoidFromX - 10, boxLimit);
     return Math.max(M, Math.min(x, limit - w));
   };
   const place = (y: number, x0: number, w: number) => {

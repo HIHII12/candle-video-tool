@@ -25,18 +25,21 @@ export const KT = {
   measure: '#5eb3ff',
 } as const;
 
-const PANE_H = 470;
+// Was 470. Two panes of that height plus a header and a verdict do not fit
+// between the platform's two lines, and the verdict is what fell off the
+// bottom. Sized so header + pane + seam + pane + verdict lands on SAFE.
+const PANE_H = 400;
 
 export const KLAYOUT = {
-  headerTop: 78,
+  headerTop: SAFE.top + 14,
   /** Top pane. */
-  a: {left: 0, top: 330, width: 1080, height: PANE_H},
+  a: {left: 0, top: 470, width: 1080, height: PANE_H},
   /** Bottom pane, the same size to the pixel. */
-  b: {left: 0, top: 880, width: 1080, height: PANE_H},
+  b: {left: 0, top: 940, width: 1080, height: PANE_H},
   /** Between the panes: where the difference is named. */
-  seamTop: 330 + PANE_H + 18,
-  /** Under both: the verdict. */
-  verdictTop: 1400,
+  seamTop: 470 + PANE_H + 18,
+  /** Under both: the verdict. Ends on the readable line, never past it. */
+  verdictTop: 1350,
   readableBottom: 1920 - SAFE.bottom,
   disclaimerY: 1862,
 } as const;

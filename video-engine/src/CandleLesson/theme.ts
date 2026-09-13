@@ -51,11 +51,20 @@ export const CFONT = TEXT_FONT;
  * gets the share that matches what the viewer came for.
  */
 export const LAYOUT = {
-  headerTop: 78,
+  // Was 78, which put the format badge, the pattern name and the channel logo
+  // under the Shorts chip row on a real phone.
+  headerTop: SAFE.top + 14,
   /** Where the chart element sits. Candles may be inset further, never wider. */
-  chart: {left: 0, top: 322, width: 1080, height: 1136},
-  /** Captions and the verdict live here; the chart is inset out of the way. */
-  captionTop: 1470,
+  chart: {left: 0, top: 470, width: 1080, height: 1920 - SAFE.bottom - 470},
+  /**
+   * Captions and the verdict live here; the chart is inset out of the way.
+   *
+   * Was 1470. The block that hangs off this line ends in the call to action,
+   * and at 1470 that button — the only element on the frame whose job is to
+   * win a subscriber — landed squarely behind the caption bar. It is raised
+   * far enough that the whole block, button included, clears readableBottom.
+   */
+  captionTop: 1120,
   /** Nothing the viewer must read may sit below this line. */
   readableBottom: 1920 - SAFE.bottom,
   /** Small print is allowed below it — required to be present, not prominent. */
@@ -233,9 +242,17 @@ const insetsAt = (frame: number) => {
   );
   // The verdict and the statistics own the bottom from the reveal onward.
   const caption = Math.max(ramp(frame, CB.reveal[0] - 30, CB.reveal[0] + 20), 0);
+  // How far the caption beat has to lift the candles: everything from the
+  // caption's own top line down to the bottom of the chart box, plus a little
+  // air. Derived rather than typed as a number, because it was typed as 150
+  // against the old taller box and stopped being enough the moment the box
+  // was shortened to clear the platform's caption bar — the verdict then
+  // printed straight across the candles and through the stop-loss label.
+  const CAPTION_LIFT =
+    LAYOUT.chart.top + LAYOUT.chart.height - LAYOUT.captionTop + 30;
   return {
     top: 26,
-    bottom: 40 + 300 * ease(panel) + 150 * ease(caption),
+    bottom: 40 + 300 * ease(panel) + CAPTION_LIFT * ease(caption),
     left: 26,
     // Clear of the platform's own button column, so a wick never sits under it.
     right: SAFE.right - 20,

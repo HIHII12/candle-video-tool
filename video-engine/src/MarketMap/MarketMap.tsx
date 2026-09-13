@@ -197,9 +197,13 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          top: 66,
+          // Was 66 — the instrument name and timeframe sat under the Shorts
+          // chip row on every phone.
+          top: SAFE.top + 14,
           left: 56,
-          right: 56,
+          // The timeframe badge is right-aligned inside this block, so at 56 it
+          // sat 74px inside the action-button column.
+          right: SAFE.right,
           opacity: titleIn,
           transform: `translateY(${interpolate(titleIn, [0, 1], [-24, 0])}px)`,
         }}
@@ -303,7 +307,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               // at the frame edge. Running it to 1080 put the last third of
               // every band under the like/comment stack, and the outermost
               // pixels touching the frame read as the chart being cut off.
-              width={MAP_BOX.width - SAFE.right + 26}
+              width={MAP_BOX.width - SAFE.right}
               height={MAP_BOX.height}
               reveal={mramp(frame, MB.trend)}
             />
@@ -317,7 +321,7 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
               // at the frame edge. Running it the full 1080 put the last third
               // of every band under the like/comment stack, and the outermost
               // pixels touching the frame read as the chart being cut off.
-              width={MAP_BOX.width - SAFE.right + 30}
+              width={MAP_BOX.width - SAFE.right}
               // Clear of the platform's button column: a zone whose name is
               // covered is a zone the viewer cannot use. See src/safeArea.ts.
               labelRight={MAP_BOX.width - SAFE.right - 14}
@@ -349,7 +353,10 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 232,
+            // Was 232, i.e. inside the caption bar. It clears the line now and
+            // overlays the chart's lower edge instead; the pill behind it is
+            // opaque, so nothing reads as crowded.
+            bottom: SAFE.bottom + 12,
             left: 56,
             right: 56,
             textAlign: 'center',
@@ -380,9 +387,13 @@ export const MarketMap: React.FC<MarketMapProps> = (props) => {
         <div
           style={{
             position: 'absolute',
-            bottom: 300,
+            // Stacked one narration-height above the line, keeping the gap the
+            // two cards always had between them.
+            bottom: SAFE.bottom + 12 + 88,
             left: 40,
-            right: 40,
+            // This is a bordered card, so its right edge is visible ink: at 40
+            // it ran to x=1040, a hundred pixels under the action buttons.
+            right: SAFE.right,
             background: MT.planSoft,
             border: `4px solid ${MT.plan}`,
             borderRadius: 22,

@@ -1,4 +1,5 @@
 import {DISPLAY_FONT, TEXT_FONT} from '../fonts';
+import {SAFE} from '../safeArea';
 
 /**
  * Light-ground palette for the map format.
@@ -29,13 +30,17 @@ export const MT = {
 export const MFONT = DISPLAY_FONT;
 export const MTEXT = TEXT_FONT;
 
-// Pulled up from 430 and made taller: the header only needs ~300px, and the gap
-// under it read as the chart having been dropped into the frame carelessly.
+// The chart sits between the two platform lines, not in the raw frame. The
+// header needs ~260px and has to start below SAFE.top, which puts the chart's
+// own top at 470; its bottom stops on SAFE's line so no candle is ever drawn
+// under the caption bar. The narration and summary cards overlay the chart's
+// lower edge rather than sitting beneath it — both carry a solid background,
+// and stacking them below is what pushed them into the dead band before.
 export const MAP_BOX = {
   left: 0,
-  top: 320,
+  top: 470,
   width: 1080,
-  height: 1200,
+  height: 1920 - SAFE.bottom - 470,
 } as const;
 
 export const MAP_DURATION = 2100;

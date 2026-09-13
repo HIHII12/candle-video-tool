@@ -154,7 +154,8 @@ export const LessonShort: React.FC<ForexChartProps> = (props) => {
       <div
         style={{
           position: 'absolute',
-          top: 70,
+          // Was 70 — under the Shorts chip row.
+          top: SAFE.top + 14,
           left: 46,
           right: 46,
           textAlign: 'center',

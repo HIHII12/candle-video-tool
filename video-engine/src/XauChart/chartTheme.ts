@@ -16,6 +16,7 @@ export const TV = {
 } as const;
 
 import {DISPLAY_FONT} from '../fonts';
+import {SAFE} from '../safeArea';
 
 export const FONT = DISPLAY_FONT;
 
@@ -34,11 +35,13 @@ export const FONT = DISPLAY_FONT;
  * starts around 970), and the height grown into the dead band underneath. The
  * chart is 13% narrower and 18% taller, and nothing in it is cut or covered.
  */
+// Height was 1160, which ran the chart's own box down to y=1630 — a hundred
+// pixels into the caption bar. It now stops exactly on the readable line.
 export const CHART_BOX = {
   left: 26,
   top: 470,
   width: 940,
-  height: 1160,
+  height: 1920 - SAFE.bottom - 470,
 } as const;
 
 // Heavy outline keeps big text legible over candles of any colour.
