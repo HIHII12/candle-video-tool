@@ -24,6 +24,7 @@ still cannot show you the frame where a label swings out of frame.
 import argparse
 import os
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -57,14 +58,20 @@ SMALL_PRINT = 150 / 1920
 
 
 def frame_at(video: Path, seconds: float) -> np.ndarray:
-    out = Path("/tmp/_layout.png")
-    subprocess.run(
-        [str(COMPOSITOR / "ffmpeg"), "-y", "-v", "error", "-ss", f"{seconds:.2f}",
-         "-i", str(video), "-frames:v", "1", str(out)],
-        env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
-        check=True,
-    )
-    return np.asarray(Image.open(out).convert("RGB")).astype(np.int16)
+    # A fixed /tmp/_layout.png meant two copies of this script could not run at
+    # once: checking a batch four files at a time, each process overwrote the
+    # frame the others were about to read, and most of them reported nothing at
+    # all. The temp file is per-call now, so a whole batch can be checked in
+    # parallel — which is the only way 120 videos get checked before a delivery.
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "khung.png"
+        subprocess.run(
+            [str(COMPOSITOR / "ffmpeg"), "-y", "-v", "error", "-ss", f"{seconds:.2f}",
+             "-i", str(video), "-frames:v", "1", str(out)],
+            env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
+            check=True,
+        )
+        return np.asarray(Image.open(out).convert("RGB")).astype(np.int16)
 
 
 def ink_mask(img: np.ndarray, threshold: int = 42) -> np.ndarray:
