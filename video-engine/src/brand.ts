@@ -14,8 +14,8 @@ export const CHANNEL_MARK = 'XAU LAB';
 export const BRAND = {
   name: 'XAU LAB | VĂN THẮNG INVEST',
   tagline: {
-    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Invest',
-    en: 'Risk Management • Safer Trading with Van Thang Invest',
+    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Trading',
+    en: 'Risk Management • Safer Trading with Van Thang Trading',
   },
   zaloUrl: 'https://zalo.me/g/vuqtnr406',
   disclaimer: 'Educational content · Not investment advice',

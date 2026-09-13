@@ -69,7 +69,7 @@ def main() -> int:
                     thieu_note += 1
                 dong.append({
                     "ten_file": mp4.name,
-                    "kenh": "GoldFather FX" if tieng_dir.name == "global" else "Van Thang Invest",
+                    "kenh": "GoldFather FX" if tieng_dir.name == "global" else "Van Thang Trading",
                     "loai": loai_dir.name,
                     "tieu_de": note.get("tieu_de", ""),
                     "mo_ta": note.get("mo_ta", ""),

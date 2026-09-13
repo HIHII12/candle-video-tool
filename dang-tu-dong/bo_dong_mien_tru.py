@@ -10,6 +10,7 @@ luon co mat va bang nhe di mot phan tu (91 KB -> 72 KB).
 from __future__ import annotations
 
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -25,7 +26,9 @@ def main() -> int:
         rows = list(csv.DictReader(p.open(encoding="utf-8-sig")))
         for r in rows:
             giu = [d for d in r["mo_ta"].split("\n") if d.strip() not in MIEN_TRU]
-            r["mo_ta"] = "\n".join(giu).strip()
+            # Bo mot dong giua doan de lai hai dong trong lien nhau — gop lai,
+            # khong thi mo ta tren YouTube ho mot khoang trang giua bai.
+            r["mo_ta"] = re.sub(r"\n{3,}", "\n\n", "\n".join(giu)).strip()
         ra = p.with_name(p.stem + "-gon.csv")
         with ra.open("w", encoding="utf-8", newline="") as f:
             w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))

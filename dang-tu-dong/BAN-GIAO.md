@@ -30,7 +30,7 @@ máy render không có credential YouTube.
 | Kênh | Ngôn ngữ | Logo | Tiền tố file |
 |---|---|---|---|
 | **GoldFather FX** | English | `goldfather-fx.png` | `en-` hoặc không có |
-| **Văn Thắng Invest** | Tiếng Việt | `van-thang-trading.png` | `vi-` |
+| **Văn Thắng Trading** | Tiếng Việt | `van-thang-trading.png` | `vi-` |
 
 **Không đăng chéo** video giữa hai kênh.
 

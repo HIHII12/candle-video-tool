@@ -11,7 +11,7 @@ from pathlib import Path
 
 GOC = Path("/home/user/candle-video-tool")
 BATCH = GOC / "video-engine" / "out" / "batch"
-LO = {"Van Thang Invest": "2026-09-06", "GoldFather FX": "2026-09-10"}
+LO = {"Van Thang Trading": "2026-09-06", "GoldFather FX": "2026-09-10"}
 
 def doc_note(txt):
     if not txt.exists():
@@ -50,7 +50,7 @@ for kenh, lo in LO.items():
         })
 
 # Xen ke hai kenh: Make loc theo cot kenh, nhung xen ke thi nhin bang de doi chieu.
-viet = [d for d in dong if d["kenh"] == "Van Thang Invest"]
+viet = [d for d in dong if d["kenh"] == "Van Thang Trading"]
 glob_ = [d for d in dong if d["kenh"] == "GoldFather FX"]
 xen = []
 for i in range(max(len(viet), len(glob_))):
@@ -63,6 +63,6 @@ with ra.open("w", encoding="utf-8-sig", newline="") as f:
     w.writeheader(); w.writerows(xen)
 
 print(f"{len(xen)} dong -> {ra}")
-print(f"  Van Thang Invest {len(viet)} · GoldFather FX {len(glob_)}")
+print(f"  Van Thang Trading {len(viet)} · GoldFather FX {len(glob_)}")
 print(f"  thieu tieu de (bo qua): {len(thieu)}")
 print(f"  kich thuoc: {ra.stat().st_size} byte")

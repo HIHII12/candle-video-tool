@@ -52,7 +52,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("nguon", help="thu muc chua .mp4 va .txt")
     ap.add_argument("--kenh", required=True, choices=["gf", "vt"],
-                    help="gf = GoldFather FX (English) | vt = Van Thang Invest (tieng Viet)")
+                    help="gf = GoldFather FX (English) | vt = Van Thang Trading (tieng Viet)")
     ap.add_argument("--loc", default="", help="chi lay file co chuoi nay trong ten")
     a = ap.parse_args()
 
