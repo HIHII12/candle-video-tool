@@ -251,7 +251,13 @@ export const CandleCompare: React.FC<CandleCompareProps> = (props) => {
         style={{
           position: 'absolute',
           zIndex: KLAYER.overlay,
-          top: KLAYOUT.verdictTop,
+          // Anchored to the readable line, not to a top coordinate. Pinned at
+          // the top, a verdict whose text wrapped one line further than the
+          // others grew downward and spilled under the caption bar — which is
+          // exactly what seven videos in a 116-video batch did. Bottom-anchored
+          // it grows upward into the empty space instead, so the length of the
+          // string stops being able to break the layout.
+          bottom: 1920 - KLAYOUT.readableBottom,
           left: 56,
           right: SAFE.right,
           display: 'flex',

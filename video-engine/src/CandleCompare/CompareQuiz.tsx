@@ -4,6 +4,7 @@ import {strings, type Locale} from '../i18n';
 import {KB, KLAYER, KLAYOUT, KT} from './theme';
 import {TEXT_FONT} from '../fonts';
 import {pillWidth} from '../textWidth';
+import {SAFE} from '../safeArea';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -95,9 +96,11 @@ export const CompareQuiz: React.FC<{
       style={{
         position: 'absolute',
         zIndex: KLAYER.overlay,
-        top: KLAYOUT.verdictTop - 6,
+        // Same rule as the verdict it sits in place of: grow upward, never past
+        // the readable line.
+        bottom: 1920 - KLAYOUT.readableBottom,
         left: 56,
-        right: 56,
+        right: SAFE.right,
         opacity: out * entry,
         transform: `translateY(${interpolate(entry, [0, 1], [18, 0])}px)`,
         display: 'flex',
