@@ -16,15 +16,32 @@ export const TV = {
 } as const;
 
 import {DISPLAY_FONT} from '../fonts';
+import {SAFE} from '../safeArea';
 
 export const FONT = DISPLAY_FONT;
 
 // Chart canvas fills the middle band; axes are hidden so candles are the hero.
+/**
+ * Where the candles are drawn — with margins, deliberately.
+ *
+ * This used to be the full 1080 wide, flush to both frame edges, and it was the
+ * single worst thing about the format on a phone. The newest candles — the ones
+ * a "buy or sell" question is actually about — sat under the platform's like /
+ * comment / share column, and the outermost bars were sliced by the frame edge,
+ * which reads as a broken export rather than a design choice. Meanwhile 300px
+ * of empty frame sat below the chart doing nothing.
+ *
+ * So: 26px clear of the left edge, 114px clear of the right (the button column
+ * starts around 970), and the height grown into the dead band underneath. The
+ * chart is 13% narrower and 18% taller, and nothing in it is cut or covered.
+ */
+// Height was 1160, which ran the chart's own box down to y=1630 — a hundred
+// pixels into the caption bar. It now stops exactly on the readable line.
 export const CHART_BOX = {
-  left: 0,
-  top: 540,
-  width: 1080,
-  height: 980,
+  left: 26,
+  top: 470,
+  width: 940,
+  height: 1920 - SAFE.bottom - 470,
 } as const;
 
 // Heavy outline keeps big text legible over candles of any colour.

@@ -1,6 +1,9 @@
 // Data contract between the Python pipeline and the Remotion renderer.
 // The Python script emits a config.json matching this shape; the video reads it.
 
+import type {Locale} from '../i18n';
+import type {Mark} from '../Marks';
+
 export type Candle = {
   // Unix seconds or any monotonic index — only ordering matters for X layout.
   time: number;
@@ -74,6 +77,12 @@ export type Outcome = {
 
 export type ForexChartProps = {
   pair: string; // e.g. "BTC/USDT"
+  /** Which track this video belongs to; absent means the global one. */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   timeframe: string; // e.g. "15m"
   title: string; // headline caption drawn on screen
   hook: string; // first-seconds teaser question
@@ -129,7 +138,15 @@ export type MapWaypoint = {
 };
 
 export type MarketMapProps = {
+  /** 'map-offline' when the series was constructed rather than fetched. */
+  note?: string;
   kind: 'marketMap';
+  /** Which track this video belongs to; absent means the global one. */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   pair: string;
   timeframe: string;
   bias: 'bullish' | 'bearish';
@@ -189,8 +206,31 @@ export type PatternStats = {
 };
 
 export type CandleLessonProps = {
+  /** Open with a BUY-or-SELL question before explaining the pattern. */
+  quiz?: boolean;
+  /** Rotates wording that would otherwise repeat across a batch. */
+  quizVariant?: number;
+  /**
+   * Extra drawing: levels, zones and swing paths, described as data.
+   *
+   * Absent for the thirteen candlestick lessons, where the candle is the whole
+   * subject. Present for everything this tool teaches that is bigger than one
+   * bar — a Fibonacci grid, an order block, a head and shoulders, a range.
+   */
+  marks?: Mark[];
+  /** Which of the three openings to use, 0-2; see make_candle_lesson.py. */
+  open?: number;
   kind: 'candleLesson';
   instrument: string;
+  /**
+   * Which track this video belongs to. Absent means the global one, so every
+   * config written before the Vietnam track existed still means what it did.
+   */
+  locale?: Locale;
+  /** Corner mark, from public/brand. Absent means the video carries none. */
+  brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
   pattern: CandlePattern;
   anatomy: Anatomy[];
   candles: Candle[];
@@ -206,4 +246,72 @@ export type CandleLessonProps = {
    */
   voiceId?: string | null;
   voiceMarks?: {text: string; startFrame: number; endFrame: number}[] | null;
+};
+
+/** One half of a comparison video. */
+export type CompareSide = {
+  name: string;
+  bias: 'bullish' | 'bearish';
+  candles: Candle[];
+  /** Which candles form the pattern; the measurement is drawn on the last. */
+  indices: number[];
+  verdict: string;
+};
+
+/**
+ * Two confusable patterns, and the one measurement that separates them.
+ *
+ * The other formats all answer "what is this". This one answers the question a
+ * beginner actually has — "these two look identical, which am I looking at" —
+ * and that question needs both charts on screen at once to answer at all.
+ */
+export type CandleCompareProps = {
+  kind: 'candleCompare';
+  /** Ask which pane is which before naming them. */
+  quiz?: boolean;
+  /** Which of the two the question names. Defaults to the top pane. */
+  quizAsk?: 'left' | 'right';
+  locale?: Locale;
+  brandMark?: string | null;
+  /** File nhac trong public/audio/nhac. Chon mot lan luc sinh cau hinh. */
+  nhac?: string | null;
+  /** Which measurement decides it: the body, or the leg that came before. */
+  metric: 'body' | 'direction' | 'upper' | 'lower';
+  title: string;
+  /** What the two have in common — said before the difference. */
+  same: string;
+  /** The instruction that separates them. */
+  diff: string;
+  /** What it costs to read it wrong. */
+  why: string;
+  left: CompareSide;
+  right: CompareSide;
+  note: string;
+};
+
+/**
+ * Position sizing quiz.
+ *
+ * The stop is a distance in DOLLARS OF PRICE, never in pips: "a pip of gold"
+ * means $0.01 to some brokers and $0.10 to others, and being ambiguous by a
+ * factor of ten on the one topic where sizing errors empty accounts is worse
+ * than saying nothing.
+ */
+export type LotQuizProps = {
+  kind: 'lotQuiz';
+  locale?: Locale;
+  brandMark?: string | null;
+  nhac?: string | null;
+  /** Instrument label shown on screen. */
+  pair: string;
+  /** Account balance, in the account's currency. */
+  soDu: number;
+  /** Percent of the balance risked on this trade. */
+  ruiRo: number;
+  /** Stop distance as a move in price, e.g. 5.00 means five dollars of gold. */
+  stopDo: number;
+  /** Units in one standard lot. 100 troy ounces for most XAU/USD symbols. */
+  ozMotLot?: number;
+  /** Smallest lot step the broker allows; the answer is rounded DOWN to it. */
+  buocLot?: number;
 };

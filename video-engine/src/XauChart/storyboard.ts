@@ -33,8 +33,15 @@ export const lastRevealIndex = (props: ForexChartProps) => {
     : Math.min(props.outcome.index, total - 1);
 };
 
-// How many candles are on screen at a given frame.
-export const shownAt = (props: ForexChartProps, frame: number) => {
+/**
+ * How many candles are on screen at a given frame — fractional.
+ *
+ * The fraction is how far the newest bar has formed. Rounding it, as this used
+ * to, meant a bar appeared whole between two frames: the chart gained a full
+ * candle in one sixtieth of a second, over and over, and both the replay and the
+ * reveal read as a flip-book. See src/camera.ts.
+ */
+export const shownFloatAt = (props: ForexChartProps, frame: number) => {
   const total = props.candles.length;
   const setup = props.setupCount;
   const revealSpan = Math.max(0, lastRevealIndex(props) - (setup - 1));
@@ -44,10 +51,14 @@ export const shownAt = (props: ForexChartProps, frame: number) => {
     // meant frame 0 was a near-empty chart — the single frame that decides
     // whether the video gets watched at all.
     const OPEN_AT = 0.55;
-    return Math.max(1, Math.round((OPEN_AT + (1 - OPEN_AT) * ramp(frame, SB.replay)) * setup));
+    return Math.max(1, (OPEN_AT + (1 - OPEN_AT) * ramp(frame, SB.replay)) * setup);
   }
-  return Math.min(total, setup + Math.round(ramp(frame, SB.reveal) * revealSpan));
+  return Math.min(total, setup + ramp(frame, SB.reveal) * revealSpan);
 };
+
+/** The same thing as a count, for anything that indexes into the series. */
+export const shownAt = (props: ForexChartProps, frame: number) =>
+  Math.max(1, Math.min(props.candles.length, Math.ceil(shownFloatAt(props, frame) - 0.001)));
 
 // The reveal stops on the candle that resolves the trade, so the payoff always
 // lands on the last frame of the reveal beat.

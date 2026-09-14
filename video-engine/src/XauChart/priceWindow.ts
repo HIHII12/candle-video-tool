@@ -1,6 +1,7 @@
 import type {ForexChartProps} from '../data/types';
 import type {PriceWindow} from './useLightweightChart';
-import {SB, lastRevealIndex, ramp} from './storyboard';
+import {DURATION, SB, lastRevealIndex, ramp} from './storyboard';
+import {slowPush} from '../camera';
 
 const spread = (prices: number[], pad = 0.07): PriceWindow => {
   const lo = Math.min(...prices);
@@ -37,8 +38,13 @@ export const priceWindowAt = (props: ForexChartProps, frame: number): PriceWindo
   const wide = spread([...allPrices, ...anchors]);
 
   const t = ramp(frame, SB.reveal);
-  return {
-    minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
-    maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
-  };
+  // Same reason as the lesson: everything before the reveal shared one window,
+  // and the countdown beat in particular sat perfectly still for three seconds.
+  return slowPush(
+    {
+      minValue: tight.minValue + (wide.minValue - tight.minValue) * t,
+      maxValue: tight.maxValue + (wide.maxValue - tight.maxValue) * t,
+    },
+    frame / DURATION,
+  );
 };

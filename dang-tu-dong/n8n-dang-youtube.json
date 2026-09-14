@@ -1,0 +1,258 @@
+{
+  "name": "Dang YouTube tu dong - 2 kenh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "0 8,13,20 * * *" }] }
+      },
+      "id": "cron",
+      "name": "Lich 8h 13h 20h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-860, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mot lan chay = mot bai cho MOI kenh.\n// Tach tu day de kenh nay hong khong keo kenh kia dung theo.\nreturn [{ json: { kenh: 'gf' } }, { json: { kenh: 'vt' } }];"
+      },
+      "id": "hai-kenh",
+      "name": "Hai kenh",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-640, 300]
+    },
+    {
+      "parameters": {
+        "command": "=cd \"{{ $env.THU_MUC_TOOL }}\" && ls lich/hang-doi/{{ $json.kenh }}-*.json 2>/dev/null | head -1"
+      },
+      "id": "lay-bai",
+      "name": "Lay bai ke tiep",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-420, 300],
+      "notes": "Windows: doi sang  dir /b lich\\hang-doi\\{{ $json.kenh }}-*.json"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "conditions": [
+            {
+              "id": "co-bai",
+              "leftValue": "={{ $json.stdout.trim() }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "con-bai",
+      "name": "Con bai khong",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-200, 300],
+      "notes": "Het hang doi thi dung im lang, khong bao loi. Het bai khong phai la hong."
+    },
+    {
+      "parameters": {
+        "command": "=cat \"{{ $json.stdout.trim() }}\""
+      },
+      "id": "doc-the",
+      "name": "Doc the bai",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [20, 220],
+      "notes": "Windows: doi  cat  thanh  type"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Giu lai duong dan cua chinh cai the JSON nay, vi buoc cuoi phai biet\n// chuyen file nao sang da-dang.\nconst bai = JSON.parse($json.stdout);\nbai.the_json = $('Lay bai ke tiep').item.json.stdout.trim();\nreturn [{ json: bai }];"
+      },
+      "id": "phan-tich",
+      "name": "Phan tich",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 220]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.duong_dan }}",
+        "options": { "dataPropertyName": "video" }
+      },
+      "id": "doc-mp4",
+      "name": "Doc file mp4",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [460, 220],
+      "notes": "dataPropertyName phai la 'video' — hai node YouTube ben duoi doc dung ten nay."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Phan tich').item.json.kenh }}",
+                    "rightValue": "gf",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GoldFather"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "version": 2 },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Phan tich').item.json.kenh }}",
+                    "rightValue": "vt",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "VanThang"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "chia-kenh",
+      "name": "Chia theo kenh",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [680, 220],
+      "notes": "MOT node YouTube khong giu duoc HAI credential. Bat buoc phai tach hai nhanh, neu khong ca hai kenh se dang chung vao mot cho."
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Phan tich').item.json.tieu_de }}",
+        "regionCode": "US",
+        "categoryId": "27",
+        "binaryProperty": "video",
+        "options": {
+          "description": "={{ $('Phan tich').item.json.mo_ta }}\n\n{{ $('Phan tich').item.json.hashtag }}",
+          "privacyStatus": "public",
+          "selfDeclaredMadeForKids": false
+        }
+      },
+      "id": "yt-gf",
+      "name": "YouTube GoldFather",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [920, 120],
+      "onError": "continueErrorOutput",
+      "notes": "Gan credential 'YT GoldFather'. categoryId 27 = Education. Video 1080x1920 dai 35s duoc YouTube tu nhan la Shorts, khong can them #Shorts."
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $('Phan tich').item.json.tieu_de }}",
+        "regionCode": "VN",
+        "categoryId": "27",
+        "binaryProperty": "video",
+        "options": {
+          "description": "={{ $('Phan tich').item.json.mo_ta }}\n\n{{ $('Phan tich').item.json.hashtag }}",
+          "privacyStatus": "public",
+          "selfDeclaredMadeForKids": false
+        }
+      },
+      "id": "yt-vt",
+      "name": "YouTube Van Thang",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [920, 320],
+      "onError": "continueErrorOutput",
+      "notes": "Gan credential 'YT Van Thang'. Phai dung Google Cloud project KHAC voi kenh kia — quota 10.000/ngay tinh theo project, moi upload ton 1.600."
+    },
+    {
+      "parameters": {
+        "command": "=cd \"{{ $env.THU_MUC_TOOL }}\" && mv \"{{ $('Phan tich').item.json.the_json }}\" lich/da-dang/"
+      },
+      "id": "xong",
+      "name": "Chuyen sang da-dang",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1160, 200],
+      "notes": "Chuyen file chu khong sua file: hoac o hang-doi, hoac o da-dang, khong co trang thai lung chung neu may tat giua chung. Windows: doi  mv  thanh  move"
+    },
+    {
+      "parameters": {
+        "command": "=cd \"{{ $env.THU_MUC_TOOL }}\" && mv \"{{ $('Phan tich').item.json.the_json }}\" lich/loi/"
+      },
+      "id": "hong",
+      "name": "Chuyen sang loi",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [1160, 440],
+      "notes": "Bai hong KHONG duoc nam lai hang-doi. Nam lai thi lan sau vo dung no, hong y het, hang doi dung tai cho mai mai."
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=✅ {{ $('Phan tich').item.json.kenh === 'gf' ? 'GoldFather FX' : 'Van Thang Invest' }}\n{{ $('Phan tich').item.json.tieu_de }}",
+        "additionalFields": {}
+      },
+      "id": "bao-ok",
+      "name": "Bao da dang",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1380, 200]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=❌ Dang HONG - {{ $('Phan tich').item.json.kenh }}\n{{ $('Phan tich').item.json.ma }}\nThe da chuyen sang lich/loi/",
+        "additionalFields": {}
+      },
+      "id": "bao-hong",
+      "name": "Bao hong",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1380, 440]
+    }
+  ],
+  "connections": {
+    "Lich 8h 13h 20h": { "main": [[{ "node": "Hai kenh", "type": "main", "index": 0 }]] },
+    "Hai kenh": { "main": [[{ "node": "Lay bai ke tiep", "type": "main", "index": 0 }]] },
+    "Lay bai ke tiep": { "main": [[{ "node": "Con bai khong", "type": "main", "index": 0 }]] },
+    "Con bai khong": { "main": [[{ "node": "Doc the bai", "type": "main", "index": 0 }], []] },
+    "Doc the bai": { "main": [[{ "node": "Phan tich", "type": "main", "index": 0 }]] },
+    "Phan tich": { "main": [[{ "node": "Doc file mp4", "type": "main", "index": 0 }]] },
+    "Doc file mp4": { "main": [[{ "node": "Chia theo kenh", "type": "main", "index": 0 }]] },
+    "Chia theo kenh": {
+      "main": [
+        [{ "node": "YouTube GoldFather", "type": "main", "index": 0 }],
+        [{ "node": "YouTube Van Thang", "type": "main", "index": 0 }]
+      ]
+    },
+    "YouTube GoldFather": {
+      "main": [
+        [{ "node": "Chuyen sang da-dang", "type": "main", "index": 0 }],
+        [{ "node": "Chuyen sang loi", "type": "main", "index": 0 }]
+      ]
+    },
+    "YouTube Van Thang": {
+      "main": [
+        [{ "node": "Chuyen sang da-dang", "type": "main", "index": 0 }],
+        [{ "node": "Chuyen sang loi", "type": "main", "index": 0 }]
+      ]
+    },
+    "Chuyen sang da-dang": { "main": [[{ "node": "Bao da dang", "type": "main", "index": 0 }]] },
+    "Chuyen sang loi": { "main": [[{ "node": "Bao hong", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

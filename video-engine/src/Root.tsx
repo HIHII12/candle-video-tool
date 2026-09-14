@@ -8,10 +8,16 @@ import {LESSON_DURATION} from './LessonShort/theme';
 import {CandleLesson} from './CandleLesson/CandleLesson';
 import {CANDLE_DURATION} from './CandleLesson/theme';
 import {MarketMap} from './MarketMap/MarketMap';
+import {LotQuiz} from './LotQuiz/LotQuiz';
+import {LDURATION} from './LotQuiz/theme';
+import lotProps from './data/lot_xau_mau.json';
+import {CandleCompare} from './CandleCompare/CandleCompare';
+import {COMPARE_DURATION} from './CandleCompare/theme';
 import {MAP_DURATION} from './MarketMap/theme';
-import type {CandleLessonProps, MarketMapProps} from './data/types';
+import type {CandleCompareProps, CandleLessonProps, LotQuizProps, MarketMapProps} from './data/types';
 import candleProps from './data/lesson_bullish-engulfing.json';
 import mapProps from './data/map_xau_h1.json';
+import compareProps from './data/compare_hammer-vs-dragonfly.json';
 import type {ForexChartProps} from './data/types';
 import defaultProps from './data/config.json';
 import {CaseFile, CaseShort, CaseThumbnail} from './Showcase/CaseShowcase';
@@ -96,6 +102,24 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={candleProps as CandleLessonProps}
+      />
+      <Composition
+        id="CandleCompare"
+        component={CandleCompare}
+        durationInFrames={COMPARE_DURATION}
+        fps={60}
+        width={1080}
+        height={1920}
+        defaultProps={compareProps as CandleCompareProps}
+      />
+      <Composition
+        id="LotQuiz"
+        component={LotQuiz}
+        durationInFrames={LDURATION}
+        fps={60}
+        width={1080}
+        height={1920}
+        defaultProps={lotProps as LotQuizProps}
       />
       <Composition
         id="MarketMap"

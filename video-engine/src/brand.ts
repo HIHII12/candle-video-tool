@@ -10,12 +10,19 @@
  */
 export const CHANNEL_MARK = 'XAU LAB';
 
-/** Locked brand and conversion target for the XAU LAB MVP. */
+/**
+ * Two channels, two names. A blanket rename once put the Vietnamese channel's
+ * name on the English tagline — they are different channels and the English
+ * side has never been Van Thang anything.
+ */
 export const BRAND = {
-  name: 'XAU LAB | VĂN THẮNG INVEST',
+  name: {
+    vi: 'XAU LAB | VĂN THẮNG TRADING',
+    en: 'GOLDFATHER FX',
+  },
   tagline: {
-    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Invest',
-    en: 'Risk Management • Safer Trading with Van Thang Invest',
+    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Trading',
+    en: 'Risk Management • Safer Trading with GoldFather FX',
   },
   zaloUrl: 'https://zalo.me/g/vuqtnr406',
   disclaimer: 'Educational content · Not investment advice',

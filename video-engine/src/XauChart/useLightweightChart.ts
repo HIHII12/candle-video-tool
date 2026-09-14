@@ -8,6 +8,7 @@ import {
 } from 'lightweight-charts';
 import {continueRender, delayRender} from 'remotion';
 import type {Candle} from '../data/types';
+import {formingCandle} from '../camera';
 import {CHART_BOX, TV, FONT} from './chartTheme';
 
 export type Coords = {
@@ -51,6 +52,12 @@ const DEFAULT_LOOK: ChartLook = {
  */
 export const useLightweightChart = (
   props: {candles: Candle[]},
+  /**
+   * How many candles are on screen. Fractional: the integer part counts closed
+   * bars, the fraction is how far the newest one has formed. Whole numbers still
+   * behave exactly as they did, so formats that do not animate bar formation are
+   * unaffected.
+   */
   shownCount: number,
   priceWindow: PriceWindow,
   look: ChartLook = DEFAULT_LOOK,
@@ -135,17 +142,23 @@ export const useLightweightChart = (
 
     // Whitespace entries reserve an x-slot for every future candle, so the
     // horizontal layout is identical from the first frame to the last.
-    const data = props.candles.map((c, i) =>
-      i < shownCount
-        ? {
-            time: c.time as UTCTimestamp,
-            open: c.open,
-            high: c.high,
-            low: c.low,
-            close: c.close,
-          }
-        : {time: c.time as UTCTimestamp},
-    );
+    const closed = Math.floor(shownCount);
+    const forming = shownCount - closed;
+    const data = props.candles.map((c, i) => {
+      if (i >= closed && !(i === closed && forming > 0.001)) {
+        return {time: c.time as UTCTimestamp};
+      }
+      // The newest bar is drawn part-formed, so its extremes grow continuously
+      // instead of the series gaining a whole candle between two frames.
+      const bar = i === closed ? formingCandle(c, forming) : c;
+      return {
+        time: bar.time as UTCTimestamp,
+        open: bar.open,
+        high: bar.high,
+        low: bar.low,
+        close: bar.close,
+      };
+    });
     series.setData(data);
 
     // Re-assert both scales. applyOptions re-runs autoscaleInfoProvider, which

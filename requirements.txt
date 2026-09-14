@@ -1,0 +1,6 @@
+# Every third-party package the scripts import. Pinned to major versions only:
+# these are all stable, widely-packaged libraries, and pinning them exactly is
+# how an install breaks on a Python version nobody tested.
+numpy>=1.24
+pillow>=10.0
+imageio-ffmpeg>=0.4.9

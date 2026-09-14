@@ -1,0 +1,5 @@
+# Only needed by scripts/qa_showcase.py, which reads the QR code back off a
+# rendered frame to prove it scans. Kept out of the main list because it ships
+# native wheels and fails to build on some machines — a QA extra must never be
+# the reason an install fails.
+zxing-cpp>=2.2

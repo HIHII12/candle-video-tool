@@ -1,4 +1,5 @@
 import React from 'react';
+import {strings} from '../i18n';
 import {AbsoluteFill, interpolate, spring} from 'remotion';
 import type {ForexChartProps} from '../data/types';
 import {CHART_BOX, TV, FONT, stroke} from './chartTheme';
@@ -55,6 +56,7 @@ export const ResultStrip: React.FC<{
   const rr = props.riskReward;
   if (!rr) return null;
 
+  const t = strings(props.locale).quiz;
   const rise = spring({frame: frame - at, fps, config: {damping: 14}, durationInFrames: 28});
   const win = props.outcome.result === 'TP';
   const move = win ? Math.abs(rr.target - rr.entry) : -Math.abs(rr.stop - rr.entry);
@@ -79,7 +81,7 @@ export const ResultStrip: React.FC<{
       }}
     >
       <div style={{fontSize: 66, fontWeight: 900, color: win ? TV.up : TV.down, ...stroke(6)}}>
-        {props.side} {win ? 'HIT TP ✅' : 'STOPPED OUT ❌'}
+        {props.side} {win ? t.hitTp : t.stopped}
       </div>
       <div
         style={{
