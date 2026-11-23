@@ -39,24 +39,65 @@ Bước 5. Nháy đúp file  CAI-DAT.bat
 
 
 ---------------------------------------------------------------------
- PHẦN 2 — LÀM VIDEO MỖI NGÀY (chỉ 1 thao tác)
+ PHẦN 2 — LÀM VIDEO (chỉ 1 thao tác)
 ---------------------------------------------------------------------
 
 1. Nháy đúp file  THO-REN-VANG.bat
-2. Nó hỏi "Hôm nay làm bao nhiêu video?" -> gõ số (ví dụ 10) -> Enter.
-   Bỏ trống rồi Enter = 10 video.
-3. Để máy chạy. Mỗi video mất khoảng 2-4 phút. 10 video ~ 30 phút.
-   Trong lúc chạy cứ làm việc khác, ĐỪNG tắt cửa sổ đen.
-4. Xong, tool tự:
+
+2. Nó hỏi:  "Hôm nay làm bao nhiêu video?"
+   -> gõ số rồi Enter. Bỏ trống rồi Enter = 10 video.
+   Làm bao nhiêu cũng được: 10, 30, 50... (xem mục 2B bên dưới cho lô lớn)
+
+3. Nó hỏi tiếp:  "Giá vàng hiện tại"
+   -> mở TradingView (hoặc app bất kỳ), xem giá vàng XAU/USD lúc đó,
+      gõ số NGUYÊN, ví dụ  4120  -> Enter.
+   Biểu đồ trong video sẽ được dựng quanh đúng mức giá này, để tiêu đề
+   (vd "Vàng 15m quanh 4135") không lệch xa giá ngoài thị trường.
+   Bỏ trống rồi Enter = dùng mức giá cũ (khoảng 2.380) — KHÔNG nên.
+
+4. Để máy chạy. ĐỪNG tắt cửa sổ đen. Trong lúc chạy cứ làm việc khác.
+
+5. Xong, tool tự:
    - soi lỗi từng video (chữ bị che, mất tiếng, sai độ dài, khung đen)
    - chuyển video lỗi vào thư mục  LOI-DUNG-DANG
    - mở thư mục chứa video sạch
 
-Video nằm ở:  C:\THO-REN-VANG\video-engine\out\batch\<ngày hôm nay>\
+Video nằm ở:  C:\THO-REN-VANG\video-engine\out\batch\<ngày chạy>\
 
-Mỗi ngày tool tự làm biểu đồ MỚI — không bao giờ ra 2 video giống nhau.
-Chạy 2 lần trong cùng 1 ngày: lần sau chỉ làm thêm phần còn thiếu,
-không làm lại cái đã có.
+Mỗi lần chạy tool làm biểu đồ MỚI — không bao giờ ra 2 video giống nhau.
+
+
+---------------------------------------------------------------------
+ PHẦN 2B — LÀM 1 LÔ LỚN 30-50 VIDEO
+---------------------------------------------------------------------
+
+Tool làm được 30, 50 video trong 1 lần chạy. Chỉ cần gõ  30  hoặc  50
+ở câu hỏi đầu tiên.
+
+Thời gian (đo trên máy 4 nhân, mỗi video khoảng 3 phút):
+   30 video  ~ 1 tiếng 30 phút
+   50 video  ~ 2 tiếng 30 phút
+   Máy yếu hơn thì lâu hơn.
+-> Nên bấm chạy trước khi đi về / đi ngủ / lúc nghỉ trưa.
+
+!! TRƯỚC KHI CHẠY LÔ LỚN: TẮT CHẾ ĐỘ NGỦ CỦA MÁY
+   Máy tự ngủ giữa chừng = render dừng.
+   Settings -> System -> Power & battery (hoặc Power & sleep)
+   -> mục "Sleep" / "Ngủ" -> chọn  Never / Không bao giờ.
+   (Màn hình tự tắt thì KHÔNG sao, chỉ cần máy không ngủ.)
+
+Nếu bị dừng giữa chừng (mất điện, lỡ tắt cửa sổ...):
+   -> Chạy lại THO-REN-VANG.bat NGAY TRONG NGÀY, gõ ĐÚNG số cũ.
+      Tool bỏ qua video đã làm xong, chỉ làm nốt phần còn thiếu.
+   -> Nếu sang ngày hôm sau mới chạy lại: tool làm một lô MỚI
+      (lô cũ vẫn giữ nguyên trong thư mục ngày cũ, đăng bình thường).
+
+Làm 50 video KHÔNG có nghĩa đăng hết 50 trong 1 ngày.
+   Mỗi kênh đăng tối đa 3 video/ngày (xem Phần 4).
+   50 video, đăng 2 video/ngày = đủ dùng khoảng 25 ngày.
+   -> Cách làm gọn nhất: mỗi tháng chạy 1 lô 50, rồi mỗi ngày đăng 2 cái.
+
+Ổ cứng: mỗi video khoảng 6 MB. 50 video ~ 300 MB.
 
 
 ---------------------------------------------------------------------
