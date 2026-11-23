@@ -38,7 +38,8 @@ export const ExplainCard: React.FC<{
   const loc: Loc = props.locale === 'en' ? 'en' : 'vi';
   const step = steps[i];
   const [s0] = windows[i];
-  const enter = interpolate(frame, [s0, s0 + 14], [0, 1], clamp);
+  // Never fully blank between cards: a fully empty card for a few frames reads as a flicker.
+  const enter = interpolate(frame, [s0, s0 + 10], [0.2, 1], clamp);
   const cardIn = interpolate(frame, [windows[0][0], windows[0][0] + 16], [0, 1], clamp);
   const color = accent(step, props);
   const head = step.head[loc];
@@ -140,8 +141,13 @@ export const Spotlight: React.FC<{
   const [s0] = windows[i];
   const local = frame - s0;
   const draw = interpolate(local, [0, 22], [0, 1], clamp);
-  const dimIn = interpolate(frame, [windows[0][0], windows[0][0] + 18], [0, 1], clamp);
-  const dim = f.kind === 'none' ? 0 : 0.62 * dimIn * interpolate(local, [0, 10], [0.55, 1], clamp);
+  const tintIn = interpolate(frame, [windows[0][0], windows[0][0] + 18], [0, 1], clamp);
+  // No darkening. Dimming the chart put a hard-edged black sheet over the
+  // candles, and anything near the edge of a lit area sat half in shadow —
+  // which reads as a rendering fault, not as emphasis. The focus is carried by
+  // a soft tint of the card's colour under the thing being discussed, plus the
+  // glowing redraw of it on top. Every candle stays fully visible.
+  const halo = f.kind === 'none' || f.kind === 'plan' ? 0 : 0.12 * tintIn * interpolate(local, [0, 14], [0, 1], clamp);
   const color = accent(step, props);
   const rr = props.riskReward;
   const y = (p: number) => coords.priceToY(p);
@@ -154,7 +160,7 @@ export const Spotlight: React.FC<{
   if (f.kind === 'level' || f.kind === 'fibo') {
     const yy = y(f.price);
     const x0 = f.kind === 'fibo' && props.fibonacci ? x(props.fibonacci.startIndex) - 10 : 0;
-    holes.push(<rect key="h" x={x0} y={yy - 30} width={W - x0} height={60} rx={14} />);
+    holes.push(<rect key="h" x={x0} y={yy - 16} width={W - x0} height={32} rx={10} />);
     marks.push(
       <line key="m" x1={x0} x2={x0 + (W - 40 - x0) * draw} y1={yy} y2={yy} stroke={color} strokeWidth={4} filter="url(#exGlow)" />,
     );
@@ -216,10 +222,9 @@ export const Spotlight: React.FC<{
       props.outcome.result === 'TP' && rr ? rr.target : props.outcome.result === 'SL' && rr ? rr.stop : props.candles[idx].close;
     const cx = x(idx);
     const cy = y(price);
-    holes.push(<circle key="h" cx={cx} cy={cy} r={92} />);
-    if (rr) holes.push(<rect key="h2" x={x(rr.entryIndex) - 10} y={y(rr.entry) - 16} width={cx - x(rr.entryIndex) + 20} height={32} rx={10} />);
+    holes.push(<circle key="h" cx={cx} cy={cy} r={44} />);
     marks.push(
-      <circle key="m" cx={cx} cy={cy} r={(34 + 8 * pulse) * draw} fill="none" stroke={color} strokeWidth={4} filter="url(#exGlow)" />,
+      <circle key="m" cx={cx} cy={cy} r={(18 + 5 * pulse) * draw} fill="none" stroke={color} strokeWidth={4} filter="url(#exGlow)" />,
     );
   }
 
@@ -233,17 +238,15 @@ export const Spotlight: React.FC<{
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="exFeather">
-          <feGaussianBlur stdDeviation="10" />
+        <filter id="exFeather" x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur stdDeviation="9" />
         </filter>
-        <mask id="exMask">
-          <rect x={0} y={0} width={W} height={H} fill="#fff" />
-          <g fill="#000" filter="url(#exFeather)">
-            {holes}
-          </g>
-        </mask>
       </defs>
-      {dim > 0 && <rect x={0} y={0} width={W} height={H} fill={TV.bg} opacity={dim} mask="url(#exMask)" />}
+      {halo > 0 && (
+        <g fill={color} opacity={halo} filter="url(#exFeather)">
+          {holes}
+        </g>
+      )}
       {marks}
     </g>
   );

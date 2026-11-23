@@ -125,10 +125,12 @@ export const PositionBox: React.FC<{
         {/* Labels start at the entry bar and run right, so an entry near the
             newest candle pushed "SL 2220.0" past the box and under the like
             button. Pulled left until the widest label fits. */}
-        <text x={labelX} y={yTarget - 10} fill={TV.up} fontSize={27} fontWeight={800}>
+        {/* Outside the box, beyond its line: inside, the label landed on the
+            candles and on any zone drawn in the same price range. */}
+        <text x={labelX} y={yTarget > yEntry ? yTarget + 30 : yTarget - 10} fill={TV.up} fontSize={27} fontWeight={800} stroke="#0f0a07" strokeWidth={6} paintOrder="stroke" strokeLinejoin="round">
           TP {rr.target.toFixed(1)}
         </text>
-        <text x={labelX} y={yStop + 28} fill={TV.down} fontSize={27} fontWeight={800}>
+        <text x={labelX} y={yStop > yEntry ? yStop + 30 : yStop - 10} fill={TV.down} fontSize={27} fontWeight={800} stroke="#0f0a07" strokeWidth={6} paintOrder="stroke" strokeLinejoin="round">
           SL {rr.stop.toFixed(1)}
         </text>
         <rect

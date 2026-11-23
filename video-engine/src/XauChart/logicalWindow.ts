@@ -17,12 +17,14 @@ export const logicalWindowAt = (
   setupCount: number,
   lastShownIndex: number,
   revealProgress: number,
+  /** Extra empty slots after the newest bar, so it never sits in the edge fade. */
+  rightPad = 0,
 ): LogicalWindow => {
   // A full slot of margin at each end rather than half of one. At -0.6 the
   // first bar sat about fifteen pixels off the edge, which on a phone reads as
   // touching it; the same at the other end put the newest bar — the one the
   // question is about — hard against the frame.
   const from = -1.3;
-  const to = setupCount + 0.5 + (lastShownIndex + 1.3 - (setupCount + 0.5)) * revealProgress;
+  const to = setupCount + 0.5 + rightPad + (lastShownIndex + 1.3 - (setupCount + 0.5)) * revealProgress;
   return {from, to};
 };

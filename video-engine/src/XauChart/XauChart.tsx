@@ -50,7 +50,17 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
     shownFloat,
     priceWindow,
     undefined,
-    logicalWindowAt(props.setupCount, lastRevealIndex(props), ramp(frame, SB.reveal)),
+    (() => {
+      // Room after the newest bar: it is the bar the question is about, and
+      // flush against the edge it sat inside the edge fade, half hidden.
+      const base = logicalWindowAt(props.setupCount, lastRevealIndex(props), ramp(frame, SB.reveal), 3);
+      if (!props.explain) return base;
+      // Walk-through: step back so the whole trade sits clear of every edge.
+      const x = ramp(frame, [EX.explain[0] - 60, EX.explain[0] + 10]);
+      const k = x * x * (3 - 2 * x);
+      const to = lastRevealIndex(props) + 9;
+      return {from: base.from + (-2 - base.from) * k, to: base.to + (to - base.to) * k};
+    })(),
   );
 
   const resistance = props.levels.find((l) => l.kind === 'resistance');
@@ -166,7 +176,10 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
         }}
       />
 
-      <ChartEdges box={CHART_BOX} bg={TV.bg} zIndex={5} transform={`translateX(${shake}px)`} />
+      {/* Thin edge fade. The default 92px band dimmed the newest candles — the
+          ones the whole video is about. With room left around the bars it
+          only has to tidy the boundary, not hide anything. */}
+      <ChartEdges box={CHART_BOX} bg={TV.bg} side={34} top={22} bottom={22} solid={6} zIndex={5} transform={`translateX(${shake}px)`} />
 
       {/* Below both the banner and the BUY/SELL pills. The banner owns the top
           116px and the pills sit at 176; anything between the two lands on one
