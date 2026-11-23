@@ -1,4 +1,4 @@
-import type {ForexChartProps} from '../data/types';
+import type {ExplainStep, ForexChartProps} from '../data/types';
 
 // 35 seconds at 60fps. The viewer is asked to commit to BUY or SELL early, so
 // every later beat is them waiting to find out whether they were right.
@@ -63,3 +63,43 @@ export const shownAt = (props: ForexChartProps, frame: number) =>
 // The reveal stops on the candle that resolves the trade, so the payoff always
 // lands on the last frame of the reveal beat.
 export const RESOLUTION_FRAME = SB.reveal[1];
+
+// --- Walk-through -----------------------------------------------------------
+// Videos that carry an `explain` run longer: after the reveal, the setup is
+// taken apart one card at a time — why this side, the plan, what happened, the
+// lesson. The quiz alone only tells a viewer whether they guessed right; this is
+// the part they keep. Older channels have no `explain` and keep DURATION.
+export const EXPLAIN_DURATION = 2820; // 47 s
+export const EX = {
+  explain: [1850, 2600] as const,
+  result: [2600, EXPLAIN_DURATION] as const,
+};
+
+export const durationFor = (props: ForexChartProps) =>
+  props.explain ? EXPLAIN_DURATION : DURATION;
+
+export const resultAt = (props: ForexChartProps) =>
+  props.explain ? EX.result[0] : SB.result[0];
+
+/**
+ * When each card is on screen. Time is shared out by how much there is to read,
+ * with a floor so a short card still registers. The last card (the lesson)
+ * stays up to the end of the video, under the result strip.
+ */
+export const stepWindows = (steps: ExplainStep[], locale: 'vi' | 'en') => {
+  const [a, b] = EX.explain;
+  const MIN = 96;
+  const weights = steps.slice(0, -1).map((s) => s.head[locale].length + s.detail[locale].length);
+  const lastShare = 130; // the lesson's own slot before the result strip lands
+  const pool = b - a - lastShare - MIN * weights.length;
+  const total = weights.reduce((x, y) => x + y, 0) || 1;
+  const out: [number, number][] = [];
+  let t = a;
+  for (const w of weights) {
+    const len = Math.round(MIN + Math.max(0, pool) * (w / total));
+    out.push([t, t + len]);
+    t += len;
+  }
+  out.push([t, EXPLAIN_DURATION]);
+  return out;
+};

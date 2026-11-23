@@ -108,7 +108,21 @@ export type ForexChartProps = {
   outcome: Outcome;
   /** 'offline' when the candles were constructed rather than downloaded. */
   note?: string;
+  /** Walk-through shown after the answer. Absent on the older channels. */
+  explain?: Explain;
 };
+
+export type L10n = {vi: string; en: string};
+
+export type ExplainFocus =
+  | {kind: 'level' | 'fibo'; price: number; ratio?: number}
+  | {kind: 'fvg' | 'ob'; top: number; bottom: number; startIndex: number}
+  | {kind: 'pattern'; points: {index: number; price: number}[]}
+  | {kind: 'plan' | 'verdict' | 'none'};
+
+export type ExplainStep = {focus: ExplainFocus; tag: L10n; head: L10n; detail: L10n};
+
+export type Explain = {steps: ExplainStep[]; result: string};
 
 // --- Daily market map ------------------------------------------------------
 // The forward-looking format. The other three ask "what happened next"; this one

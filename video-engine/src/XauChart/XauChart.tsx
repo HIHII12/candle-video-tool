@@ -4,11 +4,12 @@ import {AbsoluteFill, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {ForexChartProps} from '../data/types';
 import {useLightweightChart} from './useLightweightChart';
 import {priceWindowAt} from './priceWindow';
-import {Cursor, LevelLine, PositionBox} from './Overlay';
+import {LevelLine, PositionBox} from './Overlay';
+import {ExplainCard, Spotlight} from './Explain';
 import {FiboLevels, FvgBox, OrderBlockBox} from './Zones';
 import {Flash, ResultStrip} from './Beats';
 import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark, ForgeHeader, HookCard} from './Chrome';
-import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt, shownFloatAt} from './storyboard';
+import {EX, RESOLUTION_FRAME, SB, lastRevealIndex, ramp, resultAt, shownAt, shownFloatAt, stepWindows} from './storyboard';
 import {visibleCandles} from '../camera';
 import {ChartEdges} from '../ChartEdges';
 import {BrandMark} from '../BrandMark';
@@ -85,75 +86,12 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
   const shake = revealing ? Math.sin(frame * 1.9) * 1.8 : 0;
   const pulse = 0.5 + 0.5 * Math.sin(frame * 0.3);
 
-  let cursor = {x: 0, y: 0, opacity: 0, pressed: false};
-  if (coords) {
-    const resPoint = {x: 250, y: resistance ? coords.priceToY(resistance.price) : 0};
-    const supPoint = {x: 250, y: support ? coords.priceToY(support.price) : 0};
-    const entryPoint = props.riskReward
-      ? {
-          x: coords.indexToX(props.riskReward.entryIndex),
-          y: coords.priceToY(props.riskReward.entry),
-        }
-      : resPoint;
-
-    const fvg = props.fvgs[0];
-    const fvgPoint = fvg
-      ? {x: coords.indexToX(fvg.startIndex), y: coords.priceToY((fvg.top + fvg.bottom) / 2)}
-      : resPoint;
-    const fibPoint = props.fibonacci
-      ? {
-          x: coords.indexToX(props.fibonacci.startIndex),
-          y: coords.priceToY(props.fibonacci.levels[3].price),
-        }
-      : resPoint;
-
-    const anchors = [
-      SB.level[0] - 40,
-      SB.level[0],
-      SB.level[1],
-      SB.fvg[0],
-      SB.fvg[1],
-      SB.fibo[0],
-      SB.fibo[1],
-      SB.box[0],
-    ];
-    const xs = [
-      CHART_BOX.width * 0.5,
-      resPoint.x,
-      supPoint.x,
-      fvgPoint.x,
-      fvgPoint.x,
-      fibPoint.x,
-      fibPoint.x,
-      entryPoint.x,
-    ];
-    const ys = [
-      CHART_BOX.height * 0.5,
-      resPoint.y,
-      supPoint.y,
-      fvgPoint.y,
-      fvgPoint.y,
-      fibPoint.y,
-      fibPoint.y,
-      entryPoint.y,
-    ];
-
-    cursor = {
-      x: interpolate(frame, anchors, xs, clamp),
-      y: interpolate(frame, anchors, ys, clamp),
-      opacity: interpolate(
-        frame,
-        [SB.level[0] - 60, SB.level[0] - 24, SB.box[1], SB.box[1] + 26],
-        [0, 1, 1, 0],
-        clamp,
-      ),
-      pressed:
-        (frame >= SB.level[0] && frame <= SB.level[1]) ||
-        (frame >= SB.fvg[0] && frame <= SB.fvg[1] + 45) ||
-        (frame >= SB.fibo[0] && frame <= SB.fibo[1]) ||
-        (frame >= SB.box[0] && frame <= SB.box[1]),
-    };
-  }
+  // Walk-through timing, and the moment the quiz chrome steps aside for it.
+  const resAt = resultAt(props);
+  const windows = props.explain
+    ? stepWindows(props.explain.steps, props.locale === 'en' ? 'en' : 'vi')
+    : null;
+  const quizChrome = windows ? interpolate(frame, [EX.explain[0] - 14, EX.explain[0]], [1, 0], clamp) : 1;
 
   return (
     <AbsoluteFill
@@ -172,8 +110,12 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
       ) : (
         <TopBanner text={quizBanner(props)} frame={frame} />
       )}
-      <QuizPills frame={frame} fps={fps} answerAt={SB.answer} answer={props.answer} locale={props.locale} />
-      <Watermark visible={frame < SB.result[0] && !props.brandMark} />
+      {quizChrome > 0 && (
+        <div style={{opacity: quizChrome}}>
+          <QuizPills frame={frame} fps={fps} answerAt={SB.answer} answer={props.answer} locale={props.locale} />
+        </div>
+      )}
+      <Watermark visible={frame < resAt && !props.brandMark} />
 
       {/* Instrument + live price, small so the candles stay dominant.
           Hidden once the result strip claims this slot. */}
@@ -189,7 +131,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           left: 0,
           right: 0,
           zIndex: 30,
-          opacity: frame >= SB.result[0] ? 0 : 1,
+          opacity: frame >= resAt ? 0 : quizChrome,
           display: 'flex',
           justifyContent: 'center',
           gap: 20,
@@ -308,16 +250,17 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
             />
           )}
 
-          <Cursor {...cursor} />
+          {windows && <Spotlight props={props} frame={frame} windows={windows} coords={coords} />}
         </svg>
       )}
 
       <Countdown frame={frame} fps={fps} range={SB.countdown} />
-      {frame < SB.result[0] && (
+      {frame < resAt && quizChrome > 0 && (
         <AnswerBadge frame={frame} fps={fps} at={SB.answer} answer={props.answer} locale={props.locale} />
       )}
       <Flash frame={frame} at={RESOLUTION_FRAME} win={win} />
-      <ResultStrip props={props} frame={frame} fps={fps} at={SB.result[0]} />
+      <ResultStrip props={props} frame={frame} fps={fps} at={resAt} />
+      {windows && <ExplainCard props={props} frame={frame} windows={windows} />}
 
       <div
         style={{
@@ -341,7 +284,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           ? THO_REN.practice[props.locale === 'en' ? 'en' : 'vi']
           : strings(props.locale).realData(props.pair)}
       </div>
-      <Soundtrack nhac={props.nhac} bed="dark" cues={quizCues(win)} durationInFrames={durationInFrames} fps={fps} />
+      <Soundtrack nhac={props.nhac} bed="dark" cues={[...quizCues(win), ...(windows ?? []).map(([at]) => ({at, sound: 'whoosh' as const, gain: 0.45}))]} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>
   );
 };

@@ -71,39 +71,40 @@ export const ResultStrip: React.FC<{
         // Was top: 330, which landed the card on the brand header, the pills
         // and the top of the chart all at once. It belongs where the countdown
         // and the answer were — they are finished by the time it arrives.
-        bottom: SAFE.bottom + 18,
+        // In the strip under the chart, not over it: the chart is the proof.
+        bottom: SAFE.bottom + 2,
         left: 40,
         right: SAFE.right,
         zIndex: 46,
         background: 'rgba(15,10,7,0.90)',
-        border: `5px solid ${win ? TV.up : TV.down}`,
-        borderRadius: 26,
-        padding: '20px 26px',
+        border: `2.5px solid ${win ? TV.up : TV.down}`,
+        borderRadius: 20,
+        padding: '8px 20px 10px',
         textAlign: 'center',
         fontFamily: FONT,
         opacity: rise,
         transform: `translateY(${interpolate(rise, [0, 1], [50, 0])}px)`,
       }}
     >
-      <div style={{fontSize: 66, fontWeight: 900, color: win ? TV.up : TV.down, ...stroke(6)}}>
+      <div
+        style={{
+          fontSize: 44,
+          fontWeight: 900,
+          color: win ? TV.up : TV.down,
+          whiteSpace: 'nowrap',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
         {/* side is LONG / SHORT in the data; on the Vietnamese track that
             printed an English word in front of a Vietnamese sentence. */}
         {props.side === 'LONG' ? t.buy : t.sell} {win ? t.hitTp : t.stopped}
+        <span style={{color: '#fff', fontSize: 36}}>
+          {'  '}
+          {move >= 0 ? '+' : ''}
+          {move.toFixed(1)} USD
+        </span>
       </div>
-      <div
-        style={{
-          fontSize: 42,
-          fontWeight: 900,
-          color: '#fff',
-          marginTop: 6,
-          fontVariantNumeric: 'tabular-nums',
-          ...stroke(4),
-        }}
-      >
-        {move >= 0 ? '+' : ''}
-        {move.toFixed(1)} USD · R:R 1:{ratio.toFixed(1)}
-      </div>
-      <div style={{fontSize: 34, fontWeight: 800, color: TV.goldHot, marginTop: 10}}>
+      <div style={{fontSize: 28, fontWeight: 800, color: TV.goldHot, marginTop: 2}}>
         {THO_REN.comment[props.locale === 'en' ? 'en' : 'vi']}
       </div>
     </div>

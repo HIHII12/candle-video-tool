@@ -5,7 +5,7 @@ Bon cach mot video bi "san", moi cach mot phep do:
 
   bo cuc   chu nam duoi giao dien Shorts   -> video-engine/scripts/check_layout.py
   am thanh khong co tieng, hoac im lang    -> ffmpeg volumedetect
-  do dai   khong phai ~35 giay             -> ffprobe
+  do dai   khong phai ~47 giay             -> ffprobe
   khung den mo dau bang mot khung toi thui -> do sang khung dau
 
 Video nao co san bi chuyen vao thu muc con "LOI-DUNG-DANG" de khong ai dang nham.
@@ -79,8 +79,9 @@ def khung_dau_den(v):
     return (float(m.group(1)) < 6) if m else False
 
 
-def bo_cuc(v):
-    r = chay([sys.executable, "scripts/check_layout.py", str(v.resolve())], cwd=ENGINE)
+def bo_cuc(v, d):
+    # Lay mau tren dung do dai video, ke ca doan giai ma setup o cuoi.
+    r = chay([sys.executable, "scripts/check_layout.py", str(v.resolve()), "--duration", f"{max(1.0, d - 0.5):.1f}"], cwd=ENGINE)
     m = re.search(r"(\d+) layout problem", r.stdout)
     return int(m.group(1)) if m else -1
 
@@ -88,14 +89,14 @@ def bo_cuc(v):
 def soi(v):
     loi = []
     d = do_dai(v)
-    if not (34.0 <= d <= 36.0):
+    if not (46.0 <= d <= 48.0):
         loi.append(f"do dai {d:.1f}s")
     ok, ghi = co_tieng(v)
     if not ok:
         loi.append(ghi)
     if khung_dau_den(v):
         loi.append("khung mo dau den")
-    n = bo_cuc(v)
+    n = bo_cuc(v, d)
     if n != 0:
         loi.append(f"bo cuc {n} loi" if n > 0 else "khong kiem duoc bo cuc")
     return v, loi

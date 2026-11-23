@@ -441,10 +441,10 @@ async function runJob(job) {
     composition,
     caption: { title: caption.title, hook: caption.hook, source: caption.source },
     renderSeconds: Math.round((Date.now() - started) / 1000),
-    // All current batch compositions are 2100 frames at 60 fps. Keep this
-    // distinct from wall-clock render time; older manifests called the latter
-    // simply `seconds`, which made downstream scheduling reports ambiguous.
-    videoDurationSeconds: 35,
+    // 2100 frames at 60 fps, or 2820 when the quiz carries the setup
+    // walk-through. Kept distinct from wall-clock render time; older manifests
+    // called the latter simply `seconds`, which made scheduling reports ambiguous.
+    videoDurationSeconds: cfg && cfg.explain ? 47 : 35,
   };
 }
 

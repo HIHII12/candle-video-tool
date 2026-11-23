@@ -44,6 +44,14 @@ export const FONT = DISPLAY_FONT;
  */
 // Height was 1160, which ran the chart's own box down to y=1630 — a hundred
 // pixels into the caption bar. It now stops exactly on the readable line.
+/**
+ * A strip under the chart that belongs to the countdown, the answer and the
+ * result. They used to be printed over the bottom of the chart — exactly where
+ * support, the stop and its label sit — so the moment the viewer most needed to
+ * read the chart, the verdict covered it.
+ */
+export const QUIZ_STRIP = 120;
+
 export const CHART_BOX = {
   left: 26,
   // 540, not 470: the band above now carries the brand header, the BUY / SELL
@@ -52,7 +60,7 @@ export const CHART_BOX = {
   // 900, not 940: at 940 the box ended at x=966, past the button column at
   // 950, and the stop / target labels printed under the like button.
   width: 900,
-  height: 1920 - SAFE.bottom - 540,
+  height: 1920 - SAFE.bottom - 540 - QUIZ_STRIP,
 } as const;
 
 // Heavy outline keeps big text legible over candles of any colour.

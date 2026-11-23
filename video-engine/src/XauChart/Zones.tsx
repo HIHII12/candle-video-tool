@@ -41,20 +41,20 @@ export const FvgBox: React.FC<{fvg: Fvg; coords: Coords; reveal: number}> = ({
         y={yTop}
         width={Math.max(0, x1 - x0)}
         height={Math.max(2, yBottom - yTop)}
-        fill={bullish ? 'rgba(0,224,95,0.26)' : 'rgba(255,43,43,0.26)'}
+        fill={bullish ? 'rgba(47,210,127,0.15)' : 'rgba(239,68,68,0.15)'}
         stroke={color}
-        strokeWidth={3}
-        strokeDasharray="10 8"
+        strokeWidth={1.5}
+        strokeDasharray="6 5"
       />
       <g opacity={labelOpacity}>
-        <rect x={x0 + 8} y={yTop - 46} width={116} height={40} rx={8} fill={color} />
+        <rect x={x0 + 6} y={Math.max(2, yTop - 34)} width={70} height={30} rx={7} fill={color} />
         <text
-          x={x0 + 22}
-          y={yTop - 17}
-          fill="#06110d"
+          x={x0 + 17}
+          y={Math.max(2, yTop - 34) + 22}
+          fill="#0b0705"
           fontFamily={FONT}
-          fontSize={28}
-          fontWeight={900}
+          fontSize={20}
+          fontWeight={800}
         >
           FVG
         </text>
@@ -85,19 +85,21 @@ export const OrderBlockBox: React.FC<{ob: OrderBlock; coords: Coords; reveal: nu
         y={yTop}
         width={Math.max(0, x1 - x0)}
         height={Math.max(2, yBottom - yTop)}
-        fill="rgba(139,108,255,0.22)"
+        fill="rgba(139,108,255,0.15)"
         stroke={color}
-        strokeWidth={3}
+        strokeWidth={1.5}
       />
       <g opacity={labelOpacity}>
-        <rect x={x1 - 108} y={yBottom + 8} width={100} height={40} rx={8} fill={color} />
+        {/* Left end, where the block was made. At the right end it sat exactly
+            where the trade box prints its TP / SL label. */}
+        <rect x={x0 + 4} y={yBottom + 6} width={56} height={30} rx={7} fill={color} />
         <text
-          x={x1 - 94}
-          y={yBottom + 37}
+          x={x0 + 16}
+          y={yBottom + 28}
           fill="#100a24"
           fontFamily={FONT}
-          fontSize={28}
-          fontWeight={900}
+          fontSize={20}
+          fontWeight={800}
         >
           OB
         </text>
@@ -115,6 +117,9 @@ export const FiboLevels: React.FC<{fib: Fibonacci; coords: Coords; reveal: numbe
 
   const x0 = coords.indexToX(fib.startIndex);
   const gold = '#ffd166';
+  // Only the three ratios a retracement entry is actually taken from. All five
+  // drew a ladder of lines across the chart that buried the candles.
+  const levels = fib.levels.filter((l) => l.ratio === 0.5 || l.ratio === 0.618 || l.ratio === 0.786);
 
   // The 0.618-0.786 band is where retracement entries are usually taken, so it
   // gets a fill while the other ratios stay as plain reference lines.
@@ -131,15 +136,15 @@ export const FiboLevels: React.FC<{fib: Fibonacci; coords: Coords; reveal: numbe
           y={zoneTop}
           width={Math.max(0, interpolate(zoneReveal, [0, 1], [x0, RIGHT_EDGE]) - x0)}
           height={Math.max(2, zoneBottom - zoneTop)}
-          fill="rgba(255,209,102,0.11)"
+          fill="rgba(255,209,102,0.08)"
         />
       )}
 
-      {fib.levels.map((l, i) => {
+      {levels.map((l, i) => {
         // Levels draw one after another, cheapest way to look hand-drawn.
         const stagger = interpolate(
           reveal,
-          [i / fib.levels.length, (i + 1) / fib.levels.length],
+          [i / levels.length, (i + 1) / levels.length],
           [0, 1],
           clamp,
         );
@@ -155,17 +160,17 @@ export const FiboLevels: React.FC<{fib: Fibonacci; coords: Coords; reveal: numbe
               y1={y}
               y2={y}
               stroke={gold}
-              strokeWidth={emphasis ? 4 : 2}
-              strokeDasharray={emphasis ? undefined : '8 8'}
-              opacity={emphasis ? 1 : 0.72}
+              strokeWidth={emphasis ? 2 : 1.2}
+              strokeDasharray={emphasis ? undefined : '6 6'}
+              opacity={emphasis ? 0.95 : 0.7}
             />
             <text
               x={x0 + 10}
               y={y - 10}
               fill={gold}
               fontFamily={FONT}
-              fontSize={emphasis ? 30 : 24}
-              fontWeight={900}
+              fontSize={emphasis ? 22 : 19}
+              fontWeight={800}
               opacity={interpolate(stagger, [0.6, 1], [0, 1], clamp)}
             >
               {l.ratio.toFixed(3)}

@@ -7,8 +7,11 @@ Tool này tự làm video Shorts vàng dạng "MUA hay BÁN?":
   - Mở đầu bằng 1 câu hỏi gây tò mò
   - Biểu đồ vàng chạy, vẽ vùng giá, đếm ngược 3-2-1
   - Lật đáp án, lệnh chạy tới chốt lời hoặc dừng lỗ
+  - GIẢI MÃ SETUP: từng thẻ giải thích vì sao vào lệnh (hỗ trợ/kháng cự,
+    order block, FVG, Fibo, mô hình giá), kế hoạch cắt lỗ/chốt lời,
+    chuyện gì đã xảy ra và bài học — biểu đồ tự rọi sáng đúng chỗ đang nói
   - Kết bằng lời mời comment
-Mỗi video dài 35 giây, khổ dọc 1080x1920, có logo Thợ Rèn Vàng và nhạc nền.
+Mỗi video dài 47 giây, khổ dọc 1080x1920, có logo Thợ Rèn Vàng và nhạc nền.
 Mỗi video kèm 1 file .txt cùng tên chứa sẵn TIÊU ĐỀ, MÔ TẢ, HASHTAG.
 
 

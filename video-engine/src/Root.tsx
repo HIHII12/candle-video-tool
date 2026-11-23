@@ -2,7 +2,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {ForexChart} from './ForexChart/ForexChart';
 import {XauChart} from './XauChart/XauChart';
-import {DURATION} from './XauChart/storyboard';
+import {DURATION, durationFor} from './XauChart/storyboard';
 import {LessonShort} from './LessonShort/LessonShort';
 import {LESSON_DURATION} from './LessonShort/theme';
 import {CandleLesson} from './CandleLesson/CandleLesson';
@@ -89,6 +89,7 @@ export const RemotionRoot: React.FC = () => {
         id="XauChart"
         component={XauChart}
         durationInFrames={DURATION}
+        calculateMetadata={({props}) => ({durationInFrames: durationFor(props as ForexChartProps)})}
         fps={60}
         width={1080}
         height={1920}

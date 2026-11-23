@@ -208,6 +208,7 @@ function thoRenNote(job, cfg) {
     `Biểu đồ vàng ${cfg.pair ?? 'XAU/USD'} khung ${tf}.` +
       (res && sup ? ` Kháng cự ${Number(res).toFixed(1)} · hỗ trợ ${Number(sup).toFixed(1)}.` : ''),
     'Dừng video ở giây thứ 20, chọn MUA hoặc BÁN, rồi xem thị trường trả lời.',
+    'Xem đến cuối: video giải mã vì sao vào lệnh, đặt cắt lỗ/chốt lời ở đâu, và bài học rút ra.',
     'Bạn đoán đúng không? Comment MUA hoặc BÁN 👇',
     '',
     'Thợ Rèn Vàng — mỗi ngày một chart vàng để rèn mắt đọc lệnh.',

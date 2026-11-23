@@ -1,6 +1,6 @@
 import React from 'react';
 import {interpolate, spring} from 'remotion';
-import {TV, FONT, stroke} from './chartTheme';
+import {TV, FONT, stroke, QUIZ_STRIP} from './chartTheme';
 import {strings, type Locale} from '../i18n';
 import {CHANNEL_MARK} from '../brand';
 import {SAFE} from '../safeArea';
@@ -172,15 +172,17 @@ export const Countdown: React.FC<{
         position: 'absolute',
         // Was 330. This is the verdict, set at 150px, so its box reached up
         // from y=1590 — the bottom third of it printed under the caption bar.
-        bottom: SAFE.bottom + 24,
+        bottom: SAFE.bottom,
+        height: QUIZ_STRIP,
+        lineHeight: `${QUIZ_STRIP}px`,
         left: 0,
         right: 0,
         textAlign: 'center',
         fontFamily: FONT,
-        fontSize: 150,
+        fontSize: 104,
         fontWeight: 900,
         color: '#fff',
-        transform: `scale(${interpolate(beat, [0, 1], [1.6, 1])})`,
+        transform: `scale(${interpolate(beat, [0, 1], [1.4, 1])})`,
         ...stroke(8),
       }}
     >
@@ -207,7 +209,9 @@ export const AnswerBadge: React.FC<{
         position: 'absolute',
         // Was 330. This is the verdict, set at 150px, so its box reached up
         // from y=1590 — the bottom third of it printed under the caption bar.
-        bottom: SAFE.bottom + 24,
+        bottom: SAFE.bottom,
+        height: QUIZ_STRIP,
+        lineHeight: `${QUIZ_STRIP}px`,
         left: 0,
         // Centred in the readable width, not the frame: centred on 1080 the
         // last letter of "ĐÁP ÁN · BÁN" ran under the button column.
@@ -217,7 +221,7 @@ export const AnswerBadge: React.FC<{
         // Sized from the text, not fixed. The English verdict is eleven
         // characters and fits at 104; the Vietnamese one is thirteen and ran
         // into both edges of the frame at the same size.
-        fontSize: Math.min(96, Math.round(980 / Math.max(9, strings(locale).quiz.won(answer).length))),
+        fontSize: Math.min(84, Math.round(900 / Math.max(9, strings(locale).quiz.won(answer).length))),
         fontWeight: 900,
         color,
         transform: `scale(${interpolate(pop, [0, 1], [0.5, 1])})`,
