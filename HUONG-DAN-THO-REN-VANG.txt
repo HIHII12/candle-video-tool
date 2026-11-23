@@ -77,9 +77,9 @@ Mỗi lần chạy tool làm biểu đồ MỚI — không bao giờ ra 2 video 
 Tool làm được 30, 50 video trong 1 lần chạy. Chỉ cần gõ  30  hoặc  50
 ở câu hỏi đầu tiên.
 
-Thời gian (đo trên máy 4 nhân, mỗi video khoảng 3 phút):
-   30 video  ~ 1 tiếng 30 phút
-   50 video  ~ 2 tiếng 30 phút
+Thời gian (đo trên máy 4 nhân, mỗi video khoảng 4 phút):
+   30 video  ~ 2 tiếng
+   50 video  ~ 3 tiếng 20 phút
    Máy yếu hơn thì lâu hơn.
 -> Nên bấm chạy trước khi đi về / đi ngủ / lúc nghỉ trưa.
 
@@ -100,7 +100,7 @@ Làm 50 video KHÔNG có nghĩa đăng hết 50 trong 1 ngày.
    50 video, đăng 2 video/ngày = đủ dùng khoảng 25 ngày.
    -> Cách làm gọn nhất: mỗi tháng chạy 1 lô 50, rồi mỗi ngày đăng 2 cái.
 
-Ổ cứng: mỗi video khoảng 6 MB. 50 video ~ 300 MB.
+Ổ cứng: mỗi video khoảng 7 MB. 50 video ~ 350 MB.
 
 
 ---------------------------------------------------------------------
