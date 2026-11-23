@@ -1,3 +1,4 @@
+import {THO_REN} from '../brand';
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame, useVideoConfig} from 'remotion';
 import type {ForexChartProps} from '../data/types';
@@ -6,7 +7,7 @@ import {priceWindowAt} from './priceWindow';
 import {Cursor, LevelLine, PositionBox} from './Overlay';
 import {FiboLevels, FvgBox, OrderBlockBox} from './Zones';
 import {Flash, ResultStrip} from './Beats';
-import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark} from './Chrome';
+import {AnswerBadge, Countdown, QuizPills, TopBanner, Watermark, ForgeHeader, HookCard} from './Chrome';
 import {RESOLUTION_FRAME, SB, lastRevealIndex, ramp, shownAt, shownFloatAt} from './storyboard';
 import {visibleCandles} from '../camera';
 import {ChartEdges} from '../ChartEdges';
@@ -166,7 +167,11 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           caption model's hook is used when it is short enough to stay on one
           line at this size; otherwise a rotation, indexed off the data so a
           keyless run still varies between videos. */}
-      <TopBanner text={quizBanner(props)} frame={frame} />
+      {props.brandMark === THO_REN.logo ? (
+        <ForgeHeader frame={frame} fps={fps} locale={props.locale} logo={props.brandMark} />
+      ) : (
+        <TopBanner text={quizBanner(props)} frame={frame} />
+      )}
       <QuizPills frame={frame} fps={fps} answerAt={SB.answer} answer={props.answer} locale={props.locale} />
       <Watermark visible={frame < SB.result[0] && !props.brandMark} />
 
@@ -191,7 +196,7 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           alignItems: 'baseline',
         }}
       >
-        <span style={{fontSize: 40, fontWeight: 900, color: '#ffe000'}}>
+        <span style={{fontSize: 40, fontWeight: 900, color: TV.gold}}>
           {props.pair} · {props.timeframe}
         </span>
         <span
@@ -224,7 +229,21 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
       {/* Below both the banner and the BUY/SELL pills. The banner owns the top
           116px and the pills sit at 176; anything between the two lands on one
           of them, so the mark waits until under both. */}
-      {props.brandMark ? <BrandMark file={props.brandMark} top={300} size={76} opacity={0.85} /> : null}
+      {props.brandMark && props.brandMark !== THO_REN.logo ? (
+        <BrandMark file={props.brandMark} top={300} size={76} opacity={0.85} />
+      ) : null}
+      {props.brandMark === THO_REN.logo ? (
+        <HookCard
+          frame={frame}
+          fps={fps}
+          top={CHART_BOX.top}
+          height={CHART_BOX.height}
+          text={(() => {
+            const pool = THO_REN.hooks[props.locale === 'en' ? 'en' : 'vi'];
+            return pool[(props.candles.length * 7 + props.setupCount + Math.round(props.candles[0].close)) % pool.length];
+          })()}
+        />
+      ) : null}
 
       {/* Annotation overlay, aligned to the chart canvas.
           zIndex matters: the chart canvas paints over siblings without it. */}
@@ -318,7 +337,9 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           zIndex: 60,
         }}
       >
-        {strings(props.locale).realData(props.pair)}
+        {props.note === 'offline'
+          ? THO_REN.practice[props.locale === 'en' ? 'en' : 'vi']
+          : strings(props.locale).realData(props.pair)}
       </div>
       <Soundtrack nhac={props.nhac} bed="dark" cues={quizCues(win)} durationInFrames={durationInFrames} fps={fps} />
     </AbsoluteFill>

@@ -1,0 +1,130 @@
+=====================================================================
+   THỢ RÈN VÀNG — HƯỚNG DẪN LÀM VÀ ĐĂNG VIDEO SHORTS
+   (dành cho người vận hành — không cần biết code)
+=====================================================================
+
+Tool này tự làm video Shorts vàng dạng "MUA hay BÁN?":
+  - Mở đầu bằng 1 câu hỏi gây tò mò
+  - Biểu đồ vàng chạy, vẽ vùng giá, đếm ngược 3-2-1
+  - Lật đáp án, lệnh chạy tới chốt lời hoặc dừng lỗ
+  - Kết bằng lời mời comment
+Mỗi video dài 35 giây, khổ dọc 1080x1920, có logo Thợ Rèn Vàng và nhạc nền.
+Mỗi video kèm 1 file .txt cùng tên chứa sẵn TIÊU ĐỀ, MÔ TẢ, HASHTAG.
+
+
+---------------------------------------------------------------------
+ PHẦN 1 — CÀI ĐẶT (chỉ làm 1 lần trên mỗi máy, khoảng 15 phút)
+---------------------------------------------------------------------
+
+Bước 1. Cài Node.js
+   Vào https://nodejs.org -> tải bản "LTS" -> cứ bấm Next đến hết.
+
+Bước 2. Cài Python 3
+   Vào https://python.org -> Downloads -> tải bản mới nhất.
+   !! QUAN TRỌNG: ở màn hình đầu tiên, TÍCH VÀO Ô "Add Python to PATH"
+   rồi mới bấm Install Now. Quên tích là tool không chạy.
+
+Bước 3. Khởi động lại máy tính.
+
+Bước 4. Giải nén tool
+   - Giải nén file zip vào  C:\THO-REN-VANG
+   - !! KHÔNG để trong thư mục Downloads hay Desktop. Hai chỗ đó hay bị
+     OneDrive đồng bộ, khiến file bị khoá và tool báo lỗi lung tung.
+   - Nếu WinRAR báo "Cannot open" hoặc "being used by another process":
+     chuột phải file zip -> "Extract All..." (bộ giải nén có sẵn của Windows).
+
+Bước 5. Nháy đúp file  CAI-DAT.bat
+   - Nó tự tải mọi thứ còn thiếu (cần mạng, khoảng 5-10 phút).
+   - Chạy xong nó tự render thử 1 khung hình. Thấy chữ "xong" là máy đã sẵn sàng.
+
+
+---------------------------------------------------------------------
+ PHẦN 2 — LÀM VIDEO MỖI NGÀY (chỉ 1 thao tác)
+---------------------------------------------------------------------
+
+1. Nháy đúp file  THO-REN-VANG.bat
+2. Nó hỏi "Hôm nay làm bao nhiêu video?" -> gõ số (ví dụ 10) -> Enter.
+   Bỏ trống rồi Enter = 10 video.
+3. Để máy chạy. Mỗi video mất khoảng 2-4 phút. 10 video ~ 30 phút.
+   Trong lúc chạy cứ làm việc khác, ĐỪNG tắt cửa sổ đen.
+4. Xong, tool tự:
+   - soi lỗi từng video (chữ bị che, mất tiếng, sai độ dài, khung đen)
+   - chuyển video lỗi vào thư mục  LOI-DUNG-DANG
+   - mở thư mục chứa video sạch
+
+Video nằm ở:  C:\THO-REN-VANG\video-engine\out\batch\<ngày hôm nay>\
+
+Mỗi ngày tool tự làm biểu đồ MỚI — không bao giờ ra 2 video giống nhau.
+Chạy 2 lần trong cùng 1 ngày: lần sau chỉ làm thêm phần còn thiếu,
+không làm lại cái đã có.
+
+
+---------------------------------------------------------------------
+ PHẦN 3 — ĐĂNG LÊN YOUTUBE
+---------------------------------------------------------------------
+
+Mỗi video có 1 file .txt cùng tên. Mở file .txt bằng Notepad, trong đó có:
+   TIÊU ĐỀ:   -> dán vào ô Tiêu đề
+   MÔ TẢ:     -> dán vào ô Mô tả (dán cả dòng miễn trừ bên dưới)
+   HASHTAG:   -> dán vào CUỐI ô Mô tả
+
+Các bước trên YouTube Studio (studio.youtube.com):
+   1. Bấm TẠO -> Tải video lên -> kéo file .mp4 vào
+   2. Dán Tiêu đề và Mô tả như trên
+   3. Mục "Đối tượng người xem": chọn  "Không, nội dung này không dành cho trẻ em"
+   4. Bấm Tiếp -> Tiếp -> Tiếp
+   5. Chế độ hiển thị: chọn  "Lên lịch"  (hoặc "Công khai" nếu đăng ngay)
+
+Lịch đăng đề xuất: 2 video/ngày, khung 11:30 và 19:30 giờ Việt Nam.
+   (Đây là đề xuất ban đầu. Sau 2 tuần xem số liệu Analytics rồi chỉnh.)
+
+Sau khi video lên:
+   - Vào phần bình luận, đăng và GHIM bình luận:
+       "MUA hay BÁN? Comment trước khi xem đáp án 👇"
+   - Trả lời các bình luận trong 1 giờ đầu — YouTube đẩy video có tương tác sớm.
+
+
+---------------------------------------------------------------------
+ PHẦN 4 — 6 ĐIỀU KHÔNG ĐƯỢC LÀM
+---------------------------------------------------------------------
+
+ 1. KHÔNG đăng video nằm trong thư mục  LOI-DUNG-DANG.
+ 2. KHÔNG sửa tiêu đề thành lời hứa lãi: "x2 tài khoản", "chắc thắng",
+    "100% win". Vừa sai sự thật, vừa bị YouTube bóp tương tác.
+ 3. KHÔNG xoá dòng miễn trừ "Chỉ mang tính giáo dục..." khỏi mô tả.
+ 4. KHÔNG nói đây là "tín hiệu thật" hay "lệnh thật". Biểu đồ trong video
+    là biểu đồ DỰNG LẠI để luyện tập — dòng chữ nhỏ cuối video đã ghi rõ.
+ 5. KHÔNG đăng quá 3 video/ngày lên cùng 1 kênh.
+ 6. KHÔNG đăng lại cùng một file lên kênh khác của công ty.
+
+
+---------------------------------------------------------------------
+ PHẦN 5 — GẶP LỖI THÌ LÀM GÌ
+---------------------------------------------------------------------
+
+ "node is not recognized" / "python is not recognized"
+    -> Cài lại Node.js / Python (nhớ tích "Add to PATH"), khởi động lại máy.
+
+ Cửa sổ đen hiện chữ đỏ rồi dừng
+    -> Chụp màn hình gửi quản lý. Đừng xoá gì.
+
+ Máy chạy rất chậm, quạt kêu to
+    -> Bình thường. Nếu máy yếu quá: mở THO-REN-VANG.bat bằng Notepad,
+       sửa  "--workers 2"  thành  "--workers 1", lưu lại.
+
+ Thư mục LOI-DUNG-DANG có video
+    -> Bình thường, thỉnh thoảng có 1-2 cái. Bỏ qua, đăng những cái còn lại.
+       Nếu MỌI video đều lỗi -> báo quản lý.
+
+ YouTube báo "Đã xác nhận bản quyền" (Content ID) trên video
+    -> Nhạc nền là một bản nhạc trending. Video vẫn được xem bình thường,
+       chỉ là tiền quảng cáo của video đó về chủ bản nhạc. KHÔNG cần gỡ video.
+       Ghi lại tên video và báo quản lý.
+
+ YouTube CHẶN hẳn video
+    -> Báo quản lý ngay. Đừng tự đăng lại.
+
+
+=====================================================================
+   Có thắc mắc -> hỏi quản lý trước khi làm.
+=====================================================================

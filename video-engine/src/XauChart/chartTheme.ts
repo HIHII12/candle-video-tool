@@ -1,18 +1,25 @@
 // Short-form palette: saturated enough to read at thumbnail size on a phone,
 // which is why it departs from TradingView's muted desktop teal/rose.
+// Lo ren: nen den am cua bep than, vang nung cho moi thu thuoc ve thuong hieu,
+// than hong cho diem nhan. Nen giu xanh / do — nguoi xem doc nen bang mau truoc
+// khi doc bang mat, doi mau la bat ho hoc lai — nhung ha bot do ruc neon de
+// khong danh nhau voi vang.
 export const TV = {
-  bg: '#0a0e1a',
-  bgTop: '#131a2e',
-  up: '#00e05f',
-  down: '#ff2b2b',
-  text: '#ffffff',
-  textDim: 'rgba(255,255,255,0.5)',
-  banner: '#ffe000',
-  level: '#ffe000',
-  support: '#00e05f',
-  resistance: '#ff2b2b',
-  profitFill: 'rgba(0,224,95,0.22)',
-  lossFill: 'rgba(255,43,43,0.22)',
+  bg: '#0f0a07',
+  bgTop: '#21150c',
+  up: '#2fd27f',
+  down: '#ef4444',
+  text: '#fff7ea',
+  textDim: 'rgba(255,247,234,0.5)',
+  banner: '#f5b83d',
+  level: '#f5b83d',
+  gold: '#f5b83d',
+  goldHot: '#ffd98a',
+  ember: '#ff7a1a',
+  support: '#2fd27f',
+  resistance: '#ef4444',
+  profitFill: 'rgba(47,210,127,0.20)',
+  lossFill: 'rgba(239,68,68,0.20)',
 } as const;
 
 import {DISPLAY_FONT} from '../fonts';
@@ -39,9 +46,13 @@ export const FONT = DISPLAY_FONT;
 // pixels into the caption bar. It now stops exactly on the readable line.
 export const CHART_BOX = {
   left: 26,
-  top: 470,
-  width: 940,
-  height: 1920 - SAFE.bottom - 470,
+  // 540, not 470: the band above now carries the brand header, the BUY / SELL
+  // pills and the price line, in that order, and needs the room.
+  top: 540,
+  // 900, not 940: at 940 the box ended at x=966, past the button column at
+  // 950, and the stop / target labels printed under the like button.
+  width: 900,
+  height: 1920 - SAFE.bottom - 540,
 } as const;
 
 // Heavy outline keeps big text legible over candles of any colour.

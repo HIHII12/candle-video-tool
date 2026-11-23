@@ -504,3 +504,45 @@ export function lotPlan(isoDate, count = 30, locale = 'vi') {
   }
   return jobs;
 }
+
+/**
+ * Tho Ren Vang — kenh vang moi.
+ *
+ * Kenh cu dang giao duc nen (giai phau, so sanh, khai niem) va xem it: nguoi xem
+ * luot qua mot bai giang. Kenh nay chi lam MOT dang — cau do "Mua hay Ban?" tren
+ * bieu do vang — vi no la dang duy nhat ep nguoi xem chon phe truoc khi biet ket
+ * qua, roi giu ho lai de xem minh dung hay sai. Do la giu chan, khong phai day.
+ *
+ * Chi vang (XAU/USD). Khung thoi gian xoay vong de hai video lien nhau khong trong
+ * giong nhau. Ket qua de tu nhien ("any"): co lenh trung, co lenh dinh dung lo —
+ * kenh ma luc nao cung thang la kenh khong ai tin.
+ *
+ * Nen dung san (offline): khong can mang, chay duoc tren may nao cung duoc.
+ */
+export function thoRenPlan(isoDate, count = 30) {
+  const day = dayIndex(isoDate);
+  const KHUNG = [
+    {interval: '15m', label: '15m'},
+    {interval: '5m', label: '5m'},
+    {interval: '30m', label: '30m'},
+    {interval: '1h', label: 'H1'},
+  ];
+  const jobs = [];
+  for (let i = 0; i < count; i++) {
+    const tf = KHUNG[i % KHUNG.length];
+    const seed = day * 1000 + i;
+    jobs.push({
+      id: `tho-ren-${isoDate}-${String(i + 1).padStart(2, '0')}`,
+      format: 'buy-or-sell-quiz',
+      offline: true,
+      seed,
+      symbol: 'GC=F',
+      pair: 'XAU/USD',
+      interval: tf.interval,
+      timeframe: tf.label,
+      outcome: 'any',
+      label: `XAU/USD ${tf.label} · ${i + 1}`,
+    });
+  }
+  return jobs;
+}

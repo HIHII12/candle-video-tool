@@ -74,6 +74,8 @@ export const PositionBox: React.FC<{
   const xStart = coords.indexToX(rr.entryIndex);
   const xEnd = interpolate(reveal, [0, 1], [xStart, CHART_BOX.width - 120]);
   const width = Math.max(0, xEnd - xStart);
+  // Widest label is the R:R plate at 230px; keep it inside the box.
+  const labelX = Math.min(xStart + 12, CHART_BOX.width - 250);
 
   const yEntry = coords.priceToY(rr.entry);
   const yStop = coords.priceToY(rr.stop);
@@ -115,21 +117,24 @@ export const PositionBox: React.FC<{
       />
 
       <g opacity={labelOpacity} fontFamily={FONT}>
-        <text x={xStart + 12} y={yTarget - 12} fill={TV.up} fontSize={34} fontWeight={900}>
+        {/* Labels start at the entry bar and run right, so an entry near the
+            newest candle pushed "SL 2220.0" past the box and under the like
+            button. Pulled left until the widest label fits. */}
+        <text x={labelX} y={yTarget - 12} fill={TV.up} fontSize={34} fontWeight={900}>
           TP {rr.target.toFixed(1)}
         </text>
-        <text x={xStart + 12} y={yStop + 30} fill={TV.down} fontSize={34} fontWeight={900}>
+        <text x={labelX} y={yStop + 30} fill={TV.down} fontSize={34} fontWeight={900}>
           SL {rr.stop.toFixed(1)}
         </text>
         <rect
-          x={xStart + 12}
+          x={labelX}
           y={yEntry + 14}
           width={230}
           height={54}
           rx={8}
           fill="rgba(12,13,16,0.85)"
         />
-        <text x={xStart + 26} y={yEntry + 44} fill={TV.text} fontSize={36} fontWeight={900}>
+        <text x={labelX + 14} y={yEntry + 44} fill={TV.text} fontSize={36} fontWeight={900}>
           R:R 1:{ratio.toFixed(1)}
         </text>
       </g>

@@ -1,3 +1,5 @@
+import {SAFE} from '../safeArea';
+import {THO_REN} from '../brand';
 import React from 'react';
 import {strings} from '../i18n';
 import {AbsoluteFill, interpolate, spring} from 'remotion';
@@ -66,22 +68,27 @@ export const ResultStrip: React.FC<{
     <div
       style={{
         position: 'absolute',
-        top: 330,
+        // Was top: 330, which landed the card on the brand header, the pills
+        // and the top of the chart all at once. It belongs where the countdown
+        // and the answer were — they are finished by the time it arrives.
+        bottom: SAFE.bottom + 18,
         left: 40,
-        right: 40,
+        right: SAFE.right,
         zIndex: 46,
-        background: win ? 'rgba(0,224,95,0.16)' : 'rgba(255,43,43,0.16)',
+        background: 'rgba(15,10,7,0.90)',
         border: `5px solid ${win ? TV.up : TV.down}`,
         borderRadius: 26,
         padding: '20px 26px',
         textAlign: 'center',
         fontFamily: FONT,
         opacity: rise,
-        transform: `translateY(${interpolate(rise, [0, 1], [-50, 0])}px)`,
+        transform: `translateY(${interpolate(rise, [0, 1], [50, 0])}px)`,
       }}
     >
       <div style={{fontSize: 66, fontWeight: 900, color: win ? TV.up : TV.down, ...stroke(6)}}>
-        {props.side} {win ? t.hitTp : t.stopped}
+        {/* side is LONG / SHORT in the data; on the Vietnamese track that
+            printed an English word in front of a Vietnamese sentence. */}
+        {props.side === 'LONG' ? t.buy : t.sell} {win ? t.hitTp : t.stopped}
       </div>
       <div
         style={{
@@ -95,6 +102,9 @@ export const ResultStrip: React.FC<{
       >
         {move >= 0 ? '+' : ''}
         {move.toFixed(1)} USD · R:R 1:{ratio.toFixed(1)}
+      </div>
+      <div style={{fontSize: 34, fontWeight: 800, color: TV.goldHot, marginTop: 10}}>
+        {THO_REN.comment[props.locale === 'en' ? 'en' : 'vi']}
       </div>
     </div>
   );

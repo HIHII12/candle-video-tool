@@ -55,6 +55,62 @@ def fetch_candles(symbol: str, interval: str, rng: str) -> list[dict]:
     return candles
 
 
+STEP_SEC = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "60m": 3600,
+            "4h": 14400, "1d": 86400}
+
+
+def synth_candles(seed: int, interval: str, bars: int = 900,
+                  base: float = 2380.0) -> list[dict]:
+    """A constructed XAU series, for when the network cannot be used.
+
+    Yahoo is the only thing in this script that needs the network, and it is
+    blocked on the render server and absent on many of the machines this tool
+    is handed to. Everything downstream — levels, gaps, Fibonacci, the trade and
+    its outcome — is measured from whatever candles it is given, so a series
+    with the texture of gold is enough to make the quiz render anywhere.
+
+    Texture, not noise: price moves in regimes (a trend that runs, a range that
+    chops, a reversal that breaks it), volatility clusters, and wicks are wider
+    on the bars that move most. A plain random walk has none of that and gives
+    the scenario finder nothing worth featuring.
+    """
+    import math
+    import random
+    rng = random.Random(seed)
+    step = STEP_SEC.get(interval, 900)
+    t = 1_760_000_000 - bars * step
+    price = base * (1 + rng.uniform(-0.04, 0.04))
+    vol = 0.0016
+    drift, left = 0.0, 0
+    out = []
+    for _ in range(bars):
+        if left <= 0:
+            kind = rng.choices(["trend", "range", "flip"], [0.45, 0.35, 0.20])[0]
+            left = rng.randint(25, 70)
+            if kind == "trend":
+                drift = rng.choice([-1, 1]) * rng.uniform(0.0004, 0.0011)
+            elif kind == "range":
+                drift = 0.0
+            else:
+                drift = -drift * rng.uniform(1.2, 2.0) if drift else rng.choice([-1, 1]) * 0.0008
+        left -= 1
+        vol = max(0.0007, min(0.0042, vol * math.exp(rng.gauss(0, 0.18)) * 0.98 + 0.00004))
+        o = price
+        c = o * (1 + drift + rng.gauss(0, vol))
+        # Keo nhe ve quanh muc goc khi troi qua 6%: van co xu huong, nhung gia
+        # tren tieu de luon gan voi muc nguoi van hanh nhap.
+        if abs(c / base - 1) > 0.06:
+            c = o * (1 - 0.0015 * (1 if c > base else -1)) + (c - o) * 0.3
+        span = abs(c - o) + o * vol * rng.uniform(0.3, 1.4)
+        h = max(o, c) + span * rng.uniform(0.05, 0.55)
+        l = min(o, c) - span * rng.uniform(0.05, 0.55)
+        out.append({"time": t, "open": round(o, 2), "high": round(h, 2),
+                    "low": round(l, 2), "close": round(c, 2)})
+        price = c
+        t += step
+    return out
+
+
 def swing_points(candles: list[dict], lookback: int = 3):
     """A swing high is a candle whose high exceeds `lookback` neighbours each side."""
     highs, lows = [], []
@@ -547,6 +603,8 @@ def main() -> None:
     ap.add_argument("--timeframe", default="15m")
     ap.add_argument("--interval", default="15m")
     ap.add_argument("--range", dest="rng", default="1mo")
+    ap.add_argument("--offline-seed", type=int, default=None,
+                    help="dung nen vang dung san thay vi tai tu Yahoo (khong can mang)")
     ap.add_argument("--setup", type=int, default=42, help="candles shown for analysis")
     ap.add_argument("--future", type=int, default=22, help="candles withheld for the reveal")
     ap.add_argument("--min-rr", type=float, default=1.5, help="minimum reward:risk to feature")
@@ -562,7 +620,18 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    candles = fetch_candles(args.symbol, args.interval, args.rng)
+    if args.offline_seed is not None:
+        # Gia vang quanh muc nguoi van hanh nhap luc chay (THO-REN-VANG.bat hoi).
+        # Bieu do dung san o 2.000 trong khi vang ngoai thi truong o muc khac han
+        # thi nguoi xem nhin tieu de la biet gia.
+        import os
+        try:
+            base = float(os.environ.get("THO_REN_GIA", "") or 2380)
+        except ValueError:
+            base = 2380.0
+        candles = synth_candles(args.offline_seed, args.interval, base=base)
+    else:
+        candles = fetch_candles(args.symbol, args.interval, args.rng)
     if len(candles) < args.setup + args.future:
         raise SystemExit(f"Only got {len(candles)} candles — widen --range.")
 
@@ -571,6 +640,8 @@ def main() -> None:
                         want=args.outcome, judge=args.judge,
                         max_gap_min=max_gap)
     cfg["pair"] = args.pair
+    if args.offline_seed is not None:
+        cfg["note"] = "offline"
     cfg["timeframe"] = args.timeframe
     Path(args.out).write_text(json.dumps(cfg, indent=2, ensure_ascii=False))
 

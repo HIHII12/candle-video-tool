@@ -106,6 +106,8 @@ export type ForexChartProps = {
   orderBlock: OrderBlock | null;
   fibonacci: Fibonacci | null;
   outcome: Outcome;
+  /** 'offline' when the candles were constructed rather than downloaded. */
+  note?: string;
 };
 
 // --- Daily market map ------------------------------------------------------

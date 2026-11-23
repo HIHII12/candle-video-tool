@@ -174,25 +174,68 @@ function bodyOf(job, cfg, locale) {
   return out.filter(Boolean);
 }
 
+
+/**
+ * Tho Ren Vang — tieu de, mo ta va hashtag rieng cho kenh vang.
+ *
+ * Ban mac dinh cua dang cau do sinh tieu de tieng Anh giong "cau view" ("THE
+ * SNIPER ENTRY FORMULA"), lac hoan toan tren kenh tieng Viet. O day:
+ *  - tieu de co GIA cu the: vua that hon, vua khien hai video cung khung khong
+ *    bao gio trung tieu de (YouTube coi tieu de lap la spam);
+ *  - KHONG lo dap an o dau ca: tieu de / mo ta noi MUA hay BAN la xem het video
+ *    truoc khi bam vao — giet luon ly do de xem.
+ */
+const THO_REN_TITLES = [
+  (tf, p) => `Vàng ${tf} quanh ${p}: MUA hay BÁN? Bạn có 3 giây`,
+  (tf, p) => `Đoán hướng vàng ${tf} tại ${p} — đừng tua!`,
+  (tf, p) => `Lệnh vàng ${tf} ở ${p} này thắng hay thua?`,
+  (tf, p) => `Thợ rèn hỏi: vàng ${tf} từ ${p} đi đâu tiếp?`,
+  (tf, p) => `Bạn dám vào lệnh vàng ${tf} ở ${p} không?`,
+  (tf, p) => `Vàng ${tf} quanh ${p} — chốt lời hay dính stop?`,
+  (tf, p) => `Test mắt đọc chart vàng ${tf} · vùng ${p}`,
+  (tf, p) => `Vàng ${tf} ${p}: sắp bứt hay sắp sập?`,
+];
+
+function thoRenNote(job, cfg) {
+  const rr = cfg.riskReward ?? {};
+  const price = Math.round(rr.entry ?? cfg.candles?.[cfg.setupCount - 1]?.close ?? 0);
+  const tf = cfg.timeframe ?? job.timeframe ?? '';
+  const seed = Number(job.seed ?? 0);
+  const title = THO_REN_TITLES[Math.abs(seed) % THO_REN_TITLES.length](tf, price);
+  const res = cfg.levels?.[0]?.price;
+  const sup = cfg.levels?.[1]?.price;
+  const body = [
+    `Biểu đồ vàng ${cfg.pair ?? 'XAU/USD'} khung ${tf}.` +
+      (res && sup ? ` Kháng cự ${Number(res).toFixed(1)} · hỗ trợ ${Number(sup).toFixed(1)}.` : ''),
+    'Dừng video ở giây thứ 20, chọn MUA hoặc BÁN, rồi xem thị trường trả lời.',
+    'Bạn đoán đúng không? Comment MUA hoặc BÁN 👇',
+    '',
+    'Thợ Rèn Vàng — mỗi ngày một chart vàng để rèn mắt đọc lệnh.',
+  ];
+  const tags = '#xauusd #vang #giavang #tradingvang #forex #phantichkythuat #thorenvang';
+  return {title, body, tags};
+}
+
 export function writeUploadNote(engineDir, videoPath, job, cfg, caption) {
   const locale = job.locale ?? cfg.locale ?? 'en';
   const L = LABEL[locale] ?? LABEL.en;
   const t = TAGS[locale] ?? TAGS.en;
   const tags = [...(t[job.format] ?? []), ...instrumentTags(cfg, locale), ...t.base].join(' ');
 
+  const tr = job.offline && job.format === 'buy-or-sell-quiz' ? thoRenNote(job, cfg) : null;
   const text = [
     `${L.file}: ${videoPath.split('/').pop()}`,
     '',
     `${L.title}:`,
-    titleOf(job, cfg, caption, locale),
+    tr ? tr.title : titleOf(job, cfg, caption, locale),
     '',
     `${L.desc}:`,
-    ...bodyOf(job, cfg, locale),
+    ...(tr ? tr.body : bodyOf(job, cfg, locale)),
     '',
     DISCLAIMER[locale] ?? DISCLAIMER.en,
     '',
     `${L.tags}:`,
-    tags,
+    tr ? tr.tags : tags,
     '',
   ].join('\n');
 

@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, lotPlan, replayPlan, mixedPlan } from './variants.mjs';
+import { planFor, candlePlan, comparePlan, conceptPlan, mapPlan, anatomyPlan, quizPlan, lotPlan, replayPlan, mixedPlan, thoRenPlan } from './variants.mjs';
 import { writeCaption } from './caption.mjs';
 import { writeUploadNote } from './upload-kit.mjs';
 
@@ -258,7 +258,10 @@ async function buildData(job) {
   await sh(python, ['scripts/fetch_gold.py',
     '--symbol', job.symbol, '--pair', job.pair,
     '--interval', job.interval, '--timeframe', job.timeframe,
-    '--range', '60d', '--outcome', job.outcome, '--judge', judge, '--out', out]);
+    '--range', '60d', '--outcome', job.outcome, '--judge', judge, '--out', out,
+    // Nen dung san thay cho Yahoo: may cap duoi va may chu render deu co the
+    // khong vao duoc mang — dang cau do van phai ra duoc.
+    ...(job.offline ? ['--offline-seed', String(job.seed)] : [])]);
 
   const cfg = JSON.parse(readFileSync(join(ENGINE, out), 'utf8'));
   const rr = judge === 'pattern' ? cfg.patternTrade : cfg.riskReward;
@@ -550,11 +553,13 @@ let plan = mix
               ? anatomyPlan(date, count, locale)
               : format === 'quiz'
                 ? quizPlan(date, count, locale)
+              : format === 'tho-ren'
+                ? thoRenPlan(date, count)
                 : format === 'lot-quiz'
                   ? lotPlan(date, count, locale)
               : planFor(date, count);
 if ((replay || mix) && format) plan = plan.filter((j) => j.format === format);
-if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz', 'lot-quiz'].includes(format)) {
+if (format && !['candle-lesson', 'candle-compare', 'concept-lesson', 'map-offline', 'anatomy', 'quiz', 'lot-quiz', 'tho-ren'].includes(format)) {
   plan = plan.filter((j) => j.format === format);
 }
 // Comma-separated, so a smoke test can name one job per format rather than
