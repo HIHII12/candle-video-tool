@@ -1,0 +1,746 @@
+{
+  "pair": "XAU/USD",
+  "timeframe": "15m",
+  "title": "READ THE STRUCTURE FIRST",
+  "hook": "XAU/USD on the 15m — does this one reach target?",
+  "side": "SHORT",
+  "answer": "BUY",
+  "candles": [
+    {
+      "time": 1759874000,
+      "open": 4162.82,
+      "high": 4171.02,
+      "low": 4155.35,
+      "close": 4169.26
+    },
+    {
+      "time": 1759874900,
+      "open": 4169.26,
+      "high": 4177.84,
+      "low": 4160.38,
+      "close": 4175.81
+    },
+    {
+      "time": 1759875800,
+      "open": 4175.81,
+      "high": 4178.95,
+      "low": 4164.16,
+      "close": 4170.86
+    },
+    {
+      "time": 1759876700,
+      "open": 4170.86,
+      "high": 4175.22,
+      "low": 4163.41,
+      "close": 4166.92
+    },
+    {
+      "time": 1759877600,
+      "open": 4166.92,
+      "high": 4177.73,
+      "low": 4157.62,
+      "close": 4171.87
+    },
+    {
+      "time": 1759878500,
+      "open": 4171.87,
+      "high": 4196.91,
+      "low": 4166.07,
+      "close": 4188.36
+    },
+    {
+      "time": 1759879400,
+      "open": 4188.36,
+      "high": 4201.88,
+      "low": 4181.4,
+      "close": 4192.12
+    },
+    {
+      "time": 1759880300,
+      "open": 4192.12,
+      "high": 4233.38,
+      "low": 4175.29,
+      "close": 4222.24
+    },
+    {
+      "time": 1759881200,
+      "open": 4222.24,
+      "high": 4229.86,
+      "low": 4219.47,
+      "close": 4222.51
+    },
+    {
+      "time": 1759882100,
+      "open": 4222.51,
+      "high": 4233.57,
+      "low": 4221.1,
+      "close": 4228.5
+    },
+    {
+      "time": 1759883000,
+      "open": 4228.5,
+      "high": 4231.43,
+      "low": 4226.34,
+      "close": 4230.6
+    },
+    {
+      "time": 1759883900,
+      "open": 4230.6,
+      "high": 4243.23,
+      "low": 4227.32,
+      "close": 4241.61
+    },
+    {
+      "time": 1759884800,
+      "open": 4241.61,
+      "high": 4247.81,
+      "low": 4228.35,
+      "close": 4229.63
+    },
+    {
+      "time": 1759885700,
+      "open": 4229.63,
+      "high": 4234.68,
+      "low": 4210.95,
+      "close": 4216.23
+    },
+    {
+      "time": 1759886600,
+      "open": 4216.23,
+      "high": 4238.6,
+      "low": 4205.85,
+      "close": 4229.21
+    },
+    {
+      "time": 1759887500,
+      "open": 4229.21,
+      "high": 4252.37,
+      "low": 4223.17,
+      "close": 4244.98
+    },
+    {
+      "time": 1759888400,
+      "open": 4244.98,
+      "high": 4252.48,
+      "low": 4234.16,
+      "close": 4240.12
+    },
+    {
+      "time": 1759889300,
+      "open": 4240.12,
+      "high": 4241.39,
+      "low": 4230.4,
+      "close": 4236.42
+    },
+    {
+      "time": 1759890200,
+      "open": 4236.42,
+      "high": 4274.11,
+      "low": 4232.58,
+      "close": 4266.69
+    },
+    {
+      "time": 1759891100,
+      "open": 4266.69,
+      "high": 4267.63,
+      "low": 4261.23,
+      "close": 4264.38
+    },
+    {
+      "time": 1759892000,
+      "open": 4264.38,
+      "high": 4271.24,
+      "low": 4254.98,
+      "close": 4262.23
+    },
+    {
+      "time": 1759892900,
+      "open": 4262.23,
+      "high": 4264.68,
+      "low": 4255.05,
+      "close": 4258.35
+    },
+    {
+      "time": 1759893800,
+      "open": 4258.35,
+      "high": 4272.59,
+      "low": 4254.98,
+      "close": 4264.26
+    },
+    {
+      "time": 1759894700,
+      "open": 4264.26,
+      "high": 4271.42,
+      "low": 4262.45,
+      "close": 4263.27
+    },
+    {
+      "time": 1759895600,
+      "open": 4263.27,
+      "high": 4270.1,
+      "low": 4255,
+      "close": 4261.32
+    },
+    {
+      "time": 1759896500,
+      "open": 4261.32,
+      "high": 4275.82,
+      "low": 4228.76,
+      "close": 4240.7
+    },
+    {
+      "time": 1759897400,
+      "open": 4240.7,
+      "high": 4243.52,
+      "low": 4233.79,
+      "close": 4236.7
+    },
+    {
+      "time": 1759898300,
+      "open": 4236.7,
+      "high": 4246.45,
+      "low": 4224.49,
+      "close": 4226.41
+    },
+    {
+      "time": 1759899200,
+      "open": 4226.41,
+      "high": 4231.54,
+      "low": 4224.44,
+      "close": 4227.37
+    },
+    {
+      "time": 1759900100,
+      "open": 4227.37,
+      "high": 4227.67,
+      "low": 4224.73,
+      "close": 4226.41
+    },
+    {
+      "time": 1759901000,
+      "open": 4226.41,
+      "high": 4239.73,
+      "low": 4218.59,
+      "close": 4235.58
+    },
+    {
+      "time": 1759901900,
+      "open": 4235.58,
+      "high": 4242.38,
+      "low": 4233.04,
+      "close": 4234.8
+    },
+    {
+      "time": 1759902800,
+      "open": 4234.8,
+      "high": 4245.94,
+      "low": 4226.49,
+      "close": 4242.89
+    },
+    {
+      "time": 1759903700,
+      "open": 4242.89,
+      "high": 4250.89,
+      "low": 4233.39,
+      "close": 4248.46
+    },
+    {
+      "time": 1759904600,
+      "open": 4248.46,
+      "high": 4253.97,
+      "low": 4241.16,
+      "close": 4244.66
+    },
+    {
+      "time": 1759905500,
+      "open": 4244.66,
+      "high": 4249.87,
+      "low": 4236.01,
+      "close": 4241.9
+    },
+    {
+      "time": 1759906400,
+      "open": 4241.9,
+      "high": 4250.05,
+      "low": 4241.45,
+      "close": 4246.51
+    },
+    {
+      "time": 1759907300,
+      "open": 4246.51,
+      "high": 4247.51,
+      "low": 4230.59,
+      "close": 4233.58
+    },
+    {
+      "time": 1759908200,
+      "open": 4233.58,
+      "high": 4239.8,
+      "low": 4230.21,
+      "close": 4238.54
+    },
+    {
+      "time": 1759909100,
+      "open": 4238.54,
+      "high": 4244.03,
+      "low": 4232.47,
+      "close": 4237.9
+    },
+    {
+      "time": 1759910000,
+      "open": 4237.9,
+      "high": 4246.69,
+      "low": 4234.68,
+      "close": 4240.32
+    },
+    {
+      "time": 1759910900,
+      "open": 4240.32,
+      "high": 4240.96,
+      "low": 4237.23,
+      "close": 4239.23
+    },
+    {
+      "time": 1759911800,
+      "open": 4239.23,
+      "high": 4240.8,
+      "low": 4231.89,
+      "close": 4234.44
+    },
+    {
+      "time": 1759912700,
+      "open": 4234.44,
+      "high": 4255.05,
+      "low": 4221.28,
+      "close": 4253.28
+    },
+    {
+      "time": 1759913600,
+      "open": 4253.28,
+      "high": 4257.12,
+      "low": 4250.07,
+      "close": 4254.89
+    },
+    {
+      "time": 1759914500,
+      "open": 4254.89,
+      "high": 4261.06,
+      "low": 4250.58,
+      "close": 4255.45
+    },
+    {
+      "time": 1759915400,
+      "open": 4255.45,
+      "high": 4272.46,
+      "low": 4250.8,
+      "close": 4270.03
+    },
+    {
+      "time": 1759916300,
+      "open": 4270.03,
+      "high": 4277.44,
+      "low": 4269.06,
+      "close": 4273.43
+    },
+    {
+      "time": 1759917200,
+      "open": 4273.43,
+      "high": 4278.29,
+      "low": 4268.42,
+      "close": 4274.88
+    },
+    {
+      "time": 1759918100,
+      "open": 4274.88,
+      "high": 4289.88,
+      "low": 4269.26,
+      "close": 4282.71
+    },
+    {
+      "time": 1759919000,
+      "open": 4282.71,
+      "high": 4300.71,
+      "low": 4280.15,
+      "close": 4294.73
+    },
+    {
+      "time": 1759919900,
+      "open": 4294.73,
+      "high": 4308.41,
+      "low": 4293.58,
+      "close": 4304.49
+    },
+    {
+      "time": 1759920800,
+      "open": 4304.49,
+      "high": 4312.09,
+      "low": 4303.35,
+      "close": 4308.35
+    },
+    {
+      "time": 1759921700,
+      "open": 4308.35,
+      "high": 4313.6,
+      "low": 4307.34,
+      "close": 4311.86
+    },
+    {
+      "time": 1759922600,
+      "open": 4311.86,
+      "high": 4316.39,
+      "low": 4310.97,
+      "close": 4314.79
+    },
+    {
+      "time": 1759923500,
+      "open": 4314.79,
+      "high": 4319.87,
+      "low": 4312.34,
+      "close": 4319.18
+    },
+    {
+      "time": 1759924400,
+      "open": 4319.18,
+      "high": 4324.23,
+      "low": 4316.72,
+      "close": 4321.79
+    },
+    {
+      "time": 1759925300,
+      "open": 4321.79,
+      "high": 4331.65,
+      "low": 4320.24,
+      "close": 4328.23
+    },
+    {
+      "time": 1759926200,
+      "open": 4328.23,
+      "high": 4332.77,
+      "low": 4326.98,
+      "close": 4331.42
+    },
+    {
+      "time": 1759927100,
+      "open": 4331.42,
+      "high": 4332.88,
+      "low": 4329.63,
+      "close": 4330.15
+    },
+    {
+      "time": 1759928000,
+      "open": 4330.15,
+      "high": 4334.75,
+      "low": 4329.08,
+      "close": 4334.1
+    },
+    {
+      "time": 1759928900,
+      "open": 4334.1,
+      "high": 4335.85,
+      "low": 4331.6,
+      "close": 4332.54
+    },
+    {
+      "time": 1759929800,
+      "open": 4332.54,
+      "high": 4341.34,
+      "low": 4331.86,
+      "close": 4337.51
+    },
+    {
+      "time": 1759930700,
+      "open": 4337.51,
+      "high": 4340.44,
+      "low": 4334.32,
+      "close": 4339.48
+    }
+  ],
+  "setupCount": 42,
+  "levels": [
+    {
+      "price": 4275.82,
+      "label": "Resistance",
+      "kind": "resistance"
+    },
+    {
+      "price": 4157.62,
+      "label": "Support",
+      "kind": "support"
+    }
+  ],
+  "riskReward": {
+    "entry": 4239.23,
+    "stop": 4290,
+    "target": 4157.62,
+    "entryIndex": 41
+  },
+  "structure": [
+    {
+      "index": 2,
+      "price": 4178.95,
+      "type": "H"
+    },
+    {
+      "index": 4,
+      "price": 4157.62,
+      "type": "L"
+    },
+    {
+      "index": 12,
+      "price": 4247.81,
+      "type": "H"
+    },
+    {
+      "index": 14,
+      "price": 4205.85,
+      "type": "L"
+    },
+    {
+      "index": 18,
+      "price": 4274.11,
+      "type": "H"
+    },
+    {
+      "index": 22,
+      "price": 4254.98,
+      "type": "L"
+    },
+    {
+      "index": 25,
+      "price": 4275.82,
+      "type": "H"
+    },
+    {
+      "index": 30,
+      "price": 4218.59,
+      "type": "L"
+    },
+    {
+      "index": 34,
+      "price": 4253.97,
+      "type": "H"
+    },
+    {
+      "index": 38,
+      "price": 4230.21,
+      "type": "L"
+    }
+  ],
+  "pattern": {
+    "name": "Head & Shoulders",
+    "bias": "bearish",
+    "neckline": 4218.59,
+    "points": [
+      {
+        "index": 18,
+        "price": 4274.11,
+        "label": "Shoulder"
+      },
+      {
+        "index": 25,
+        "price": 4275.82,
+        "label": "Head"
+      },
+      {
+        "index": 34,
+        "price": 4253.97,
+        "label": "Shoulder"
+      }
+    ]
+  },
+  "patternTrade": {
+    "entry": 4218.59,
+    "stop": 4267.24,
+    "target": 4161.36,
+    "entryIndex": 41
+  },
+  "patternSide": "SHORT",
+  "patternOutcome": {
+    "result": "SL",
+    "index": 46
+  },
+  "fvgs": [
+    {
+      "kind": "bullish",
+      "bottom": 4201.88,
+      "top": 4219.47,
+      "startIndex": 8
+    },
+    {
+      "kind": "bearish",
+      "bottom": 4243.52,
+      "top": 4255,
+      "startIndex": 26
+    }
+  ],
+  "orderBlock": {
+    "kind": "bearish",
+    "top": 4264.26,
+    "bottom": 4258.35,
+    "index": 22
+  },
+  "fibonacci": {
+    "high": 4275.82,
+    "low": 4157.62,
+    "direction": "up",
+    "levels": [
+      {
+        "ratio": 0.236,
+        "price": 4247.92
+      },
+      {
+        "ratio": 0.382,
+        "price": 4230.67
+      },
+      {
+        "ratio": 0.5,
+        "price": 4216.72
+      },
+      {
+        "ratio": 0.618,
+        "price": 4202.77
+      },
+      {
+        "ratio": 0.786,
+        "price": 4182.91
+      }
+    ],
+    "startIndex": 4
+  },
+  "outcome": {
+    "result": "SL",
+    "index": 50
+  },
+  "explain": {
+    "steps": [
+      {
+        "focus": {
+          "kind": "level",
+          "price": 4275.82
+        },
+        "head": {
+          "vi": "SÁT KHÁNG CỰ 4275.8",
+          "en": "AT RESISTANCE 4275.8"
+        },
+        "detail": {
+          "vi": "Giá ở đỉnh kênh (cách đỉnh 31%). Bán ở mép kênh, không bán giữa kênh.",
+          "en": "Price is at the ceiling of the range (31% down). Sell the edge, not the middle."
+        },
+        "tag": {
+          "vi": "LÝ DO 1/3",
+          "en": "REASON 1/3"
+        }
+      },
+      {
+        "focus": {
+          "kind": "fvg",
+          "top": 4255,
+          "bottom": 4243.52,
+          "startIndex": 26
+        },
+        "head": {
+          "vi": "FVG GIẢM 4243.5–4255.0",
+          "en": "BEARISH FVG 4243.5–4255.0"
+        },
+        "detail": {
+          "vi": "Ngay trên điểm vào: khoảng trống giá chưa lấp, phe bán hay quay lại bảo vệ.",
+          "en": "Right behind the entry: an unfilled gap that sellers tend to defend."
+        },
+        "tag": {
+          "vi": "LÝ DO 2/3",
+          "en": "REASON 2/3"
+        }
+      },
+      {
+        "focus": {
+          "kind": "pattern",
+          "points": [
+            {
+              "index": 18,
+              "price": 4274.11,
+              "label": "Shoulder"
+            },
+            {
+              "index": 25,
+              "price": 4275.82,
+              "label": "Head"
+            },
+            {
+              "index": 34,
+              "price": 4253.97,
+              "label": "Shoulder"
+            }
+          ]
+        },
+        "head": {
+          "vi": "MÔ HÌNH VAI ĐẦU VAI",
+          "en": "HEAD & SHOULDERS"
+        },
+        "detail": {
+          "vi": "Tín hiệu đảo chiều giảm hình thành ngay tại vùng giá này.",
+          "en": "A bearish reversal forming right at this level."
+        },
+        "tag": {
+          "vi": "LÝ DO 3/3",
+          "en": "REASON 3/3"
+        }
+      },
+      {
+        "focus": {
+          "kind": "plan"
+        },
+        "tag": {
+          "vi": "KẾ HOẠCH",
+          "en": "THE PLAN"
+        },
+        "head": {
+          "vi": "BÁN 4239.2 · R:R 1:1.6",
+          "en": "SELL 4239.2 · R:R 1:1.6"
+        },
+        "detail": {
+          "vi": "Cắt lỗ 4290.0 ngay trên kháng cự — vùng bị phá là sai. Chốt lời 4157.6 tại hỗ trợ.",
+          "en": "Stop 4290.0 just above resistance — if the zone breaks, the idea is wrong. Target 4157.6 at support."
+        }
+      },
+      {
+        "head": {
+          "vi": "DÍNH CẮT LỖ −1R",
+          "en": "STOPPED OUT −1R"
+        },
+        "detail": {
+          "vi": "Giá vượt kháng cự — vùng bán bị phá, lệnh đóng đúng mức lỗ đã định.",
+          "en": "Price broke resistance — the zone failed and the trade closed at the planned loss."
+        },
+        "focus": {
+          "kind": "verdict"
+        },
+        "tag": {
+          "vi": "KẾT QUẢ",
+          "en": "RESULT"
+        }
+      },
+      {
+        "head": {
+          "vi": "THUA NHỎ, THẮNG LỚN",
+          "en": "LOSE SMALL, WIN BIG"
+        },
+        "detail": {
+          "vi": "Setup đẹp vẫn có lúc thua. Cắt lỗ giữ lỗ nhỏ: 1 lệnh thắng 1:1.6 bù được 1.6 lệnh thua như thế này.",
+          "en": "Good setups still lose. The stop keeps it small: one 1:1.6 winner pays for 1.6 losers like this."
+        },
+        "focus": {
+          "kind": "none"
+        },
+        "tag": {
+          "vi": "BÀI HỌC",
+          "en": "LESSON"
+        }
+      }
+    ],
+    "result": "SL"
+  },
+  "note": "offline",
+  "locale": "vi",
+  "brandMark": "tho-ren-vang.png",
+  "nhac": "anh-gui-01.mp3"
+}

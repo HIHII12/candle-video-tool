@@ -1,0 +1,276 @@
+{
+  "kind": "candleLesson",
+  "instrument": "ILLUSTRATION",
+  "open": 2,
+  "pattern": {
+    "name": "Giảm Ba Bước",
+    "bias": "bearish",
+    "tagline": "Một cây đỏ to, ba cây xanh nhỏ, rồi một cây đỏ to hơn",
+    "rule": "Một cây giảm dài, rồi ba cây tăng nhỏ nằm TRONG biên độ của nó, rồi một cây giảm đóng dưới đáy cây đầu. Một nhịp nghỉ, không phải đảo chiều.",
+    "checks": [
+      "Ba cây nhỏ nằm trong biên độ cây đầu",
+      "Cây cuối đóng dưới đáy cây đầu",
+      "Đây là mẫu TIẾP DIỄN — ba cây xanh chính là cái bẫy"
+    ],
+    "bodyLow": 2016.9,
+    "bodyHigh": 2024.4,
+    "wickRatio": 1,
+    "indices": [
+      13,
+      17
+    ]
+  },
+  "anatomy": [
+    {
+      "index": 13,
+      "part": "body",
+      "label": "Cây dài"
+    },
+    {
+      "index": 17,
+      "part": "body",
+      "label": "Phá đáy của nó"
+    }
+  ],
+  "candles": [
+    {
+      "time": 1700000000,
+      "open": 2050,
+      "high": 2051.36,
+      "low": 2046.73,
+      "close": 2048.06
+    },
+    {
+      "time": 1700000900,
+      "open": 2048.06,
+      "high": 2049.33,
+      "low": 2044.64,
+      "close": 2045.44
+    },
+    {
+      "time": 1700001800,
+      "open": 2045.44,
+      "high": 2047.77,
+      "low": 2039.29,
+      "close": 2041.34
+    },
+    {
+      "time": 1700002700,
+      "open": 2041.34,
+      "high": 2042.25,
+      "low": 2039.45,
+      "close": 2039.99
+    },
+    {
+      "time": 1700003600,
+      "open": 2039.99,
+      "high": 2041.8,
+      "low": 2034.83,
+      "close": 2036.26
+    },
+    {
+      "time": 1700004500,
+      "open": 2036.26,
+      "high": 2037.5,
+      "low": 2035.86,
+      "close": 2037.1
+    },
+    {
+      "time": 1700005400,
+      "open": 2037.1,
+      "high": 2038.39,
+      "low": 2036.58,
+      "close": 2037.99
+    },
+    {
+      "time": 1700006300,
+      "open": 2037.99,
+      "high": 2038.59,
+      "low": 2034.84,
+      "close": 2035.63
+    },
+    {
+      "time": 1700007200,
+      "open": 2035.63,
+      "high": 2038.66,
+      "low": 2034.67,
+      "close": 2037.41
+    },
+    {
+      "time": 1700008100,
+      "open": 2037.41,
+      "high": 2039.08,
+      "low": 2033.29,
+      "close": 2034.15
+    },
+    {
+      "time": 1700009000,
+      "open": 2034.15,
+      "high": 2034.81,
+      "low": 2029.65,
+      "close": 2030.39
+    },
+    {
+      "time": 1700009900,
+      "open": 2030.39,
+      "high": 2032.02,
+      "low": 2023.79,
+      "close": 2026.52
+    },
+    {
+      "time": 1700010800,
+      "open": 2026.52,
+      "high": 2026.92,
+      "low": 2022.91,
+      "close": 2024.4
+    },
+    {
+      "time": 1700011700,
+      "open": 2024.4,
+      "high": 2024.8,
+      "low": 2018.4,
+      "close": 2018.8
+    },
+    {
+      "time": 1700012600,
+      "open": 2019.4,
+      "high": 2020.8,
+      "low": 2019.05,
+      "close": 2020.4
+    },
+    {
+      "time": 1700013500,
+      "open": 2020.2,
+      "high": 2021.6,
+      "low": 2019.85,
+      "close": 2021.2
+    },
+    {
+      "time": 1700014400,
+      "open": 2021,
+      "high": 2022.4,
+      "low": 2020.65,
+      "close": 2022
+    },
+    {
+      "time": 1700015300,
+      "open": 2022,
+      "high": 2022.4,
+      "low": 2016.4,
+      "close": 2016.9
+    },
+    {
+      "time": 1700016200,
+      "open": 2016.9,
+      "high": 2019.64,
+      "low": 2011.99,
+      "close": 2012.82
+    },
+    {
+      "time": 1700017100,
+      "open": 2012.82,
+      "high": 2015.28,
+      "low": 2012.4,
+      "close": 2014.54
+    },
+    {
+      "time": 1700018000,
+      "open": 2014.54,
+      "high": 2015.24,
+      "low": 2010.01,
+      "close": 2011.48
+    },
+    {
+      "time": 1700018900,
+      "open": 2011.48,
+      "high": 2012.31,
+      "low": 2008.3,
+      "close": 2008.89
+    },
+    {
+      "time": 1700019800,
+      "open": 2008.89,
+      "high": 2009.73,
+      "low": 2005.49,
+      "close": 2006.27
+    },
+    {
+      "time": 1700020700,
+      "open": 2006.27,
+      "high": 2006.67,
+      "low": 2003.11,
+      "close": 2004.27
+    },
+    {
+      "time": 1700021600,
+      "open": 2004.27,
+      "high": 2004.97,
+      "low": 2002.35,
+      "close": 2002.75
+    },
+    {
+      "time": 1700022500,
+      "open": 2002.75,
+      "high": 2004.69,
+      "low": 1997.71,
+      "close": 1999.35
+    },
+    {
+      "time": 1700023400,
+      "open": 1999.35,
+      "high": 2001.81,
+      "low": 1994.81,
+      "close": 1995.76
+    },
+    {
+      "time": 1700024300,
+      "open": 1995.76,
+      "high": 1999.21,
+      "low": 1994.95,
+      "close": 1997.74
+    },
+    {
+      "time": 1700025200,
+      "open": 1997.74,
+      "high": 2000.83,
+      "low": 1997.34,
+      "close": 1999.85
+    },
+    {
+      "time": 1700026100,
+      "open": 1999.85,
+      "high": 2002.33,
+      "low": 1995.4,
+      "close": 1996.28
+    },
+    {
+      "time": 1700027000,
+      "open": 1996.28,
+      "high": 1997.16,
+      "low": 1995.88,
+      "close": 1996.76
+    },
+    {
+      "time": 1700027900,
+      "open": 1996.76,
+      "high": 1998.79,
+      "low": 1991.56,
+      "close": 1993.01
+    }
+  ],
+  "setupCount": 18,
+  "trade": {
+    "entry": 2016.9,
+    "stop": 2025.4,
+    "target": 1999.9,
+    "entryIndex": 17
+  },
+  "outcome": {
+    "result": "TP",
+    "index": 25
+  },
+  "locale": "vi",
+  "note": "Minh hoạ - chuỗi giá dựng lại, không phải biểu đồ thật",
+  "stats": null,
+  "brandMark": "van-thang-trading.png"
+}

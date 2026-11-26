@@ -32,10 +32,44 @@ export const Narration: React.FC<{
   bottom?: number;
   /** Long-form 16:9 has no Shorts UI band and can use its own lower-third. */
   respectShortSafeArea?: boolean;
-  /** Master voice level. The WAV is already compressed and peak-normalised. */
+  /**
+   * Master voice level.
+   *
+   * The WAV is peak-normalised to 0 dBFS, so at 1.0 it leaves no headroom at all
+   * and any cue landing under a word pushes the sum into the clipper. Backing it
+   * off here costs nothing: the loudness pass on the finished file puts the level
+   * back where it belongs.
+   */
   volume?: number;
-}> = ({id, marks, frame, tone, bottom = 300, respectShortSafeArea = true, volume = 1}) => {
-  const current = marks.find((m) => frame >= m.startFrame && frame < m.endFrame + 8);
+  /**
+   * Stop printing subtitles from this frame on, without touching the audio.
+   *
+   * Some formats end on a panel that states the closing line in full. Keeping
+   * the subtitle there puts the same sentence on screen twice, and the copy that
+   * is redundant is the one lying across the panel that earns it.
+   */
+  hideCaptionFrom?: number;
+  /** Same, for a beat in the middle that already prints the line it speaks. */
+  hideCaptionBetween?: readonly [number, number];
+}> = ({
+  id,
+  marks,
+  frame,
+  tone,
+  bottom = 300,
+  respectShortSafeArea = true,
+  volume = 0.82,
+  hideCaptionFrom,
+  hideCaptionBetween,
+}) => {
+  const muted =
+    (hideCaptionFrom !== undefined && frame >= hideCaptionFrom) ||
+    (hideCaptionBetween !== undefined &&
+      frame >= hideCaptionBetween[0] &&
+      frame < hideCaptionBetween[1]);
+  const current = muted
+    ? undefined
+    : marks.find((m) => frame >= m.startFrame && frame < m.endFrame + 8);
 
   const ink = tone === 'dark' ? '#ffffff' : '#0b0f14';
   const scrim = tone === 'dark' ? 'rgba(6,9,13,0.82)' : 'rgba(255,255,255,0.9)';
@@ -70,6 +104,10 @@ export const Narration: React.FC<{
     </>
   );
 };
+
+/** True while a line is being spoken, with the same lead-in the duck uses. */
+export const speakingAt = (marks: VoiceMark[], frame: number, lead = 10) =>
+  marks.some((m) => frame >= m.startFrame - lead && frame < m.endFrame + 8);
 
 /**
  * Level for the music bed at a given frame.

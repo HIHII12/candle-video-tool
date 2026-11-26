@@ -1,0 +1,24 @@
+# Video BI LOAI — theo TEN FILE, khong theo duong dan.
+#
+# Vi sao theo ten chu khong theo duong dan: cung mot video hong nam o 5-6 thu
+# muc lo khac nhau (lo goc, lo -nhac, cac lo chay lai). Liet ke tung duong dan
+# thi chac chan sot — da sot that, 7 cai lot lai sau khi tuong da chan het.
+#
+# Ban render LAI bang code hien tai nam o thu muc ghi trong DUNG_LO ben duoi,
+# va chi ban do duoc di qua. Moi ban khac cung ten deu bi bo.
+#
+# DUNG_LO: 2026-09-16
+#
+# 9 video duoi day render 30/08–03/09, TRUOC ban sua khung chart:
+#   - 8 video quiz: muc cham canh tren, co thu tran ra ngoai khung
+#   - 1 named-setup: dung hinh 9 giay lien
+# Ban o 2026-09-16 da kiem lai: 9/9 dat, 0 loi.
+vi-buy-or-sell-quiz-wti-15m.mp4
+vi-buy-or-sell-quiz-wti-1H.mp4
+vi-buy-or-sell-quiz-wti-30m.mp4
+vi-buy-or-sell-quiz-wti-5m.mp4
+vi-buy-or-sell-quiz-xau-15m.mp4
+vi-buy-or-sell-quiz-xau-1H.mp4
+vi-buy-or-sell-quiz-xau-30m.mp4
+vi-buy-or-sell-quiz-xau-5m.mp4
+vi-named-setup-wti-15m.mp4

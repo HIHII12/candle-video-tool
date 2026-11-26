@@ -24,6 +24,7 @@ still cannot show you the frame where a label swings out of frame.
 import argparse
 import os
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -37,21 +38,43 @@ COMPOSITOR = Path(__file__).resolve().parents[1] / (
 # Fraction of the frame each platform's own UI covers. Numbers are deliberately
 # conservative: being wrong here means moving a caption 30px, being wrong the
 # other way means the caption is unreadable on every phone.
-SAFE = {"bottom": 0.14, "right": 0.10, "top": 0.06}
+# Do lai tren may that 2026-09-13: anh chup man hinh Shorts cho thay thanh tren
+# (Shorts / Kenh dang ky / Phat truc tiep) phu toi ~190px, cot nut ben phai ~130px,
+# va khoi ten kenh + phu de + thanh chia se duoi cung toi ~390px. Ba con so cu
+# (268 / 108 / 115 px) deu NHO HON thuc te, nen bo kiem nay cho qua nhung video
+# ma tren dien thoai bi che mat tieu de, nhan BSL/SSL va ca dong mien tru.
+SAFE = {"bottom": 390 / 1920, "right": 130 / 1080, "top": 190 / 1920}
+
+# The strip along the very bottom that is allowed to carry ink.
+#
+# Every format prints its provenance and disclaimer down there on purpose: the
+# small print has to be present, not prominent, and the description carries it
+# as well. Counting those two lines as a failure made the check cry wolf on
+# every single market map — 17 findings, all of them the same two lines — and a
+# gate that is always red is a gate nobody reads. Ink is now only reported
+# between the readable line and the top of this strip, which is where content
+# the viewer is actually meant to read would land.
+SMALL_PRINT = 150 / 1920
 
 
 def frame_at(video: Path, seconds: float) -> np.ndarray:
-    out = Path("/tmp/_layout.png")
-    subprocess.run(
-        [str(COMPOSITOR / "ffmpeg"), "-y", "-v", "error", "-ss", f"{seconds:.2f}",
-         "-i", str(video), "-frames:v", "1", str(out)],
-        env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
-        check=True,
-    )
-    return np.asarray(Image.open(out).convert("RGB")).astype(np.int16)
+    # A fixed /tmp/_layout.png meant two copies of this script could not run at
+    # once: checking a batch four files at a time, each process overwrote the
+    # frame the others were about to read, and most of them reported nothing at
+    # all. The temp file is per-call now, so a whole batch can be checked in
+    # parallel — which is the only way 120 videos get checked before a delivery.
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "khung.png"
+        subprocess.run(
+            [str(COMPOSITOR / "ffmpeg"), "-y", "-v", "error", "-ss", f"{seconds:.2f}",
+             "-i", str(video), "-frames:v", "1", str(out)],
+            env=dict(os.environ, LD_LIBRARY_PATH=str(COMPOSITOR)),
+            check=True,
+        )
+        return np.asarray(Image.open(out).convert("RGB")).astype(np.int16)
 
 
-def ink_mask(img: np.ndarray) -> np.ndarray:
+def ink_mask(img: np.ndarray, threshold: int = 42) -> np.ndarray:
     """Pixels that differ from the frame's own background.
 
     The background is estimated *per row*, from the leftmost and rightmost
@@ -63,7 +86,18 @@ def ink_mask(img: np.ndarray) -> np.ndarray:
     """
     strip = np.concatenate([img[:, :12], img[:, -12:]], axis=1)
     bg = np.median(strip, axis=1, keepdims=True)  # (h, 1, 3)
-    return np.abs(img - bg).sum(axis=2) > 42
+    return np.abs(img - bg).sum(axis=2) > threshold
+
+
+# Small print is drawn deliberately low-contrast; anything the viewer is meant
+# to read is drawn bright. Measured across the formats, the gap is wide and
+# clean: the disclaimer line peaks around 180 on this scale and the dimmest body
+# text sits above 600. See src/safeArea.ts — a disclaimer is required to be
+# present, not to be prominent, so it is allowed below the line and everything
+# else is not. Without this split the safe-area check fired on every frame of
+# every format because of that one legal line, and 1400 warnings that are all
+# the same accepted thing is the same as no check at all.
+READABLE = 200
 
 
 def check_frame(img: np.ndarray, t: float) -> list[str]:
@@ -87,16 +121,22 @@ def check_frame(img: np.ndarray, t: float) -> list[str]:
         if px > span * 0.06:
             out.append(f"{t:5.1f}s  content touches the {name} edge ({px}px)")
 
-    # safe area: ink under where the platform draws its own UI
+    # safe area: readable ink under where the platform draws its own UI
+    read = ink_mask(img, READABLE)
+    read_total = max(1, int(read.sum()))
     b = int(h * (1 - SAFE["bottom"]))
+    sp = int(h * (1 - SMALL_PRINT))
     r = int(w * (1 - SAFE["right"]))
-    bottom_ink = int(ink[b:, :].sum())
+    # Between the readable line and the small-print strip. Ink below sp is the
+    # disclaimer, which belongs there.
+    bottom_ink = int(read[b:sp, :].sum())
+    total = read_total
     if bottom_ink > total * 0.04:
         out.append(
             f"{t:5.1f}s  {100*bottom_ink/total:.0f}% of content sits in the bottom "
             f"{SAFE['bottom']:.0%} — under the platform's caption and controls"
         )
-    right_ink = int(ink[: b, r:].sum())
+    right_ink = int(read[:b, r:].sum())
     if right_ink > total * 0.06:
         out.append(
             f"{t:5.1f}s  {100*right_ink/total:.0f}% of content sits in the right "

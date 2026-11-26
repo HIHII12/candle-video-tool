@@ -1,4 +1,7 @@
+import {SAFE} from '../safeArea';
+import {THO_REN} from '../brand';
 import React from 'react';
+import {strings} from '../i18n';
 import {AbsoluteFill, interpolate, spring} from 'remotion';
 import type {ForexChartProps} from '../data/types';
 import {CHART_BOX, TV, FONT, stroke} from './chartTheme';
@@ -55,6 +58,7 @@ export const ResultStrip: React.FC<{
   const rr = props.riskReward;
   if (!rr) return null;
 
+  const t = strings(props.locale).quiz;
   const rise = spring({frame: frame - at, fps, config: {damping: 14}, durationInFrames: 28});
   const win = props.outcome.result === 'TP';
   const move = win ? Math.abs(rr.target - rr.entry) : -Math.abs(rr.stop - rr.entry);
@@ -64,35 +68,44 @@ export const ResultStrip: React.FC<{
     <div
       style={{
         position: 'absolute',
-        top: 330,
+        // Was top: 330, which landed the card on the brand header, the pills
+        // and the top of the chart all at once. It belongs where the countdown
+        // and the answer were — they are finished by the time it arrives.
+        // In the strip under the chart, not over it: the chart is the proof.
+        bottom: SAFE.bottom + 2,
         left: 40,
-        right: 40,
+        right: SAFE.right,
         zIndex: 46,
-        background: win ? 'rgba(0,224,95,0.16)' : 'rgba(255,43,43,0.16)',
-        border: `5px solid ${win ? TV.up : TV.down}`,
-        borderRadius: 26,
-        padding: '20px 26px',
+        background: 'rgba(15,10,7,0.90)',
+        border: `2.5px solid ${win ? TV.up : TV.down}`,
+        borderRadius: 20,
+        padding: '8px 20px 10px',
         textAlign: 'center',
         fontFamily: FONT,
         opacity: rise,
-        transform: `translateY(${interpolate(rise, [0, 1], [-50, 0])}px)`,
+        transform: `translateY(${interpolate(rise, [0, 1], [50, 0])}px)`,
       }}
     >
-      <div style={{fontSize: 66, fontWeight: 900, color: win ? TV.up : TV.down, ...stroke(6)}}>
-        {props.side} {win ? 'HIT TP ✅' : 'STOPPED OUT ❌'}
-      </div>
       <div
         style={{
-          fontSize: 42,
+          fontSize: 44,
           fontWeight: 900,
-          color: '#fff',
-          marginTop: 6,
+          color: win ? TV.up : TV.down,
+          whiteSpace: 'nowrap',
           fontVariantNumeric: 'tabular-nums',
-          ...stroke(4),
         }}
       >
-        {move >= 0 ? '+' : ''}
-        {move.toFixed(1)} USD · R:R 1:{ratio.toFixed(1)}
+        {/* side is LONG / SHORT in the data; on the Vietnamese track that
+            printed an English word in front of a Vietnamese sentence. */}
+        {props.side === 'LONG' ? t.buy : t.sell} {win ? t.hitTp : t.stopped}
+        <span style={{color: '#fff', fontSize: 36}}>
+          {'  '}
+          {move >= 0 ? '+' : ''}
+          {move.toFixed(1)} USD
+        </span>
+      </div>
+      <div style={{fontSize: 28, fontWeight: 800, color: TV.goldHot, marginTop: 2}}>
+        {THO_REN.comment[props.locale === 'en' ? 'en' : 'vi']}
       </div>
     </div>
   );

@@ -55,6 +55,62 @@ def fetch_candles(symbol: str, interval: str, rng: str) -> list[dict]:
     return candles
 
 
+STEP_SEC = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "60m": 3600,
+            "4h": 14400, "1d": 86400}
+
+
+def synth_candles(seed: int, interval: str, bars: int = 900,
+                  base: float = 2380.0) -> list[dict]:
+    """A constructed XAU series, for when the network cannot be used.
+
+    Yahoo is the only thing in this script that needs the network, and it is
+    blocked on the render server and absent on many of the machines this tool
+    is handed to. Everything downstream — levels, gaps, Fibonacci, the trade and
+    its outcome — is measured from whatever candles it is given, so a series
+    with the texture of gold is enough to make the quiz render anywhere.
+
+    Texture, not noise: price moves in regimes (a trend that runs, a range that
+    chops, a reversal that breaks it), volatility clusters, and wicks are wider
+    on the bars that move most. A plain random walk has none of that and gives
+    the scenario finder nothing worth featuring.
+    """
+    import math
+    import random
+    rng = random.Random(seed)
+    step = STEP_SEC.get(interval, 900)
+    t = 1_760_000_000 - bars * step
+    price = base * (1 + rng.uniform(-0.04, 0.04))
+    vol = 0.0016
+    drift, left = 0.0, 0
+    out = []
+    for _ in range(bars):
+        if left <= 0:
+            kind = rng.choices(["trend", "range", "flip"], [0.45, 0.35, 0.20])[0]
+            left = rng.randint(25, 70)
+            if kind == "trend":
+                drift = rng.choice([-1, 1]) * rng.uniform(0.0004, 0.0011)
+            elif kind == "range":
+                drift = 0.0
+            else:
+                drift = -drift * rng.uniform(1.2, 2.0) if drift else rng.choice([-1, 1]) * 0.0008
+        left -= 1
+        vol = max(0.0007, min(0.0042, vol * math.exp(rng.gauss(0, 0.18)) * 0.98 + 0.00004))
+        o = price
+        c = o * (1 + drift + rng.gauss(0, vol))
+        # Keo nhe ve quanh muc goc khi troi qua 6%: van co xu huong, nhung gia
+        # tren tieu de luon gan voi muc nguoi van hanh nhap.
+        if abs(c / base - 1) > 0.06:
+            c = o * (1 - 0.0015 * (1 if c > base else -1)) + (c - o) * 0.3
+        span = abs(c - o) + o * vol * rng.uniform(0.3, 1.4)
+        h = max(o, c) + span * rng.uniform(0.05, 0.55)
+        l = min(o, c) - span * rng.uniform(0.05, 0.55)
+        out.append({"time": t, "open": round(o, 2), "high": round(h, 2),
+                    "low": round(l, 2), "close": round(c, 2)})
+        price = c
+        t += step
+    return out
+
+
 def swing_points(candles: list[dict], lookback: int = 3):
     """A swing high is a candle whose high exceeds `lookback` neighbours each side."""
     highs, lows = [], []
@@ -489,9 +545,177 @@ def build_scenario(candles: list[dict], end: int, setup: int, future: int,
     }
 
 
+PATTERN_VI = {
+    "Double Bottom": "Hai đáy",
+    "Double Top": "Hai đỉnh",
+    "Head & Shoulders": "Vai đầu vai",
+    "Inverse Head & Shoulders": "Vai đầu vai ngược",
+}
+
+
+def _p(x: float) -> str:
+    return f"{x:.1f}"
+
+
+def explain(cfg: dict) -> dict:
+    """Why this setup, read off this chart — the part of the video that teaches.
+
+    A quiz that only says right or wrong gives the viewer nothing to keep. This
+    builds the walk-through shown after the answer, one step per card: the
+    reasons for the side, the plan (where the stop and target go and why), what
+    actually happened, and the lesson in it. Each card has a short head a viewer
+    reads at a glance and one detail line for anyone who pauses.
+
+    Every reason is checked against the geometry before it may be said. A
+    detector firing is not enough: a "double bottom" whose lows sit above the
+    entry is a pattern price has already broken, and naming it as a reason to
+    buy would teach something false. A reason that fails its check is dropped.
+
+    Each step carries what the renderer should light up on the chart while the
+    card is on screen.
+    """
+    rr = cfg["riskReward"]
+    long_ = cfg["side"] == "LONG"
+    res = cfg["levels"][0]["price"]
+    sup = cfg["levels"][1]["price"]
+    band = res - sup
+    entry = rr["entry"]
+    pos = (entry - sup) / band if band else 0.5
+    near = band * 0.5
+    want = "bullish" if long_ else "bearish"
+    reasons = []
+
+    # 1. Where price sits in the channel — why this side at all.
+    if long_:
+        reasons.append({
+            "focus": {"kind": "level", "price": sup},
+            "head": {"vi": f"SÁT HỖ TRỢ {_p(sup)}", "en": f"AT SUPPORT {_p(sup)}"},
+            "detail": {"vi": f"Giá ở đáy kênh (cách đáy {round(pos*100)}%). Mua ở mép kênh, không mua giữa kênh.",
+                       "en": f"Price is at the floor of the range ({round(pos*100)}% up). Buy the edge, not the middle."},
+        })
+    else:
+        reasons.append({
+            "focus": {"kind": "level", "price": res},
+            "head": {"vi": f"SÁT KHÁNG CỰ {_p(res)}", "en": f"AT RESISTANCE {_p(res)}"},
+            "detail": {"vi": f"Giá ở đỉnh kênh (cách đỉnh {round((1-pos)*100)}%). Bán ở mép kênh, không bán giữa kênh.",
+                       "en": f"Price is at the ceiling of the range ({round((1-pos)*100)}% down). Sell the edge, not the middle."},
+        })
+
+    # 2. A zone where the same side acted before, close behind the entry.
+    def beside(top, bottom):
+        if long_:
+            return top <= entry + band * 0.02 and entry - top <= near
+        return bottom >= entry - band * 0.02 and bottom - entry <= near
+
+    zones = []
+    ob = cfg.get("orderBlock")
+    if ob and ob["kind"] == want and beside(ob["top"], ob["bottom"]):
+        zones.append(("ob", abs(entry - (ob["top"] + ob["bottom"]) / 2), ob, ob["index"]))
+    for g in cfg.get("fvgs") or []:
+        if g["kind"] == want and beside(g["top"], g["bottom"]):
+            zones.append(("fvg", abs(entry - (g["top"] + g["bottom"]) / 2), g, g["startIndex"]))
+    zones.sort(key=lambda z: z[1])
+    if zones:
+        kind, _, z, idx = zones[0]
+        rng = f"{_p(z['bottom'])}–{_p(z['top'])}"
+        dir_vi, dir_en = ("tăng", "bullish") if long_ else ("giảm", "bearish")
+        side_vi, side_en = ("mua", "buyers") if long_ else ("bán", "sellers")
+        under_vi = "dưới" if long_ else "trên"
+        focus = {"kind": kind, "top": z["top"], "bottom": z["bottom"], "startIndex": idx}
+        if kind == "ob":
+            reasons.append({
+                "focus": focus,
+                "head": {"vi": f"ORDER BLOCK {dir_vi.upper()} {rng}", "en": f"{dir_en.upper()} ORDER BLOCK {rng}"},
+                "detail": {"vi": f"Ngay {under_vi} điểm vào: nơi phe {side_vi} lớn từng vào lệnh trước một cú đẩy mạnh.",
+                           "en": f"Right behind the entry: where big {side_en} stepped in before a strong push."},
+            })
+        else:
+            reasons.append({
+                "focus": focus,
+                "head": {"vi": f"FVG {dir_vi.upper()} {rng}", "en": f"{dir_en.upper()} FVG {rng}"},
+                "detail": {"vi": f"Ngay {under_vi} điểm vào: khoảng trống giá chưa lấp, phe {side_vi} hay quay lại bảo vệ.",
+                           "en": f"Right behind the entry: an unfilled gap that {side_en} tend to defend."},
+            })
+
+    # 3. A pullback into the usual zone of a leg that runs the trade's way.
+    fib = cfg.get("fibonacci")
+    if fib and fib["direction"] == ("up" if long_ else "down"):
+        cand = [l for l in fib["levels"] if l["ratio"] in (0.5, 0.618, 0.786)]
+        if cand:
+            best = min(cand, key=lambda l: abs(l["price"] - entry))
+            if abs(best["price"] - entry) <= band * 0.08:
+                reasons.append({
+                    "focus": {"kind": "fibo", "price": best["price"], "ratio": best["ratio"]},
+                    "head": {"vi": f"HỒI ĐÚNG FIBO {best['ratio']}", "en": f"PULLBACK TO FIB {best['ratio']}"},
+                    "detail": {"vi": f"Nhịp {'tăng' if long_ else 'giảm'} trước đó hồi về vùng 0.5–0.786 — vùng hồi giá hay kết thúc.",
+                               "en": f"The prior {'up' if long_ else 'down'} leg retraced into 0.5–0.786, where pullbacks often end."},
+                })
+
+    # 4. A formation — only if it agrees with the side AND is not already broken.
+    pat = cfg.get("pattern")
+    if pat and len(reasons) < 3 and pat["bias"] == want:
+        pts = [pt["price"] for pt in pat["points"]]
+        intact = entry >= min(pts) - band * 0.05 if long_ else entry <= max(pts) + band * 0.05
+        if intact:
+            name_vi = PATTERN_VI.get(pat["name"], pat["name"])
+            reasons.append({
+                "focus": {"kind": "pattern", "points": pat["points"]},
+                "head": {"vi": f"MÔ HÌNH {name_vi.upper()}", "en": pat["name"].upper()},
+                "detail": {"vi": f"Tín hiệu đảo chiều {'tăng' if long_ else 'giảm'} hình thành ngay tại vùng giá này.",
+                           "en": f"A {'bullish' if long_ else 'bearish'} reversal forming right at this level."},
+            })
+
+    reasons = reasons[:3]
+    for i, r in enumerate(reasons):
+        r["tag"] = {"vi": f"LÝ DO {i+1}/{len(reasons)}", "en": f"REASON {i+1}/{len(reasons)}"}
+
+    risk = abs(entry - rr["stop"])
+    ratio = abs(rr["target"] - entry) / risk if risk else 0.0
+    plan = {
+        "focus": {"kind": "plan"},
+        "tag": {"vi": "KẾ HOẠCH", "en": "THE PLAN"},
+        "head": {"vi": f"{'MUA' if long_ else 'BÁN'} {_p(entry)} · R:R 1:{ratio:.1f}",
+                 "en": f"{'BUY' if long_ else 'SELL'} {_p(entry)} · R:R 1:{ratio:.1f}"},
+        "detail": {"vi": (f"Cắt lỗ {_p(rr['stop'])} ngay {'dưới hỗ trợ' if long_ else 'trên kháng cự'} — vùng bị phá là sai. "
+                          f"Chốt lời {_p(rr['target'])} tại {'kháng cự' if long_ else 'hỗ trợ'}."),
+                   "en": (f"Stop {_p(rr['stop'])} just {'below support' if long_ else 'above resistance'} — if the zone breaks, the idea is wrong. "
+                          f"Target {_p(rr['target'])} at {'resistance' if long_ else 'support'}.")},
+    }
+
+    result = cfg["outcome"]["result"]
+    if result == "TP":
+        verdict = {"head": {"vi": f"CHỐT LỜI +{ratio:.1f}R", "en": f"TARGET HIT +{ratio:.1f}R"},
+                   "detail": {"vi": f"Giá bật khỏi {'hỗ trợ' if long_ else 'kháng cự'} và chạy thẳng tới mép bên kia của kênh.",
+                              "en": "Price bounced off the edge and ran straight to the other side of the range."}}
+        lesson = {"head": {"vi": "MÉP KÊNH + VÙNG ĐỠ", "en": "EDGE + A ZONE BEHIND YOU"},
+                  "detail": {"vi": "Vào lệnh ở mép kênh, có vùng hợp lưu đỡ phía sau. Đừng đuổi giá ở giữa kênh.",
+                             "en": "Enter at the edge with a zone behind you. Never chase the middle."}}
+    elif result == "SL":
+        verdict = {"head": {"vi": "DÍNH CẮT LỖ −1R", "en": "STOPPED OUT −1R"},
+                   "detail": {"vi": f"Giá {'thủng hỗ trợ' if long_ else 'vượt kháng cự'} — vùng {'mua' if long_ else 'bán'} bị phá, lệnh đóng đúng mức lỗ đã định.",
+                              "en": f"Price {'broke support' if long_ else 'broke resistance'} — the zone failed and the trade closed at the planned loss."}}
+        lesson = {"head": {"vi": "THUA NHỎ, THẮNG LỚN", "en": "LOSE SMALL, WIN BIG"},
+                  "detail": {"vi": f"Setup đẹp vẫn có lúc thua. Cắt lỗ giữ lỗ nhỏ: 1 lệnh thắng 1:{ratio:.1f} bù được {ratio:.1f} lệnh thua như thế này.",
+                             "en": f"Good setups still lose. The stop keeps it small: one 1:{ratio:.1f} winner pays for {ratio:.1f} losers like this."}}
+    else:
+        verdict = {"head": {"vi": "LỆNH CHƯA ĐÓNG", "en": "STILL OPEN"},
+                   "detail": {"vi": "Hết thời gian mà giá chưa chạm chốt lời hay cắt lỗ.",
+                              "en": "Time ran out before the target or the stop."}}
+        lesson = {"head": {"vi": "KIÊN NHẪN", "en": "PATIENCE"},
+                  "detail": {"vi": "Không phải lệnh nào cũng chạy ngay. Chờ đúng kế hoạch, đừng tự đóng sớm.",
+                             "en": "Not every trade moves at once. Let the plan play out."}}
+    if result == "TP" and len(reasons) == 1:
+        lesson["detail"] = {"vi": "Vào lệnh ở mép kênh, cắt lỗ ngắn, chốt lời xa. Đừng đuổi giá ở giữa kênh.",
+                            "en": "Enter at the edge, stop tight, target far. Never chase the middle."}
+    verdict.update({"focus": {"kind": "verdict"}, "tag": {"vi": "KẾT QUẢ", "en": "RESULT"}})
+    lesson.update({"focus": {"kind": "none"}, "tag": {"vi": "BÀI HỌC", "en": "LESSON"}})
+
+    return {"steps": reasons + [plan, verdict, lesson], "result": result}
+
+
 def find_scenario(candles: list[dict], setup: int, future: int, min_rr: float,
                   want: str = "any", judge: str = "channel",
-                  max_gap_min: int = 90) -> dict:
+                  max_gap_min: int = 90, legible: bool = False) -> dict:
     """Most recent setup that both resolves and offers a sellable risk/reward.
 
     Scanning backwards keeps the featured moment as fresh as possible while
@@ -529,10 +753,26 @@ def find_scenario(candles: list[dict], setup: int, future: int, min_rr: float,
                 fallback = sc
             continue
         score = (2 if sc["pattern"] else 0) + (1 if sc["fvgs"] else 0)
+        full = 3
+        if legible:
+            # Constructed series can choose their moment freely, so choose one
+            # that reads on a phone and has something to teach:
+            #  - the channel must fill a fair share of the chart. A long trend
+            #    leg before it squashes support and resistance into a sliver at
+            #    one edge, and the whole lesson happens in that sliver.
+            #  - more checked reasons make a richer walk-through.
+            shown = candles[end - setup:end + future]
+            span = max(c["high"] for c in shown) - min(c["low"] for c in shown)
+            band = sc["levels"][0]["price"] - sc["levels"][1]["price"]
+            if span <= 0 or band / span < 0.3:
+                continue
+            sc["outcome"] = oc
+            score += len(explain(sc)["steps"]) - 3  # 1..3 reasons
+            full = 6
         if score > best_score:
             best_score, best = score, sc
-        if score == 3:
-            return sc  # most recent scenario with both
+        if score >= full:
+            return sc  # most recent scenario with everything
     if best is not None:
         return best
     if fallback is None:
@@ -547,6 +787,8 @@ def main() -> None:
     ap.add_argument("--timeframe", default="15m")
     ap.add_argument("--interval", default="15m")
     ap.add_argument("--range", dest="rng", default="1mo")
+    ap.add_argument("--offline-seed", type=int, default=None,
+                    help="dung nen vang dung san thay vi tai tu Yahoo (khong can mang)")
     ap.add_argument("--setup", type=int, default=42, help="candles shown for analysis")
     ap.add_argument("--future", type=int, default=22, help="candles withheld for the reveal")
     ap.add_argument("--min-rr", type=float, default=1.5, help="minimum reward:risk to feature")
@@ -562,15 +804,31 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    candles = fetch_candles(args.symbol, args.interval, args.rng)
+    if args.offline_seed is not None:
+        # Gia vang quanh muc nguoi van hanh nhap luc chay (THO-REN-VANG.bat hoi).
+        # Bieu do dung san o 2.000 trong khi vang ngoai thi truong o muc khac han
+        # thi nguoi xem nhin tieu de la biet gia.
+        import os
+        try:
+            base = float(os.environ.get("THO_REN_GIA", "") or 2380)
+        except ValueError:
+            base = 2380.0
+        candles = synth_candles(args.offline_seed, args.interval, base=base)
+    else:
+        candles = fetch_candles(args.symbol, args.interval, args.rng)
     if len(candles) < args.setup + args.future:
         raise SystemExit(f"Only got {len(candles)} candles — widen --range.")
 
     max_gap = args.max_gap_min or auto_gap_tolerance(candles)
     cfg = find_scenario(candles, args.setup, args.future, args.min_rr,
+                        legible=args.offline_seed is not None,
                         want=args.outcome, judge=args.judge,
                         max_gap_min=max_gap)
     cfg["pair"] = args.pair
+    cfg["explain"] = explain(cfg)
+    if args.offline_seed is not None:
+        cfg["note"] = "offline"
+        cfg["hookIndex"] = args.offline_seed % 1000
     cfg["timeframe"] = args.timeframe
     Path(args.out).write_text(json.dumps(cfg, indent=2, ensure_ascii=False))
 

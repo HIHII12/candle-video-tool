@@ -10,13 +10,73 @@
  */
 export const CHANNEL_MARK = 'XAU LAB';
 
-/** Locked brand and conversion target for the XAU LAB MVP. */
+/**
+ * Two channels, two names. A blanket rename once put the Vietnamese channel's
+ * name on the English tagline — they are different channels and the English
+ * side has never been Van Thang anything.
+ */
 export const BRAND = {
-  name: 'XAU LAB | VĂN THẮNG INVEST',
+  name: {
+    vi: 'XAU LAB | VĂN THẮNG TRADING',
+    en: 'GOLDFATHER FX',
+  },
   tagline: {
-    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Invest',
-    en: 'Risk Management • Safer Trading with Van Thang Invest',
+    vi: 'Quản lý vốn • Giao dịch an toàn cùng Văn Thắng Trading',
+    en: 'Risk Management • Safer Trading with GoldFather FX',
   },
   zaloUrl: 'https://zalo.me/g/vuqtnr406',
   disclaimer: 'Educational content · Not investment advice',
+} as const;
+
+
+/**
+ * Tho Ren Vang — kenh vang moi.
+ *
+ * Moc mo man la thu quyet dinh nguoi xem o lai hay luot di, nen no duoc viet tay
+ * va xoay vong theo tung video: mot cau dung lai moi ngay la dau hieu ro nhat cua
+ * kenh do may chay. Khong cau nao hua loi nhuan hay bia so lieu ("90% doan sai") —
+ * vua sai su that, vua la thu nen tang bop tuong tac.
+ */
+export const THO_REN = {
+  logo: 'tho-ren-vang.png',
+  name: {vi: 'THỢ RÈN VÀNG', en: 'GOLD SMITH'},
+  hooks: {
+    // Each one is a question the video answers, never a promise it cannot
+    // keep: no win rates, no profit claims, nothing that gives away the side.
+    vi: [
+      'LỆNH NÀY\nLỜI HAY CHÁY?',
+      'NẾU LÀ BẠN,\nBẠN BẤM GÌ?',
+      'BẪY GIÁ\nHAY CƠ HỘI?',
+      'CHỜ ĐÃ.\nĐỪNG VỘI BẤM MUA.',
+      'VÀNG SẮP\nBỨT HAY SẬP?',
+      'CHỐT LỜI\nHAY DÍNH STOP?',
+      'MỘT QUYẾT ĐỊNH.\nBA GIÂY.',
+      'XEM HẾT ĐỂ BIẾT\nVÌ SAO VÀO LỆNH',
+      'MẮT BẠN ĐỌC CHART\nTỚI ĐÂU?',
+      'CÂY NẾN TIẾP THEO\nĐI ĐÂU?',
+      'BẠN VÀO LỆNH\nHAY ĐỨNG NGOÀI?',
+      'ĐỪNG TUA.\nĐOÁN TRƯỚC ĐÃ.',
+      'VÙNG GIÁ NÀY\nĐANG GIẤU GÌ?',
+      'THỢ RÈN SẼ\nCHỌN PHE NÀO?',
+      'BẠN CÓ DÁM\nVÀO LỆNH NÀY?',
+      'ĐỌC ĐÚNG CÂY NÀY\nLÀ LÊN TAY',
+    ],
+    en: [
+      'WHERE IS GOLD\nGOING NEXT?',
+      '3 SECONDS.\nPICK A SIDE.',
+      'NEXT CANDLE:\nUP OR DOWN?',
+      'WOULD YOU TAKE\nTHIS TRADE?',
+      "DON'T SKIP.\nCALL IT FIRST.",
+    ],
+  },
+  comment: {
+    vi: 'Bạn đoán đúng không? Comment ngay 👇',
+    en: 'Did you call it? Tell us below 👇',
+  },
+  // Du lieu dung san phai noi la dung san. Cau cu ghi "du lieu that" — dung voi
+  // ban lay tu Yahoo, sai hoan toan voi ban chay offline.
+  practice: {
+    vi: 'Biểu đồ dựng lại để luyện tập · Chỉ mang tính giáo dục, không phải lời khuyên đầu tư',
+    en: 'Constructed chart for practice · Educational only, not financial advice',
+  },
 } as const;
