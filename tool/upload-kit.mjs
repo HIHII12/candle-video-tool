@@ -187,13 +187,17 @@ function bodyOf(job, cfg, locale) {
  */
 const THO_REN_TITLES = [
   (tf, p) => `Vàng ${tf} quanh ${p}: MUA hay BÁN? Bạn có 3 giây`,
-  (tf, p) => `Đoán hướng vàng ${tf} tại ${p} — đừng tua!`,
-  (tf, p) => `Lệnh vàng ${tf} ở ${p} này thắng hay thua?`,
-  (tf, p) => `Thợ rèn hỏi: vàng ${tf} từ ${p} đi đâu tiếp?`,
-  (tf, p) => `Bạn dám vào lệnh vàng ${tf} ở ${p} không?`,
+  (tf, p) => `Lệnh vàng ${tf} ở ${p} này lời hay cháy?`,
+  (tf, p) => `Vàng ${p}: bẫy giá hay cơ hội? (khung ${tf})`,
+  (tf, p) => `Nếu là bạn, bạn MUA hay BÁN vàng ở ${p}? · ${tf}`,
+  (tf, p) => `Đoán hướng vàng ${tf} tại ${p} — xem hết để biết vì sao`,
   (tf, p) => `Vàng ${tf} quanh ${p} — chốt lời hay dính stop?`,
   (tf, p) => `Test mắt đọc chart vàng ${tf} · vùng ${p}`,
   (tf, p) => `Vàng ${tf} ${p}: sắp bứt hay sắp sập?`,
+  (tf, p) => `Thợ rèn hỏi: vàng ${tf} từ ${p} đi đâu tiếp?`,
+  (tf, p) => `Bạn dám vào lệnh vàng ${tf} ở ${p} không?`,
+  (tf, p) => `Vùng giá vàng ${p} đang giấu gì? Giải mã setup ${tf}`,
+  (tf, p) => `1 chart vàng ${tf}, 1 quyết định: MUA hay BÁN ở ${p}?`,
 ];
 
 function thoRenNote(job, cfg) {

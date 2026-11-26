@@ -41,13 +41,25 @@ export const THO_REN = {
   logo: 'tho-ren-vang.png',
   name: {vi: 'THỢ RÈN VÀNG', en: 'GOLD SMITH'},
   hooks: {
+    // Each one is a question the video answers, never a promise it cannot
+    // keep: no win rates, no profit claims, nothing that gives away the side.
     vi: [
+      'LỆNH NÀY\nLỜI HAY CHÁY?',
+      'NẾU LÀ BẠN,\nBẠN BẤM GÌ?',
+      'BẪY GIÁ\nHAY CƠ HỘI?',
+      'CHỜ ĐÃ.\nĐỪNG VỘI BẤM MUA.',
       'VÀNG SẮP\nBỨT HAY SẬP?',
-      '3 GIÂY.\nCHỌN MỘT PHE.',
+      'CHỐT LỜI\nHAY DÍNH STOP?',
+      'MỘT QUYẾT ĐỊNH.\nBA GIÂY.',
+      'XEM HẾT ĐỂ BIẾT\nVÌ SAO VÀO LỆNH',
+      'MẮT BẠN ĐỌC CHART\nTỚI ĐÂU?',
       'CÂY NẾN TIẾP THEO\nĐI ĐÂU?',
-      'BẠN CÓ DÁM\nVÀO LỆNH NÀY?',
+      'BẠN VÀO LỆNH\nHAY ĐỨNG NGOÀI?',
       'ĐỪNG TUA.\nĐOÁN TRƯỚC ĐÃ.',
+      'VÙNG GIÁ NÀY\nĐANG GIẤU GÌ?',
       'THỢ RÈN SẼ\nCHỌN PHE NÀO?',
+      'BẠN CÓ DÁM\nVÀO LỆNH NÀY?',
+      'ĐỌC ĐÚNG CÂY NÀY\nLÀ LÊN TAY',
     ],
     en: [
       'WHERE IS GOLD\nGOING NEXT?',

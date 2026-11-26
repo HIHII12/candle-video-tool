@@ -828,6 +828,7 @@ def main() -> None:
     cfg["explain"] = explain(cfg)
     if args.offline_seed is not None:
         cfg["note"] = "offline"
+        cfg["hookIndex"] = args.offline_seed % 1000
     cfg["timeframe"] = args.timeframe
     Path(args.out).write_text(json.dumps(cfg, indent=2, ensure_ascii=False))
 

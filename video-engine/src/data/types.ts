@@ -108,6 +108,8 @@ export type ForexChartProps = {
   outcome: Outcome;
   /** 'offline' when the candles were constructed rather than downloaded. */
   note?: string;
+  /** Which opening hook to use; set by a batch so a day's videos do not repeat. */
+  hookIndex?: number;
   /** Walk-through shown after the answer. Absent on the older channels. */
   explain?: Explain;
 };

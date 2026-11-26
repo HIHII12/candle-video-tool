@@ -305,7 +305,7 @@ export const HookCard: React.FC<{frame: number; fps: number; text: string; top: 
   // written as. At a fixed 92px "CÂY NẾN TIẾP THEO" wrapped its last word onto
   // a line of its own and the card read as three ragged lines.
   const longest = Math.max(...lines.map((l) => l.length));
-  const size = Math.min(92, Math.floor(1300 / Math.max(10, longest)));
+  const size = Math.min(92, Math.floor(1120 / Math.max(10, longest)));
   return (
     <div
       style={{

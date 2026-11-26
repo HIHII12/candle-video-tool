@@ -195,7 +195,11 @@ export const XauChart: React.FC<ForexChartProps> = (props) => {
           height={CHART_BOX.height}
           text={(() => {
             const pool = THO_REN.hooks[props.locale === 'en' ? 'en' : 'vi'];
-            return pool[(props.candles.length * 7 + props.setupCount + Math.round(props.candles[0].close)) % pool.length];
+            // A batch passes its own running number, so a day's videos walk
+            // through the whole pool instead of landing on the same few lines.
+            const i =
+              props.hookIndex ?? props.candles.length * 7 + props.setupCount + Math.round(props.candles[0].close);
+            return pool[Math.abs(i) % pool.length];
           })()}
         />
       ) : null}
